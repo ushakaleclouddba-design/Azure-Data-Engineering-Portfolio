@@ -17,12 +17,12 @@
 				"userProperties": [],
 				"typeProperties": {
 					"packageLocation": {
-						"packagePath": "\\\\NODE5\\Users\\ushakale\\source\\repos\\CoreBank_SSIS_Migration\\CoreBank_SSIS_Migration\\Extract_CoreBank_Transaction.dtsx",
+						"packagePath": "\\\\ushaadfpocadls.file.core.windows.net\\ssis-packages\\Extract_CoreBank_Transaction.dtsx",
 						"type": "File",
 						"typeProperties": {
 							"accessCredential": {
-								"domain": "ushadc0",
-								"userName": "ushadc0\\ushakale",
+								"domain": "Azure",
+								"userName": " ushaadfpocadls",
 								"password": {
 									"type": "SecureString",
 									"value": "**********"
@@ -34,22 +34,14 @@
 						"referenceName": "AzureSSIS-IR",
 						"type": "IntegrationRuntimeReference"
 					},
-					"executionCredential": {
-						"domain": "ushadc0",
-						"userName": "ushadc0\\ushakale",
-						"password": {
-							"type": "SecureString",
-							"value": "**********"
-						}
-					},
 					"loggingLevel": "Basic",
 					"logLocation": {
-						"logPath": "\\\\NODE5\\Users\\ushakale\\source\\repos\\CoreBank_SSIS_Migration\\Logs",
+						"logPath": "\\\\ushaadfpocadls.file.core.windows.net\\ssis-packages\\logs",
 						"type": "File",
 						"typeProperties": {
 							"accessCredential": {
-								"domain": "ushadc0",
-								"userName": "ushadc0\\ushakale",
+								"domain": "Azure",
+								"userName": " ushaadfpocadls",
 								"password": {
 									"type": "SecureString",
 									"value": "**********"
