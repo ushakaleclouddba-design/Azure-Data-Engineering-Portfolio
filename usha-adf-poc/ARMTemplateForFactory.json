@@ -11,13 +11,13 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'LS_ADLS_Gen2'"
 		},
-		"LS_SQLServer_Node5_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'LS_SQLServer_Node5'"
-		},
 		"LS_Blob_Staging_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_Blob_Staging'"
+		},
+		"LS_SQLServer_Node5_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'LS_SQLServer_Node5'"
 		},
 		"LS_ADLS_Gen2_properties_typeProperties_url": {
 			"type": "string",
@@ -61,15 +61,15 @@
 						"userProperties": [],
 						"typeProperties": {
 							"packageLocation": {
-								"packagePath": "\\\\NODE5\\Users\\ushakale\\source\\repos\\CoreBank_SSIS_Migration\\CoreBank_SSIS_Migration\\Extract_CoreBank_Transaction.dtsx",
+								"packagePath": "\\\\ushaadfpocadls.file.core.windows.net\\ssis-packages\\Extract_CoreBank_Transaction.dtsx",
 								"type": "File",
 								"typeProperties": {
 									"accessCredential": {
-										"domain": "ushadc0",
-										"userName": "ushadc0\\ushakale",
+										"domain": "Azure",
+										"userName": " ushaadfpocadls",
 										"password": {
 											"type": "SecureString",
-											"value": "**********"
+											"value": "R@3f7097f2-ef4a-436d-b9b0-1f6f4397d645@usha-adf-poc@ServiceEndpoint=usha-adf-poc.eastus.datafactory.azure.net@Myqo33U9iMWmbp0sPDVdTeSMZ/w6/Tmw59D7ObqtFzk="
 										}
 									}
 								}
@@ -78,27 +78,19 @@
 								"referenceName": "AzureSSIS-IR",
 								"type": "IntegrationRuntimeReference"
 							},
-							"executionCredential": {
-								"domain": "ushadc0",
-								"userName": "ushadc0\\ushakale",
-								"password": {
-									"type": "SecureString",
-									"value": "**********"
-								}
-							},
 							"loggingLevel": "Basic",
 							"projectConnectionManagers": {},
 							"packageConnectionManagers": {},
 							"logLocation": {
-								"logPath": "\\\\NODE5\\Users\\ushakale\\source\\repos\\CoreBank_SSIS_Migration\\Logs",
+								"logPath": "\\\\ushaadfpocadls.file.core.windows.net\\ssis-packages\\logs",
 								"type": "File",
 								"typeProperties": {
 									"accessCredential": {
-										"domain": "ushadc0",
-										"userName": "ushadc0\\ushakale",
+										"domain": "Azure",
+										"userName": " ushaadfpocadls",
 										"password": {
 											"type": "SecureString",
-											"value": "**********"
+											"value": "R@3f7097f2-ef4a-436d-b9b0-1f6f4397d645@usha-adf-poc@ServiceEndpoint=usha-adf-poc.eastus.datafactory.azure.net@Myqo33U9iMWmbp0sPDVdTeSMZ/w6/Tmw59D7ObqtFzk="
 										}
 									}
 								}
@@ -129,6 +121,19 @@
 						"type": "SecureString",
 						"value": "[parameters('LS_ADLS_Gen2_accountKey')]"
 					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_Blob_Staging')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('LS_Blob_Staging_connectionString')]"
 				}
 			},
 			"dependsOn": []
@@ -178,7 +183,6 @@
 					},
 					"ssisProperties": {
 						"edition": "Standard",
-						"runtimeVersion": "2017",
 						"licenseType": "LicenseIncluded",
 						"dataProxyProperties": {
 							"connectVia": {
@@ -206,19 +210,6 @@
 				"type": "SelfHosted",
 				"description": "Self-Hosted IR for Node5 VirtualBox lab",
 				"typeProperties": {}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_Blob_Staging')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobStorage",
-				"typeProperties": {
-					"connectionString": "[parameters('LS_Blob_Staging_connectionString')]"
-				}
 			},
 			"dependsOn": []
 		}

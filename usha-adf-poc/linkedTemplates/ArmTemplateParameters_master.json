@@ -8,10 +8,10 @@
 		"LS_ADLS_Gen2_accountKey": {
 			"value": ""
 		},
-		"LS_SQLServer_Node5_password": {
+		"LS_Blob_Staging_connectionString": {
 			"value": ""
 		},
-		"LS_Blob_Staging_connectionString": {
+		"LS_SQLServer_Node5_password": {
 			"value": ""
 		},
 		"LS_ADLS_Gen2_properties_typeProperties_url": {
