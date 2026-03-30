@@ -1,0 +1,20 @@
+{
+	"name": "AzureSSIS-IR",
+	"properties": {
+		"type": "Managed",
+		"description": "Azure-SSIS IR for CoreBank POC",
+		"typeProperties": {
+			"computeProperties": {
+				"location": "East US",
+				"nodeSize": "Standard_D2_v3",
+				"numberOfNodes": 1,
+				"maxParallelExecutionsPerNode": 2
+			},
+			"ssisProperties": {
+				"edition": "Standard",
+				"runtimeVersion": "2017",
+				"licenseType": "LicenseIncluded"
+			}
+		}
+	}
+}
