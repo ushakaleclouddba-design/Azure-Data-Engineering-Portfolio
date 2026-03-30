@@ -13,7 +13,17 @@
 			"ssisProperties": {
 				"edition": "Standard",
 				"runtimeVersion": "2017",
-				"licenseType": "LicenseIncluded"
+				"licenseType": "LicenseIncluded",
+				"dataProxyProperties": {
+					"connectVia": {
+						"type": "IntegrationRuntimeReference",
+						"referenceName": "SHIR-Node5"
+					},
+					"stagingLinkedService": {
+						"type": "LinkedServiceReference",
+						"referenceName": "LS_Blob_Staging"
+					}
+				}
 			}
 		}
 	}
