@@ -1,0 +1,36 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "usha-adf-poc"
+		},
+		"LS_ADLS_Gen2_accountKey": {
+			"value": ""
+		},
+		"LS_SQLServer_Node5_password": {
+			"value": ""
+		},
+		"LS_Blob_Staging_connectionString": {
+			"value": ""
+		},
+		"LS_ADLS_Gen2_properties_typeProperties_url": {
+			"value": "https://ushaadfpocadls.dfs.core.windows.net/"
+		},
+		"LS_SQLServer_Node5_properties_typeProperties_server": {
+			"value": "Node5"
+		},
+		"LS_SQLServer_Node5_properties_typeProperties_database": {
+			"value": "CoreBank_onPrem_Poc"
+		},
+		"LS_SQLServer_Node5_properties_typeProperties_userName": {
+			"value": "ushadc0\\ushakale"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}
