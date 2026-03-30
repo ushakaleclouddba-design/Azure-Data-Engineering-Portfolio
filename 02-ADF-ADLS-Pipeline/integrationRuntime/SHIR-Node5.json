@@ -1,0 +1,7 @@
+{
+	"name": "SHIR-Node5",
+	"properties": {
+		"type": "SelfHosted",
+		"description": "Self-Hosted IR for Node5 VirtualBox lab"
+	}
+}
