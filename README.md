@@ -1,2 +1,2 @@
 # Azure-Data-Engineering-Portfolio
-SQL Server to Azure Migration POCs — 12 approaches with scripts, commands and documentation
+SQL Server DBA to Azure Data Engineer — Migration POCs, ADF Pipelines, Databricks, Microsoft Fabric, Synapse Analytics with scripts and documentation
