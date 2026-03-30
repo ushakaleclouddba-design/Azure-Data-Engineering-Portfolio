@@ -110,4 +110,11 @@ az vm deallocate \
   --resource-group <RESOURCE_GROUP>
 
 # Delete entire resource group (full cleanup)
-az group
+az group delete \
+  --name <RESOURCE_GROUP> \
+  --yes \
+  --no-wait
+
+# Verify deletion
+az group show --name <RESOURCE_GROUP>
+# Expected: ResourceGroupNotFound
