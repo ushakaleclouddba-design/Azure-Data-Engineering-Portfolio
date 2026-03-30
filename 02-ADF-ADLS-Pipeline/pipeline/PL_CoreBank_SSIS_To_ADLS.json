@@ -34,6 +34,13 @@
 						"referenceName": "AzureSSIS-IR",
 						"type": "IntegrationRuntimeReference"
 					},
+					"executionCredential": {
+						"userName": "ushadc0\\ushakale",
+						"password": {
+							"type": "SecureString",
+							"value": "**********"
+						}
+					},
 					"loggingLevel": "Basic",
 					"logLocation": {
 						"logPath": "\\\\NODE5\\Users\\ushakale\\source\\repos\\CoreBank_SSIS_Migration\\Logs",
