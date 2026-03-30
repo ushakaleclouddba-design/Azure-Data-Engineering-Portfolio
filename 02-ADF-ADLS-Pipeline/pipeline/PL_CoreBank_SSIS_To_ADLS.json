@@ -35,6 +35,7 @@
 						"type": "IntegrationRuntimeReference"
 					},
 					"executionCredential": {
+						"domain": "ushadc0",
 						"userName": "ushadc0\\ushakale",
 						"password": {
 							"type": "SecureString",
