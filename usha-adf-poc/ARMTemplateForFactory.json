@@ -160,17 +160,69 @@
 							},
 							"traceLevel": "Fine"
 						}
+					},
+					{
+						"name": "DF_SilverToGold",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "Data flow1",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "DFSilverToGold",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"DFSilverToGold": {},
+									"SinkGold": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
 					}
 				],
 				"policy": {
 					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"pipelineRunDate": {
+						"type": "string",
+						"defaultValue": "@formatDateTime(utc/now(),'yyyy-MM-dd')"
+					},
+					"silverPath": {
+						"type": "string",
+						"defaultValue": "processed/transactions"
+					},
+					"goldPath": {
+						"type": "string",
+						"defaultValue": "curated/transactions/gold"
+					}
 				},
 				"annotations": []
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SqlServerTable1')]",
 				"[concat(variables('factoryId'), '/datasets/DelimitedText1')]",
-				"[concat(variables('factoryId'), '/dataflows/dataflow1')]"
+				"[concat(variables('factoryId'), '/dataflows/dataflow1')]",
+				"[concat(variables('factoryId'), '/dataflows/DFSilverToGold')]"
 			]
 		},
 		{
