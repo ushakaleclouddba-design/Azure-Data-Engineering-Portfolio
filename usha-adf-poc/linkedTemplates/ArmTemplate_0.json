@@ -106,6 +106,31 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Parquet_Silver')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_Gen2",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "transactions",
+						"fileSystem": "processed"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Gen2')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DelimitedText1')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -232,7 +257,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Parquet_Silver')]",
+			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Parquet_Gold')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -245,8 +270,9 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"folderPath": "transactions",
-						"fileSystem": "processed"
+						"fileName": "gold",
+						"folderPath": "transaction",
+						"fileSystem": "curated"
 					},
 					"compressionCodec": "snappy"
 				},
@@ -382,6 +408,77 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DelimitedText1')]",
 				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Parquet_Silver')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DFSilverToGold')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DS_ADLS_Parquet_Silver",
+								"type": "DatasetReference"
+							},
+							"name": "DFSilverToGold"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DS_ADLS_Parquet_Gold",
+								"type": "DatasetReference"
+							},
+							"name": "SinkGold"
+						}
+					],
+					"transformations": [
+						{
+							"name": "aggregate1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          TransactionID as string,",
+						"          AccountID as string,",
+						"          TransactionDate as string,",
+						"          PostedDate as string,",
+						"          TransactionType as string,",
+						"          Amount as string,",
+						"          RunningBalance as string,",
+						"          Description as string,",
+						"          ReferenceNumber as string,",
+						"          Channel as string,",
+						"          Remarks as string,",
+						"          CreatedDate as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> DFSilverToGold",
+						"DFSilverToGold aggregate(groupBy(TransactionType),",
+						"     TotalAmount = sum(toDouble(Amount)),",
+						"          TransactionCount = count(TransactionID),",
+						"          AvgAmount = avg(toDouble(Amount))) ~> aggregate1",
+						"aggregate1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     partitionFileNames:['gold_transactions.parquet'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> SinkGold"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Parquet_Silver')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Parquet_Gold')]"
 			]
 		},
 		{
