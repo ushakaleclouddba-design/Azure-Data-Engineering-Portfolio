@@ -1,0 +1,37 @@
+{
+	"name": "TriggerDailySilverToGold",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_CoreBank_SSIS_To_ADLS",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"pipelineRunDate": "@formatDateTime(trigger().scheduledTime, 'yyyy-MM-dd')",
+					"silverPath": "processed/transactions",
+					"goldPath": "curated/transactions/gold"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2026-04-01T12:47:00",
+				"timeZone": "Pacific Standard Time",
+				"schedule": {
+					"minutes": [
+						47
+					],
+					"hours": [
+						12
+					]
+				}
+			}
+		}
+	}
+}
