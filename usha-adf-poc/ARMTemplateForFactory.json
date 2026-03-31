@@ -34,6 +34,17 @@
 		"LS_SQLServer_Node5_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "ushadc0\\ushakale"
+		},
+		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
+			"type": "string",
+			"defaultValue": "usha-poc-sqlsvr.database.windows.net"
+		},
+		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
+			"type": "string",
+			"defaultValue": "ssisadmin"
+		},
+		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
+			"type": "secureString"
 		}
 	},
 	"variables": {
@@ -48,12 +59,30 @@
 				"description": "CoreBank SSIS extraction to ADLS Gen2 landing container",
 				"activities": [
 					{
-						"name": "Wait1",
-						"type": "Wait",
+						"name": "Execute SSIS package1",
+						"type": "ExecuteSSISPackage",
 						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
 						"userProperties": [],
 						"typeProperties": {
-							"waitTimeInSeconds": 1
+							"packageLocation": {
+								"packagePath": "CoreBank_poc/CoreBank_SSIS_Migration/Extract_CoreBank_Transaction.dtsx",
+								"type": "SSISDB"
+							},
+							"environmentPath": null,
+							"connectVia": {
+								"referenceName": "AzureSSIS-IR",
+								"type": "IntegrationRuntimeReference"
+							},
+							"loggingLevel": "Basic",
+							"projectConnectionManagers": {},
+							"packageConnectionManagers": {}
 						}
 					}
 				],
@@ -62,7 +91,9 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/AzureSSIS-IR')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LS_ADLS_Gen2')]",
@@ -139,25 +170,21 @@
 						"maxParallelExecutionsPerNode": 2
 					},
 					"ssisProperties": {
-						"edition": "Standard",
-						"licenseType": "LicenseIncluded",
-						"dataProxyProperties": {
-							"connectVia": {
-								"type": "IntegrationRuntimeReference",
-								"referenceName": "SHIR-Node5"
+						"catalogInfo": {
+							"catalogServerEndpoint": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint')]",
+							"catalogAdminUserName": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName')]",
+							"catalogAdminPassword": {
+								"type": "SecureString",
+								"value": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword')]"
 							},
-							"stagingLinkedService": {
-								"type": "LinkedServiceReference",
-								"referenceName": "LS_Blob_Staging"
-							}
-						}
+							"catalogPricingTier": "Basic"
+						},
+						"edition": "Standard",
+						"licenseType": "LicenseIncluded"
 					}
 				}
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/SHIR-Node5')]",
-				"[concat(variables('factoryId'), '/linkedServices/LS_Blob_Staging')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/SHIR-Node5')]",

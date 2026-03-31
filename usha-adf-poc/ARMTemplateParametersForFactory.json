@@ -25,6 +25,15 @@
 		},
 		"LS_SQLServer_Node5_properties_typeProperties_userName": {
 			"value": "ushadc0\\ushakale"
+		},
+		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
+			"value": "usha-poc-sqlsvr.database.windows.net"
+		},
+		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
+			"value": "ssisadmin"
+		},
+		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
+			"value": ""
 		}
 	}
 }
