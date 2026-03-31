@@ -1,0 +1,77 @@
+{
+	"name": "SqlServerTable1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_SQLServer_Node5",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [
+			{
+				"name": "TransactionID",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "AccountID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "TransactionDate",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "PostedDate",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "TransactionType",
+				"type": "varchar"
+			},
+			{
+				"name": "Amount",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 2
+			},
+			{
+				"name": "RunningBalance",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 2
+			},
+			{
+				"name": "Description",
+				"type": "varchar"
+			},
+			{
+				"name": "ReferenceNumber",
+				"type": "varchar"
+			},
+			{
+				"name": "Channel",
+				"type": "varchar"
+			},
+			{
+				"name": "Remarks",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CreatedDate",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "Banking",
+			"table": "Transactions"
+		}
+	}
+}

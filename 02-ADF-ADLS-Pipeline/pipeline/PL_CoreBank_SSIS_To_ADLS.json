@@ -4,8 +4,8 @@
 		"description": "CoreBank SSIS extraction to ADLS Gen2 landing container",
 		"activities": [
 			{
-				"name": "Execute SSIS package1",
-				"type": "ExecuteSSISPackage",
+				"name": "Copy data1",
+				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -16,17 +16,44 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"packageLocation": {
-						"packagePath": "CoreBank_poc/CoreBank_SSIS_Migration/Extract_CoreBank_Transaction.dtsx",
-						"type": "SSISDB"
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
-					"environmentPath": null,
-					"connectVia": {
-						"referenceName": "AzureSSIS-IR",
-						"type": "IntegrationRuntimeReference"
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
 					},
-					"loggingLevel": "Basic"
-				}
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "SqlServerTable1",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DelimitedText1",
+						"type": "DatasetReference"
+					}
+				]
 			}
 		],
 		"annotations": []
