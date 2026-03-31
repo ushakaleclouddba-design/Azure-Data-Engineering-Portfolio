@@ -13,7 +13,11 @@
 				}
 			],
 			"sinks": [],
-			"transformations": [],
+			"transformations": [
+				{
+					"name": "aggregate1"
+				}
+			],
 			"scriptLines": [
 				"source(output(",
 				"          TransactionID as string,",
@@ -32,7 +36,11 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
-				"     format: 'parquet') ~> DFSilverToGold"
+				"     format: 'parquet') ~> DFSilverToGold",
+				"DFSilverToGold aggregate(groupBy(TransactionType),",
+				"     TotalAmount = sum(toDouble(Amount)),",
+				"          TransactionCount = count(TransactionID),",
+				"          AvgAmount = avg(toDouble(Amount))) ~> aggregate1"
 			]
 		}
 	}
