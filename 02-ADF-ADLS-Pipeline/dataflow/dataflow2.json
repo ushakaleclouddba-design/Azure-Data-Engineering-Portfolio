@@ -1,0 +1,39 @@
+{
+	"name": "dataflow2",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_ADLS_Parquet_Silver",
+						"type": "DatasetReference"
+					},
+					"name": "DFSilverToGold"
+				}
+			],
+			"sinks": [],
+			"transformations": [],
+			"scriptLines": [
+				"source(output(",
+				"          TransactionID as string,",
+				"          AccountID as string,",
+				"          TransactionDate as string,",
+				"          PostedDate as string,",
+				"          TransactionType as string,",
+				"          Amount as string,",
+				"          RunningBalance as string,",
+				"          Description as string,",
+				"          ReferenceNumber as string,",
+				"          Channel as string,",
+				"          Remarks as string,",
+				"          CreatedDate as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> DFSilverToGold"
+			]
+		}
+	}
+}
