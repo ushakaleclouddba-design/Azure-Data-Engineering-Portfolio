@@ -19,6 +19,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'LS_SQLServer_Node5'"
 		},
+		"LS_FileSystem_Node5_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'LS_FileSystem_Node5'"
+		},
 		"LS_ADLS_Gen2_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://ushaadfpocadls.dfs.core.windows.net/"
@@ -45,6 +49,14 @@
 		},
 		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"type": "secureString"
+		},
+		"LS_FileSystem_Node5_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "c:\\ssis_output"
+		},
+		"LS_FileSystem_Node5_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "ushadc0\\ushakale"
 		},
 		"containerUri": {
 			"type": "string",
@@ -82,8 +94,20 @@
 					"LS_SQLServer_Node5_password": {
 						"value": "[parameters('LS_SQLServer_Node5_password')]"
 					},
+					"LS_FileSystem_Node5_password": {
+						"value": "[parameters('LS_FileSystem_Node5_password')]"
+					},
 					"LS_ADLS_Gen2_properties_typeProperties_url": {
 						"value": "[parameters('LS_ADLS_Gen2_properties_typeProperties_url')]"
+					},
+					"LS_SQLServer_Node5_properties_typeProperties_server": {
+						"value": "[parameters('LS_SQLServer_Node5_properties_typeProperties_server')]"
+					},
+					"LS_SQLServer_Node5_properties_typeProperties_database": {
+						"value": "[parameters('LS_SQLServer_Node5_properties_typeProperties_database')]"
+					},
+					"LS_SQLServer_Node5_properties_typeProperties_userName": {
+						"value": "[parameters('LS_SQLServer_Node5_properties_typeProperties_userName')]"
 					},
 					"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
 						"value": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint')]"
@@ -94,14 +118,11 @@
 					"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 						"value": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword')]"
 					},
-					"LS_SQLServer_Node5_properties_typeProperties_server": {
-						"value": "[parameters('LS_SQLServer_Node5_properties_typeProperties_server')]"
+					"LS_FileSystem_Node5_properties_typeProperties_host": {
+						"value": "[parameters('LS_FileSystem_Node5_properties_typeProperties_host')]"
 					},
-					"LS_SQLServer_Node5_properties_typeProperties_database": {
-						"value": "[parameters('LS_SQLServer_Node5_properties_typeProperties_database')]"
-					},
-					"LS_SQLServer_Node5_properties_typeProperties_userName": {
-						"value": "[parameters('LS_SQLServer_Node5_properties_typeProperties_userName')]"
+					"LS_FileSystem_Node5_properties_typeProperties_userId": {
+						"value": "[parameters('LS_FileSystem_Node5_properties_typeProperties_userId')]"
 					}
 				}
 			},
