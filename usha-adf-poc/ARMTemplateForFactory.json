@@ -48,53 +48,12 @@
 				"description": "CoreBank SSIS extraction to ADLS Gen2 landing container",
 				"activities": [
 					{
-						"name": "Execute_Extract_CoreBank",
-						"type": "ExecuteSSISPackage",
+						"name": "Wait1",
+						"type": "Wait",
 						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
 						"userProperties": [],
 						"typeProperties": {
-							"packageLocation": {
-								"packagePath": "\\\\ushaadfpocadls.file.core.windows.net\\ssis-packages\\Extract_CoreBank_Transaction.dtsx",
-								"type": "File",
-								"typeProperties": {
-									"accessCredential": {
-										"domain": "Azure",
-										"userName": " ushaadfpocadls",
-										"password": {
-											"type": "SecureString",
-											"value": "**********"
-										}
-									}
-								}
-							},
-							"connectVia": {
-								"referenceName": "AzureSSIS-IR",
-								"type": "IntegrationRuntimeReference"
-							},
-							"loggingLevel": "Basic",
-							"projectConnectionManagers": {},
-							"packageConnectionManagers": {},
-							"logLocation": {
-								"logPath": "\\\\ushaadfpocadls.file.core.windows.net\\ssis-packages\\logs",
-								"type": "File",
-								"typeProperties": {
-									"accessCredential": {
-										"domain": "Azure",
-										"userName": " ushaadfpocadls",
-										"password": {
-											"type": "SecureString",
-											"value": "**********"
-										}
-									}
-								}
-							}
+							"waitTimeInSeconds": 1
 						}
 					}
 				],
@@ -103,9 +62,7 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/AzureSSIS-IR')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LS_ADLS_Gen2')]",

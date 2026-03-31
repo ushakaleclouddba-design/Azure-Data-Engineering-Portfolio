@@ -41,6 +41,30 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_CoreBank_SSIS_To_ADLS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "CoreBank SSIS extraction to ADLS Gen2 landing container",
+				"activities": [
+					{
+						"name": "Wait1",
+						"type": "Wait",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"waitTimeInSeconds": 1
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/LS_ADLS_Gen2')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -144,73 +168,6 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/integrationRuntimes/SHIR-Node5')]",
 				"[concat(variables('factoryId'), '/linkedServices/LS_Blob_Staging')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_CoreBank_SSIS_To_ADLS')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "CoreBank SSIS extraction to ADLS Gen2 landing container",
-				"activities": [
-					{
-						"name": "Execute_Extract_CoreBank",
-						"type": "ExecuteSSISPackage",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"packageLocation": {
-								"packagePath": "\\\\ushaadfpocadls.file.core.windows.net\\ssis-packages\\Extract_CoreBank_Transaction.dtsx",
-								"type": "File",
-								"typeProperties": {
-									"accessCredential": {
-										"domain": "Azure",
-										"userName": " ushaadfpocadls",
-										"password": {
-											"type": "SecureString",
-											"value": "**********"
-										}
-									}
-								}
-							},
-							"connectVia": {
-								"referenceName": "AzureSSIS-IR",
-								"type": "IntegrationRuntimeReference"
-							},
-							"loggingLevel": "Basic",
-							"projectConnectionManagers": {},
-							"packageConnectionManagers": {},
-							"logLocation": {
-								"logPath": "\\\\ushaadfpocadls.file.core.windows.net\\ssis-packages\\logs",
-								"type": "File",
-								"typeProperties": {
-									"accessCredential": {
-										"domain": "Azure",
-										"userName": " ushaadfpocadls",
-										"password": {
-											"type": "SecureString",
-											"value": "**********"
-										}
-									}
-								}
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/AzureSSIS-IR')]"
 			]
 		}
 	]
