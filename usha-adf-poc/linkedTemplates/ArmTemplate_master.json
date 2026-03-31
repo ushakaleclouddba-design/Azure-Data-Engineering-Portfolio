@@ -58,6 +58,18 @@
 		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"type": "secureString"
 		},
+		"TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_pipelineRunDate": {
+			"type": "string",
+			"defaultValue": "@formatDateTime(trigger().scheduledTime, 'yyyy-MM-dd')"
+		},
+		"TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_silverPath": {
+			"type": "string",
+			"defaultValue": "processed/transactions"
+		},
+		"TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_goldPath": {
+			"type": "string",
+			"defaultValue": "curated/transactions/gold"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -123,6 +135,15 @@
 					},
 					"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 						"value": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword')]"
+					},
+					"TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_pipelineRunDate": {
+						"value": "[parameters('TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_pipelineRunDate')]"
+					},
+					"TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_silverPath": {
+						"value": "[parameters('TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_silverPath')]"
+					},
+					"TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_goldPath": {
+						"value": "[parameters('TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_goldPath')]"
 					}
 				}
 			},

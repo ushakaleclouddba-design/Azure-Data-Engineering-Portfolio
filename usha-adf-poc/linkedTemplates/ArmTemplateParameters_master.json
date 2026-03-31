@@ -44,6 +44,15 @@
 		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"value": ""
 		},
+		"TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_pipelineRunDate": {
+			"value": "@formatDateTime(trigger().scheduledTime, 'yyyy-MM-dd')"
+		},
+		"TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_silverPath": {
+			"value": "processed/transactions"
+		},
+		"TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_goldPath": {
+			"value": "curated/transactions/gold"
+		},
 		"containerUri": {
 			"value": ""
 		},
