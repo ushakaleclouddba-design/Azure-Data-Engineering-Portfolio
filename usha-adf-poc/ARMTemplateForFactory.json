@@ -69,7 +69,7 @@
 										"userName": " ushaadfpocadls",
 										"password": {
 											"type": "SecureString",
-											"value": "R@3f7097f2-ef4a-436d-b9b0-1f6f4397d645@usha-adf-poc@ServiceEndpoint=usha-adf-poc.eastus.datafactory.azure.net@Myqo33U9iMWmbp0sPDVdTeSMZ/w6/Tmw59D7ObqtFzk="
+											"value": "**********"
 										}
 									}
 								}
@@ -90,7 +90,7 @@
 										"userName": " ushaadfpocadls",
 										"password": {
 											"type": "SecureString",
-											"value": "R@3f7097f2-ef4a-436d-b9b0-1f6f4397d645@usha-adf-poc@ServiceEndpoint=usha-adf-poc.eastus.datafactory.azure.net@Myqo33U9iMWmbp0sPDVdTeSMZ/w6/Tmw59D7ObqtFzk="
+											"value": "**********"
 										}
 									}
 								}
