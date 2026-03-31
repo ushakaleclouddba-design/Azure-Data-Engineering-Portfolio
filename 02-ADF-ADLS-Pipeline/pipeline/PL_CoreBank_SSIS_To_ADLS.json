@@ -4,12 +4,28 @@
 		"description": "CoreBank SSIS extraction to ADLS Gen2 landing container",
 		"activities": [
 			{
-				"name": "Wait1",
-				"type": "Wait",
+				"name": "Execute SSIS package1",
+				"type": "ExecuteSSISPackage",
 				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
 				"userProperties": [],
 				"typeProperties": {
-					"waitTimeInSeconds": 1
+					"packageLocation": {
+						"packagePath": "CoreBank_poc/CoreBank_SSIS_Migration/Extract_CoreBank_Transaction.dtsx",
+						"type": "SSISDB"
+					},
+					"environmentPath": null,
+					"connectVia": {
+						"referenceName": "AzureSSIS-IR",
+						"type": "IntegrationRuntimeReference"
+					},
+					"loggingLevel": "Basic"
 				}
 			}
 		],
