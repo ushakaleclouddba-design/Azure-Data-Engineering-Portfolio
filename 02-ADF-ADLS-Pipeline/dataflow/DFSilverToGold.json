@@ -12,7 +12,15 @@
 					"name": "DFSilverToGold"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DS_ADLS_Parquet_Gold",
+						"type": "DatasetReference"
+					},
+					"name": "SinkGold"
+				}
+			],
 			"transformations": [
 				{
 					"name": "aggregate1"
@@ -40,7 +48,16 @@
 				"DFSilverToGold aggregate(groupBy(TransactionType),",
 				"     TotalAmount = sum(toDouble(Amount)),",
 				"          TransactionCount = count(TransactionID),",
-				"          AvgAmount = avg(toDouble(Amount))) ~> aggregate1"
+				"          AvgAmount = avg(toDouble(Amount))) ~> aggregate1",
+				"aggregate1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     partitionFileNames:['gold_transactions.parquet'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SinkGold"
 			]
 		}
 	}
