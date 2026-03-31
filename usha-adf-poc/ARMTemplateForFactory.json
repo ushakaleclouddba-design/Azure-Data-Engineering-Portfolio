@@ -15,17 +15,25 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_Blob_Staging'"
 		},
-		"LS_SQLServer_Node5_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'LS_SQLServer_Node5'"
-		},
 		"LS_FileSystem_Node5_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'LS_FileSystem_Node5'"
 		},
+		"LS_SQLServer_Node5_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'LS_SQLServer_Node5'"
+		},
 		"LS_ADLS_Gen2_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://ushaadfpocadls.dfs.core.windows.net/"
+		},
+		"LS_FileSystem_Node5_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "c:\\ssis_output"
+		},
+		"LS_FileSystem_Node5_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "ushadc0\\ushakale"
 		},
 		"LS_SQLServer_Node5_properties_typeProperties_server": {
 			"type": "string",
@@ -49,14 +57,6 @@
 		},
 		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"type": "secureString"
-		},
-		"LS_FileSystem_Node5_properties_typeProperties_host": {
-			"type": "string",
-			"defaultValue": "c:\\ssis_output"
-		},
-		"LS_FileSystem_Node5_properties_typeProperties_userId": {
-			"type": "string",
-			"defaultValue": "ushadc0\\ushakale"
 		}
 	},
 	"variables": {
@@ -136,143 +136,32 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/LS_ADLS_Gen2')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"name": "[concat(parameters('factoryName'), '/DelimitedText1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"description": "ADLS Gen2 - ushaadfpocadls",
-				"annotations": [],
-				"type": "AzureBlobFS",
-				"typeProperties": {
-					"url": "[parameters('LS_ADLS_Gen2_properties_typeProperties_url')]",
-					"accountKey": {
-						"type": "SecureString",
-						"value": "[parameters('LS_ADLS_Gen2_accountKey')]"
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_Blob_Staging')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobStorage",
-				"typeProperties": {
-					"connectionString": "[parameters('LS_Blob_Staging_connectionString')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_SQLServer_Node5')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "SQL Server on Node5 via SHIR",
-				"annotations": [],
-				"type": "SqlServer",
-				"typeProperties": {
-					"server": "[parameters('LS_SQLServer_Node5_properties_typeProperties_server')]",
-					"database": "[parameters('LS_SQLServer_Node5_properties_typeProperties_database')]",
-					"encrypt": "optional",
-					"trustServerCertificate": true,
-					"authenticationType": "Windows",
-					"userName": "[parameters('LS_SQLServer_Node5_properties_typeProperties_userName')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('LS_SQLServer_Node5_password')]"
-					}
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_Gen2",
+					"type": "LinkedServiceReference"
 				},
-				"connectVia": {
-					"referenceName": "SHIR-Node5",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/SHIR-Node5')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/AzureSSIS-IR')]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "Managed",
-				"description": "Azure-SSIS IR for CoreBank POC",
+				"annotations": [],
+				"type": "DelimitedText",
 				"typeProperties": {
-					"computeProperties": {
-						"location": "East US",
-						"nodeSize": "Standard_D2_v3",
-						"numberOfNodes": 1,
-						"maxParallelExecutionsPerNode": 2
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "corebank_Transactions.csv",
+						"folderPath": "transactions",
+						"fileSystem": "landing"
 					},
-					"ssisProperties": {
-						"catalogInfo": {
-							"catalogServerEndpoint": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint')]",
-							"catalogAdminUserName": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName')]",
-							"catalogAdminPassword": {
-								"type": "SecureString",
-								"value": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword')]"
-							},
-							"catalogPricingTier": "Basic"
-						},
-						"edition": "Standard",
-						"runtimeVersion": "2017",
-						"licenseType": "LicenseIncluded",
-						"dataProxyProperties": {
-							"connectVia": {
-								"type": "IntegrationRuntimeReference",
-								"referenceName": "SHIR-Node5"
-							},
-							"stagingLinkedService": {
-								"type": "LinkedServiceReference",
-								"referenceName": "LS_Blob_Staging"
-							}
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/SHIR-Node5')]",
-				"[concat(variables('factoryId'), '/linkedServices/LS_Blob_Staging')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SHIR-Node5')]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "SelfHosted",
-				"description": "Self-Hosted IR for Node5 VirtualBox lab",
-				"typeProperties": {}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_FileSystem_Node5')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "FileServer",
-				"typeProperties": {
-					"host": "[parameters('LS_FileSystem_Node5_properties_typeProperties_host')]",
-					"userId": "[parameters('LS_FileSystem_Node5_properties_typeProperties_userId')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('LS_FileSystem_Node5_password')]"
-					}
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
 				},
-				"connectVia": {
-					"referenceName": "SHIR-Node5",
-					"type": "IntegrationRuntimeReference"
-				}
+				"schema": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/SHIR-Node5')]"
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Gen2')]"
 			]
 		},
 		{
@@ -358,7 +247,192 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/DelimitedText1')]",
+			"name": "[concat(parameters('factoryName'), '/LS_ADLS_Gen2')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "ADLS Gen2 - ushaadfpocadls",
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('LS_ADLS_Gen2_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('LS_ADLS_Gen2_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_Blob_Staging')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('LS_Blob_Staging_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_FileSystem_Node5')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('LS_FileSystem_Node5_properties_typeProperties_host')]",
+					"userId": "[parameters('LS_FileSystem_Node5_properties_typeProperties_userId')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('LS_FileSystem_Node5_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "SHIR-Node5",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/SHIR-Node5')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_SQLServer_Node5')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "SQL Server on Node5 via SHIR",
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"server": "[parameters('LS_SQLServer_Node5_properties_typeProperties_server')]",
+					"database": "[parameters('LS_SQLServer_Node5_properties_typeProperties_database')]",
+					"encrypt": "optional",
+					"trustServerCertificate": true,
+					"authenticationType": "Windows",
+					"userName": "[parameters('LS_SQLServer_Node5_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('LS_SQLServer_Node5_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "SHIR-Node5",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/SHIR-Node5')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSSIS-IR')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "Managed",
+				"description": "Azure-SSIS IR for CoreBank POC",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "East US",
+						"nodeSize": "Standard_D2_v3",
+						"numberOfNodes": 1,
+						"maxParallelExecutionsPerNode": 2
+					},
+					"ssisProperties": {
+						"catalogInfo": {
+							"catalogServerEndpoint": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint')]",
+							"catalogAdminUserName": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName')]",
+							"catalogAdminPassword": {
+								"type": "SecureString",
+								"value": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword')]"
+							},
+							"catalogPricingTier": "Basic"
+						},
+						"edition": "Standard",
+						"licenseType": "LicenseIncluded",
+						"dataProxyProperties": {
+							"connectVia": {
+								"type": "IntegrationRuntimeReference",
+								"referenceName": "SHIR-Node5"
+							},
+							"stagingLinkedService": {
+								"type": "LinkedServiceReference",
+								"referenceName": "LS_Blob_Staging"
+							}
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/SHIR-Node5')]",
+				"[concat(variables('factoryId'), '/linkedServices/LS_Blob_Staging')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SHIR-Node5')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"description": "Self-Hosted IR for Node5 VirtualBox lab",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dataflow1')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DelimitedText1",
+								"type": "DatasetReference"
+							},
+							"name": "Landingcsv"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DS_ADLS_Parquet_Silver",
+								"type": "DatasetReference"
+							},
+							"name": "SilverParquet"
+						}
+					],
+					"transformations": [],
+					"scriptLines": [
+						"source(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> Landingcsv",
+						"Landingcsv sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> SilverParquet"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DelimitedText1')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Parquet_Silver')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Parquet_Silver')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -367,18 +441,14 @@
 					"type": "LinkedServiceReference"
 				},
 				"annotations": [],
-				"type": "DelimitedText",
+				"type": "Parquet",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "corebank_Transactions.csv",
 						"folderPath": "transactions",
-						"fileSystem": "landing"
+						"fileSystem": "processed"
 					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
+					"compressionCodec": "snappy"
 				},
 				"schema": []
 			},

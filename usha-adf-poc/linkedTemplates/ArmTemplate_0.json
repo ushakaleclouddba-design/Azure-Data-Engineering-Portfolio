@@ -15,17 +15,25 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_Blob_Staging'"
 		},
-		"LS_SQLServer_Node5_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'LS_SQLServer_Node5'"
-		},
 		"LS_FileSystem_Node5_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'LS_FileSystem_Node5'"
 		},
+		"LS_SQLServer_Node5_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'LS_SQLServer_Node5'"
+		},
 		"LS_ADLS_Gen2_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://ushaadfpocadls.dfs.core.windows.net/"
+		},
+		"LS_FileSystem_Node5_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "c:\\ssis_output"
+		},
+		"LS_FileSystem_Node5_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "ushadc0\\ushakale"
 		},
 		"LS_SQLServer_Node5_properties_typeProperties_server": {
 			"type": "string",
@@ -49,14 +57,6 @@
 		},
 		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"type": "secureString"
-		},
-		"LS_FileSystem_Node5_properties_typeProperties_host": {
-			"type": "string",
-			"defaultValue": "c:\\ssis_output"
-		},
-		"LS_FileSystem_Node5_properties_typeProperties_userId": {
-			"type": "string",
-			"defaultValue": "ushadc0\\ushakale"
 		}
 	},
 	"variables": {
@@ -104,6 +104,59 @@
 				"typeProperties": {}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DelimitedText1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_Gen2",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "corebank_Transactions.csv",
+						"folderPath": "transactions",
+						"fileSystem": "landing"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Gen2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_FileSystem_Node5')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('LS_FileSystem_Node5_properties_typeProperties_host')]",
+					"userId": "[parameters('LS_FileSystem_Node5_properties_typeProperties_userId')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('LS_FileSystem_Node5_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "SHIR-Node5",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/SHIR-Node5')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LS_SQLServer_Node5')]",
@@ -159,7 +212,6 @@
 							"catalogPricingTier": "Basic"
 						},
 						"edition": "Standard",
-						"runtimeVersion": "2017",
 						"licenseType": "LicenseIncluded",
 						"dataProxyProperties": {
 							"connectVia": {
@@ -180,31 +232,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/LS_FileSystem_Node5')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "FileServer",
-				"typeProperties": {
-					"host": "[parameters('LS_FileSystem_Node5_properties_typeProperties_host')]",
-					"userId": "[parameters('LS_FileSystem_Node5_properties_typeProperties_userId')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('LS_FileSystem_Node5_password')]"
-					}
-				},
-				"connectVia": {
-					"referenceName": "SHIR-Node5",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/SHIR-Node5')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DelimitedText1')]",
+			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Parquet_Silver')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -213,18 +241,14 @@
 					"type": "LinkedServiceReference"
 				},
 				"annotations": [],
-				"type": "DelimitedText",
+				"type": "Parquet",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "corebank_Transactions.csv",
 						"folderPath": "transactions",
-						"fileSystem": "landing"
+						"fileSystem": "processed"
 					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
+					"compressionCodec": "snappy"
 				},
 				"schema": []
 			},
@@ -312,6 +336,52 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_SQLServer_Node5')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dataflow1')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DelimitedText1",
+								"type": "DatasetReference"
+							},
+							"name": "Landingcsv"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DS_ADLS_Parquet_Silver",
+								"type": "DatasetReference"
+							},
+							"name": "SilverParquet"
+						}
+					],
+					"transformations": [],
+					"scriptLines": [
+						"source(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> Landingcsv",
+						"Landingcsv sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> SilverParquet"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DelimitedText1')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Parquet_Silver')]"
 			]
 		},
 		{

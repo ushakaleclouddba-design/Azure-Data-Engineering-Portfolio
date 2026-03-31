@@ -11,14 +11,20 @@
 		"LS_Blob_Staging_connectionString": {
 			"value": ""
 		},
-		"LS_SQLServer_Node5_password": {
+		"LS_FileSystem_Node5_password": {
 			"value": ""
 		},
-		"LS_FileSystem_Node5_password": {
+		"LS_SQLServer_Node5_password": {
 			"value": ""
 		},
 		"LS_ADLS_Gen2_properties_typeProperties_url": {
 			"value": "https://ushaadfpocadls.dfs.core.windows.net/"
+		},
+		"LS_FileSystem_Node5_properties_typeProperties_host": {
+			"value": "c:\\ssis_output"
+		},
+		"LS_FileSystem_Node5_properties_typeProperties_userId": {
+			"value": "ushadc0\\ushakale"
 		},
 		"LS_SQLServer_Node5_properties_typeProperties_server": {
 			"value": "Node5"
@@ -37,12 +43,6 @@
 		},
 		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"value": ""
-		},
-		"LS_FileSystem_Node5_properties_typeProperties_host": {
-			"value": "c:\\ssis_output"
-		},
-		"LS_FileSystem_Node5_properties_typeProperties_userId": {
-			"value": "ushadc0\\ushakale"
 		}
 	}
 }
