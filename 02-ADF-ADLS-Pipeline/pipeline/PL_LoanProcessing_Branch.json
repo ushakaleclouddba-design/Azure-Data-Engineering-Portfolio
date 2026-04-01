@@ -321,6 +321,39 @@
 					"referenceName": "LS_AzureSQL_LoanProcessing",
 					"type": "LinkedServiceReference"
 				}
+			},
+			{
+				"name": "Script_UpdateStatus",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "StoredProc_AuditLog",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "LS_AzureSQL_LoanProcessing",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "NonQuery",
+							"text": "UPDATE dbo.LoanApplications \nSET ProcessingStatus = 'PROCESSED', UpdatedAt = GETDATE() \nWHERE BranchID = '@{pipeline().parameters.BranchID}' \nAND RunDate = '@{pipeline().parameters.RunDate}'"
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
 			}
 		],
 		"parameters": {
