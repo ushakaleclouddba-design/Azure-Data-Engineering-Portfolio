@@ -137,7 +137,8 @@
 					"headers": {
 						"Content-Type": "application/json"
 					},
-					"url": "https://httpbin.org/post"
+					"url": "https://httpbin.org/post",
+					"body": "@concat('{\"pipeline\":\"',pipeline().Pipeline,'\",\"status\":\"FAILED\",\"time\":\"',utcNow(),'\"}')"
 				}
 			}
 		],
