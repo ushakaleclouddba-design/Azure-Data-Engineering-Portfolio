@@ -268,6 +268,59 @@
 						"type": "DatasetReference"
 					}
 				]
+			},
+			{
+				"name": "StoredProc_AuditLog",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "CopyData_ToSQL",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[usp_LogPipelineRun]",
+					"storedProcedureParameters": {
+						"ApprovedCount": {
+							"value": "@activity('CopyData_ToSQL').output.rowsCopied",
+							"type": "Int32"
+						},
+						"BranchID": {
+							"value": "@pipeline().parameters.BranchID",
+							"type": "String"
+						},
+						"PipelineRunID": {
+							"value": "@pipeline().RunId",
+							"type": "String"
+						},
+						"RejectedCount": {
+							"value": "0",
+							"type": "Int32"
+						},
+						"RunDate": {
+							"value": "@pipeline().parameters.RunDate",
+							"type": "DateTime"
+						},
+						"Status": {
+							"value": "SUCCESS",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureSQL_LoanProcessing",
+					"type": "LinkedServiceReference"
+				}
 			}
 		],
 		"parameters": {
