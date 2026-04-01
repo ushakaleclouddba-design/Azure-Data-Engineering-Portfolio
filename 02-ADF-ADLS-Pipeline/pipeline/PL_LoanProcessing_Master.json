@@ -1,0 +1,31 @@
+{
+	"name": "PL_LoanProcessing_Master",
+	"properties": {
+		"variables": {
+			"BranchList": {
+				"type": "Array",
+				"defaultValue": [
+					"SF_Downtown",
+					"SanRamon_EastBay",
+					"Oakland_Financial"
+				]
+			},
+			"HolidayList": {
+				"type": "Array",
+				"defaultValue": [
+					"2026-01-01",
+					"2026-05-25",
+					"2026-07-04",
+					"2026-09-07",
+					"2026-11-26",
+					"2026-12-25"
+				]
+			},
+			"PipelineStatus": {
+				"type": "String",
+				"defaultValue": "RUNNING"
+			}
+		},
+		"annotations": []
+	}
+}
