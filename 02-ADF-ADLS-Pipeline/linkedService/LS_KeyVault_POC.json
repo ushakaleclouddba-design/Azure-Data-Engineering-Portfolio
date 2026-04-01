@@ -1,0 +1,10 @@
+{
+	"name": "LS_KeyVault_POC",
+	"properties": {
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://usha-kv-poc.vault.azure.net/"
+		}
+	}
+}
