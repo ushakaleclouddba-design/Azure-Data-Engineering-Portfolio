@@ -7,12 +7,12 @@
 		"type": "SqlServer",
 		"typeProperties": {
 			"server": "Node5",
-			"database": "CoreBank_onPrem_Poc",
+			"database": " LoanProcessing_Staging",
 			"encrypt": "optional",
 			"trustServerCertificate": true,
-			"authenticationType": "Windows",
-			"userName": "ushadc0\\ushakale",
-			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIxOTZjZTYyYS1mODgyLTQ1M2UtODAzYi05NjM4Yjc3OGIwOTgiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+			"authenticationType": "SQL",
+			"userName": "adfuser",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI0NTFhMmUxMC0xMjY0LTRmODEtOThiNS1iODJlNDJjMzY3OGQiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
 		},
 		"connectVia": {
 			"referenceName": "SHIR-Node5",
