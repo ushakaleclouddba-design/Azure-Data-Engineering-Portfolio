@@ -1,6 +1,22 @@
 {
 	"name": "PL_LoanProcessing_Branch",
 	"properties": {
+		"activities": [
+			{
+				"name": "SetVar_RetryCount",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "RetryCount",
+					"value": 0
+				}
+			}
+		],
 		"parameters": {
 			"BranchID": {
 				"type": "string"
