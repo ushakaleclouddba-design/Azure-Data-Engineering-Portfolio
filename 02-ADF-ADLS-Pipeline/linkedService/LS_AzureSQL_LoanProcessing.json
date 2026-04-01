@@ -1,0 +1,23 @@
+{
+	"name": "LS_AzureSQL_LoanProcessing",
+	"properties": {
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"server": "usha-poc-sqlsvr.database.windows.net",
+			"database": "LoanProcessing_POC",
+			"encrypt": "mandatory",
+			"trustServerCertificate": false,
+			"authenticationType": "SQL",
+			"userName": "ssisadmin",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "LS_KeyVault_POC",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "sqlPassword"
+			}
+		}
+	}
+}
