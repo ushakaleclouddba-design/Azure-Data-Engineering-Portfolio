@@ -393,6 +393,29 @@
 						"enablePartitionDiscovery": false
 					}
 				}
+			},
+			{
+				"name": "Fail_SLABreach",
+				"type": "Fail",
+				"dependsOn": [
+					{
+						"activity": "CopyData_ToSQL",
+						"dependencyConditions": [
+							"Failed"
+						]
+					},
+					{
+						"activity": "StoredProc_AuditLog",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"message": "@concat('Loan processing failed for branch ',pipeline().parameters.BranchID,' on ',pipeline().parameters.RunDate)",
+					"errorCode": "LOAN_FAIL_001"
+				}
 			}
 		],
 		"parameters": {
