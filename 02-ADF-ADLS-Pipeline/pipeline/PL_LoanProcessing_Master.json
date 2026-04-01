@@ -22,6 +22,48 @@
 						"resource": "https://vault.azure.net"
 					}
 				}
+			},
+			{
+				"name": "If Condition1",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "AKV_GetSecrets",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@and(not(equals(dayOfWeek(utcNow()),0)),not(equals(dayOfWeek(utcNow()),6)),not(contains(variables('HolidayList'),formatDateTime(utcNow(),'yyyy-MM-dd'))))",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Execute_BranchPipeline",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_LoanProcessing_Branch",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"BranchID": "SF_Downtown",
+									"RunDate": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
+									"LoanType": "Mortgage"
+								}
+							}
+						}
+					]
+				}
 			}
 		],
 		"variables": {
