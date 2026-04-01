@@ -24,7 +24,7 @@
 				}
 			},
 			{
-				"name": "If Condition1",
+				"name": "CheckBusinessDay",
 				"type": "IfCondition",
 				"dependsOn": [
 					{
@@ -37,9 +37,57 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@and(not(equals(dayOfWeek(utcNow()),0)),not(equals(dayOfWeek(utcNow()),6)),not(contains(variables('HolidayList'),formatDateTime(utcNow(),'yyyy-MM-dd'))))",
+						"value": "@and(and(not(equals(dayOfWeek(utcNow()),0)),not(equals(dayOfWeek(utcNow()),6))),not(contains(variables('HolidayList'),formatDateTime(utcNow(),'yyyy-MM-dd'))))",
 						"type": "Expression"
 					},
+					"ifFalseActivities": [
+						{
+							"name": "LogNonBusinessDay",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[usp_LogPipelineRun]",
+								"storedProcedureParameters": {
+									"ApprovedCount": {
+										"value": "0",
+										"type": "Int32"
+									},
+									"BranchID": {
+										"value": "Master",
+										"type": "String"
+									},
+									"PipelineRunID": {
+										"value": "",
+										"type": "String"
+									},
+									"RejectedCount": {
+										"value": "@pipeline().RunId",
+										"type": "Int32"
+									},
+									"RunDate": {
+										"value": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
+										"type": "DateTime"
+									},
+									"Status": {
+										"value": "skipped",
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_AzureSQL_LoanProcessing",
+								"type": "LinkedServiceReference"
+							}
+						}
+					],
 					"ifTrueActivities": [
 						{
 							"name": "Execute_BranchPipeline",
