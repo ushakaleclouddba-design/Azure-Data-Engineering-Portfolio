@@ -116,6 +116,33 @@
 					},
 					"traceLevel": "Fine"
 				}
+			},
+			{
+				"name": "Run_Gold_Analysis",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "DF_SilverToGold",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Users/ushakaleclouddba@outlook.com/Gold_Analysis"
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_Databricks_Notebook",
+					"type": "LinkedServiceReference"
+				}
 			}
 		],
 		"parameters": {
