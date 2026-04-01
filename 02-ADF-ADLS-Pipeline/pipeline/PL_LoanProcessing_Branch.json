@@ -33,6 +33,77 @@
 						"value": "@or(equals(variables('FileArrived'),'true'),greaterOrEquals(variables('RetryCount'),10))",
 						"type": "Expression"
 					},
+					"activities": [
+						{
+							"name": "Wait_30s",
+							"type": "Wait",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 30
+							}
+						},
+						{
+							"name": "CheckFileArrived",
+							"type": "GetMetadata",
+							"dependsOn": [
+								{
+									"activity": "Wait_30s",
+									"dependencyConditions": [
+										"Completed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "DS_Node5_LoanFiles",
+									"type": "DatasetReference",
+									"parameters": {
+										"Filename": "@concat(pipeline().parameters.BranchID,'_loans.csv')"
+									}
+								},
+								"fieldList": [
+									"exists"
+								],
+								"storeSettings": {
+									"type": "FileServerReadSettings",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							}
+						},
+						{
+							"name": "SetVar_FileArrived",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "CheckFileArrived",
+									"dependencyConditions": [
+										"Completed"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "FileArrived",
+								"value": "@string(activity('CheckFileArrived').output.exists)"
+							}
+						}
+					],
 					"timeout": "0.00:06:00"
 				}
 			}
