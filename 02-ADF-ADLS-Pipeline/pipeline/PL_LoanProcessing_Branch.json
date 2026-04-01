@@ -15,6 +15,26 @@
 					"variableName": "RetryCount",
 					"value": 0
 				}
+			},
+			{
+				"name": "WaitForFile",
+				"type": "Until",
+				"dependsOn": [
+					{
+						"activity": "SetVar_RetryCount",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@or(equals(variables('FileArrived'),'true'),greaterOrEquals(variables('RetryCount'),10))",
+						"type": "Expression"
+					},
+					"timeout": "0.00:06:00"
+				}
 			}
 		],
 		"parameters": {
