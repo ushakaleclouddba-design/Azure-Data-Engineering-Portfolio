@@ -11,26 +11,32 @@
 		"LS_Blob_Staging_connectionString": {
 			"value": ""
 		},
+		"LS_Databricks_Notebook_accessToken": {
+			"value": ""
+		},
+		"LS_Databricks_POC_accessToken": {
+			"value": ""
+		},
 		"LS_FileSystem_Node5_password": {
 			"value": ""
 		},
 		"LS_SQLServer_Node5_password": {
 			"value": ""
 		},
-		"LS_Databricks_POC_accessToken": {
-			"value": ""
-		},
-		"LS_Databricks_Notebook_accessToken": {
-			"value": ""
-		},
 		"LS_ADLS_Gen2_properties_typeProperties_url": {
 			"value": "https://ushaadfpocadls.dfs.core.windows.net/"
 		},
+		"LS_Databricks_Notebook_properties_typeProperties_existingClusterId": {
+			"value": "0331-224353-06bfarhe"
+		},
 		"LS_FileSystem_Node5_properties_typeProperties_host": {
-			"value": "c:\\ssis_output"
+			"value": "c:\\FNBA_Loanfiles"
 		},
 		"LS_FileSystem_Node5_properties_typeProperties_userId": {
 			"value": "ushadc0\\ushakale"
+		},
+		"LS_KeyVault_POC_properties_typeProperties_baseUrl": {
+			"value": "https://usha-kv-poc.vault.azure.net/"
 		},
 		"LS_SQLServer_Node5_properties_typeProperties_server": {
 			"value": "Node5"
@@ -59,8 +65,14 @@
 		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"value": ""
 		},
-		"LS_Databricks_Notebook_properties_typeProperties_existingClusterId": {
-			"value": "0331-224353-06bfarhe"
+		"LS_AzureSQL_LoanProcessing_properties_typeProperties_server": {
+			"value": "usha-poc-sqlsvr.database.windows.net"
+		},
+		"LS_AzureSQL_LoanProcessing_properties_typeProperties_database": {
+			"value": "LoanProcessing_POC"
+		},
+		"LS_AzureSQL_LoanProcessing_properties_typeProperties_userName": {
+			"value": "ssisadmin"
 		},
 		"containerUri": {
 			"value": ""

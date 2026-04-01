@@ -15,6 +15,14 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_Blob_Staging'"
 		},
+		"LS_Databricks_Notebook_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'LS_Databricks_Notebook'"
+		},
+		"LS_Databricks_POC_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'LS_Databricks_POC'"
+		},
 		"LS_FileSystem_Node5_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'LS_FileSystem_Node5'"
@@ -23,25 +31,25 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'LS_SQLServer_Node5'"
 		},
-		"LS_Databricks_POC_accessToken": {
-			"type": "secureString",
-			"metadata": "Secure string for 'accessToken' of 'LS_Databricks_POC'"
-		},
-		"LS_Databricks_Notebook_accessToken": {
-			"type": "secureString",
-			"metadata": "Secure string for 'accessToken' of 'LS_Databricks_Notebook'"
-		},
 		"LS_ADLS_Gen2_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://ushaadfpocadls.dfs.core.windows.net/"
 		},
+		"LS_Databricks_Notebook_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "0331-224353-06bfarhe"
+		},
 		"LS_FileSystem_Node5_properties_typeProperties_host": {
 			"type": "string",
-			"defaultValue": "c:\\ssis_output"
+			"defaultValue": "c:\\FNBA_Loanfiles"
 		},
 		"LS_FileSystem_Node5_properties_typeProperties_userId": {
 			"type": "string",
 			"defaultValue": "ushadc0\\ushakale"
+		},
+		"LS_KeyVault_POC_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://usha-kv-poc.vault.azure.net/"
 		},
 		"LS_SQLServer_Node5_properties_typeProperties_server": {
 			"type": "string",
@@ -78,9 +86,17 @@
 		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"type": "secureString"
 		},
-		"LS_Databricks_Notebook_properties_typeProperties_existingClusterId": {
+		"LS_AzureSQL_LoanProcessing_properties_typeProperties_server": {
 			"type": "string",
-			"defaultValue": "0331-224353-06bfarhe"
+			"defaultValue": "usha-poc-sqlsvr.database.windows.net"
+		},
+		"LS_AzureSQL_LoanProcessing_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "LoanProcessing_POC"
+		},
+		"LS_AzureSQL_LoanProcessing_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "ssisadmin"
 		},
 		"containerUri": {
 			"type": "string",
@@ -115,11 +131,11 @@
 					"LS_Blob_Staging_connectionString": {
 						"value": "[parameters('LS_Blob_Staging_connectionString')]"
 					},
-					"LS_Databricks_POC_accessToken": {
-						"value": "[parameters('LS_Databricks_POC_accessToken')]"
-					},
 					"LS_Databricks_Notebook_accessToken": {
 						"value": "[parameters('LS_Databricks_Notebook_accessToken')]"
+					},
+					"LS_Databricks_POC_accessToken": {
+						"value": "[parameters('LS_Databricks_POC_accessToken')]"
 					},
 					"LS_FileSystem_Node5_password": {
 						"value": "[parameters('LS_FileSystem_Node5_password')]"
@@ -132,6 +148,9 @@
 					},
 					"LS_Databricks_Notebook_properties_typeProperties_existingClusterId": {
 						"value": "[parameters('LS_Databricks_Notebook_properties_typeProperties_existingClusterId')]"
+					},
+					"LS_KeyVault_POC_properties_typeProperties_baseUrl": {
+						"value": "[parameters('LS_KeyVault_POC_properties_typeProperties_baseUrl')]"
 					},
 					"LS_FileSystem_Node5_properties_typeProperties_host": {
 						"value": "[parameters('LS_FileSystem_Node5_properties_typeProperties_host')]"
@@ -157,6 +176,33 @@
 					"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 						"value": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword')]"
 					},
+					"LS_AzureSQL_LoanProcessing_properties_typeProperties_server": {
+						"value": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_server')]"
+					},
+					"LS_AzureSQL_LoanProcessing_properties_typeProperties_database": {
+						"value": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_database')]"
+					},
+					"LS_AzureSQL_LoanProcessing_properties_typeProperties_userName": {
+						"value": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_userName')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "usha-adf-poc_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
 					"TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_pipelineRunDate": {
 						"value": "[parameters('TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_pipelineRunDate')]"
 					},
@@ -168,7 +214,9 @@
 					}
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'usha-adf-poc_ArmTemplate_0')]"
+			]
 		}
 	]
 }
