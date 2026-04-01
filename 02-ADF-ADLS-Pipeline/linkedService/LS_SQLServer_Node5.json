@@ -7,12 +7,12 @@
 		"type": "SqlServer",
 		"typeProperties": {
 			"server": "Node5",
-			"database": " LoanProcessing_Staging",
+			"database": "LoanProcessing_Staging",
 			"encrypt": "optional",
 			"trustServerCertificate": true,
 			"authenticationType": "SQL",
 			"userName": "adfuser",
-			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI0NTFhMmUxMC0xMjY0LTRmODEtOThiNS1iODJlNDJjMzY3OGQiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI2MDFkZDQ0NS1lMWY4LTQ0NGQtYjYzNS0wYTQyYjZiM2ZjMzciLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
 		},
 		"connectVia": {
 			"referenceName": "SHIR-Node5",
