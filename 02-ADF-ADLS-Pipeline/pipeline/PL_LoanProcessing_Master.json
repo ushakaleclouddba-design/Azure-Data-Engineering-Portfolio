@@ -39,16 +39,18 @@
 					"expression": {
 						"value": "@and(not(equals(dayOfWeek(utcNow()),0)),not(equals(dayOfWeek(utcNow()),6)),not(contains(variables('HolidayList'),formatDateTime(utcNow(),'yyyy-MM-dd'))))",
 						"type": "Expression"
-					}
-				}
-			},
-			{
-				"name": "Wait_True",
-				"type": "Wait",
-				"dependsOn": [],
-				"userProperties": [],
-				"typeProperties": {
-					"waitTimeInSeconds": 1
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Wait_True",
+							"type": "Wait",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 1
+							}
+						}
+					]
 				}
 			}
 		],
