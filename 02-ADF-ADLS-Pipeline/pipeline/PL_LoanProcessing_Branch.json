@@ -21,7 +21,7 @@
 				"type": "Until",
 				"dependsOn": [
 					{
-						"activity": "SetVar_RetryCount",
+						"activity": "SetVar_FileArrived_True",
 						"dependencyConditions": [
 							"Completed"
 						]
@@ -416,6 +416,27 @@
 					"message": "@concat('Loan processing failed for branch ',pipeline().parameters.BranchID,' on ',pipeline().parameters.RunDate)",
 					"errorCode": "LOAN_FAIL_001"
 				}
+			},
+			{
+				"name": "SetVar_FileArrived_True",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "SetVar_RetryCount",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "FileArrived",
+					"value": "true"
+				}
 			}
 		],
 		"parameters": {
@@ -438,6 +459,9 @@
 			},
 			"RejectedIDs": {
 				"type": "Array"
+			},
+			"SetVar_FileArrived_True": {
+				"type": "String"
 			}
 		},
 		"annotations": []
