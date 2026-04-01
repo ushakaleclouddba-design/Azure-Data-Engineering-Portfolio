@@ -17,6 +17,12 @@
 		"LS_SQLServer_Node5_password": {
 			"value": ""
 		},
+		"LS_Databricks_POC_accessToken": {
+			"value": ""
+		},
+		"LS_Databricks_Notebook_accessToken": {
+			"value": ""
+		},
 		"LS_ADLS_Gen2_properties_typeProperties_url": {
 			"value": "https://ushaadfpocadls.dfs.core.windows.net/"
 		},
@@ -35,6 +41,15 @@
 		"LS_SQLServer_Node5_properties_typeProperties_userName": {
 			"value": "ushadc0\\ushakale"
 		},
+		"TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_pipelineRunDate": {
+			"value": "@formatDateTime(trigger().scheduledTime, 'yyyy-MM-dd')"
+		},
+		"TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_silverPath": {
+			"value": "processed/transactions"
+		},
+		"TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_goldPath": {
+			"value": "curated/transactions/gold"
+		},
 		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
 			"value": "usha-poc-sqlsvr.database.windows.net"
 		},
@@ -44,14 +59,8 @@
 		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"value": ""
 		},
-		"TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_pipelineRunDate": {
-			"value": "@formatDateTime(trigger().scheduledTime, 'yyyy-MM-dd')"
-		},
-		"TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_silverPath": {
-			"value": "processed/transactions"
-		},
-		"TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_goldPath": {
-			"value": "curated/transactions/gold"
+		"LS_Databricks_Notebook_properties_typeProperties_existingClusterId": {
+			"value": "0331-224353-06bfarhe"
 		},
 		"containerUri": {
 			"value": ""
