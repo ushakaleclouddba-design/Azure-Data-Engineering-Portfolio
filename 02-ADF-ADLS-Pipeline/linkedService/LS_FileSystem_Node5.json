@@ -5,9 +5,9 @@
 		"annotations": [],
 		"type": "FileServer",
 		"typeProperties": {
-			"host": "c:\\FNBA_Loanfiles",
+			"host": "\\\\NODE5\\FNBA_Loanfiles",
 			"userId": "ushadc0\\ushakale",
-			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIzODNkMWNjNy1mMWYwLTRiODMtOTY1ZS0yNjNlYmM4MTYxN2EiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI4ZTk0NDU5ZS1jNTc0LTQzMjAtYjJmMi0zZDY2NmE3NmRkOTciLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
 		},
 		"connectVia": {
 			"referenceName": "SHIR-Node5",
