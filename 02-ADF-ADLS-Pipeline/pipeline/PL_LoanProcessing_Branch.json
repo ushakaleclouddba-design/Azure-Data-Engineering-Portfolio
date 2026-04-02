@@ -167,10 +167,7 @@
 				"outputs": [
 					{
 						"referenceName": "DS_ADLS_Landing",
-						"type": "DatasetReference",
-						"parameters": {
-							"BranchID": "@pipeline().parameters.BranchID"
-						}
+						"type": "DatasetReference"
 					}
 				]
 			},
