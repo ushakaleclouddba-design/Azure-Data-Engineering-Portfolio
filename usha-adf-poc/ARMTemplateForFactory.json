@@ -1041,493 +1041,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/PL_LoanProcessing_Branch')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "SetVar_RetryCount",
-						"type": "SetVariable",
-						"dependsOn": [],
-						"policy": {
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "RetryCount",
-							"value": 0
-						}
-					},
-					{
-						"name": "WaitForFile",
-						"type": "Until",
-						"dependsOn": [
-							{
-								"activity": "SetVar_FileArrived_True",
-								"dependencyConditions": [
-									"Completed"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@or(equals(variables('FileArrived'),'true'),greaterOrEquals(variables('RetryCount'),10))",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "Wait_30s",
-									"type": "Wait",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"waitTimeInSeconds": 30
-									}
-								},
-								{
-									"name": "CheckFileArrived",
-									"type": "GetMetadata",
-									"dependsOn": [
-										{
-											"activity": "Wait_30s",
-											"dependencyConditions": [
-												"Completed"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"dataset": {
-											"referenceName": "DS_Node5_LoanFiles",
-											"type": "DatasetReference",
-											"parameters": {
-												"Filename": "@concat(pipeline().parameters.BranchID,'_loans.csv')"
-											}
-										},
-										"fieldList": [
-											"exists"
-										],
-										"storeSettings": {
-											"type": "FileServerReadSettings",
-											"enablePartitionDiscovery": false
-										},
-										"formatSettings": {
-											"type": "DelimitedTextReadSettings"
-										}
-									}
-								},
-								{
-									"name": "SetVar_FileArrived",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "CheckFileArrived",
-											"dependencyConditions": [
-												"Completed"
-											]
-										}
-									],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "FileArrived",
-										"value": "@string(activity('CheckFileArrived').output.exists)"
-									}
-								}
-							],
-							"timeout": "0.00:06:00"
-						}
-					},
-					{
-						"name": "CopyLoanFile",
-						"type": "Copy",
-						"dependsOn": [
-							{
-								"activity": "WaitForFile",
-								"dependencyConditions": [
-									"Completed"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "SqlServerSource",
-								"sqlReaderQuery": "SELECT * FROM dbo.@{pipeline().parameters.BranchID}_loans",
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings",
-									"copyBehavior": "PreserveHierarchy"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".csv"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "DS_Node5_SQL_Loans",
-								"type": "DatasetReference",
-								"parameters": {
-									"Branchid": "@pipeline().parameters.BranchID"
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "DS_ADLS_Landing",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						]
-					},
-					{
-						"name": "Lookup_IntrestRates",
-						"type": "Lookup",
-						"dependsOn": [
-							{
-								"activity": "CopyLoanFile",
-								"dependencyConditions": [
-									"Completed"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": "SELECT ProductCode, BaseRate FROM dbo.LoanRates WHERE EffectiveDate = CAST(GETDATE() AS DATE) AND ProductCode = '@{pipeline().parameters.LoanType}'",
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_AzureSQL_RateTable",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						}
-					},
-					{
-						"name": "CopyData_ToSQL",
-						"type": "Copy",
-						"dependsOn": [
-							{
-								"activity": "Lookup_IntrestRates",
-								"dependencyConditions": [
-									"Completed"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "AzureBlobFSReadSettings",
-									"recursive": true,
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
-							},
-							"sink": {
-								"type": "AzureSqlSink",
-								"preCopyScript": "DELETE FROM dbo.LoanApplications WHERE BranchID = '@{pipeline().parameters.BranchID}' AND RunDate = '@{pipeline().parameters.RunDate}'",
-								"writeBehavior": "insert",
-								"sqlWriterUseTableLock": false,
-								"disableMetricsCollection": false
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "DS_ADLS_Landing",
-								"type": "DatasetReference",
-								"parameters": {
-									"BranchID": "@pipeline().parameters.BranchID"
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "DS_AzureSQL_LoanApplications",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						]
-					},
-					{
-						"name": "StoredProc_AuditLog",
-						"type": "SqlServerStoredProcedure",
-						"dependsOn": [
-							{
-								"activity": "CopyData_ToSQL",
-								"dependencyConditions": [
-									"Completed"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"storedProcedureName": "[[dbo].[usp_LogPipelineRun]",
-							"storedProcedureParameters": {
-								"ApprovedCount": {
-									"value": "@activity('CopyData_ToSQL').output.rowsCopied",
-									"type": "Int32"
-								},
-								"BranchID": {
-									"value": "@pipeline().parameters.BranchID",
-									"type": "String"
-								},
-								"PipelineRunID": {
-									"value": "@pipeline().RunId",
-									"type": "String"
-								},
-								"RejectedCount": {
-									"value": "0",
-									"type": "Int32"
-								},
-								"RunDate": {
-									"value": "@pipeline().parameters.RunDate",
-									"type": "DateTime"
-								},
-								"Status": {
-									"value": "SUCCESS",
-									"type": "String"
-								}
-							}
-						},
-						"linkedServiceName": {
-							"referenceName": "LS_AzureSQL_LoanProcessing",
-							"type": "LinkedServiceReference"
-						}
-					},
-					{
-						"name": "Script_UpdateStatus",
-						"type": "Script",
-						"dependsOn": [
-							{
-								"activity": "StoredProc_AuditLog",
-								"dependencyConditions": [
-									"Completed"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"linkedServiceName": {
-							"referenceName": "LS_AzureSQL_LoanProcessing",
-							"type": "LinkedServiceReference"
-						},
-						"typeProperties": {
-							"scripts": [
-								{
-									"type": "NonQuery",
-									"text": "UPDATE dbo.LoanApplications \nSET ProcessingStatus = 'PROCESSED', UpdatedAt = GETDATE() \nWHERE BranchID = '@{pipeline().parameters.BranchID}' \nAND RunDate = '@{pipeline().parameters.RunDate}'"
-								}
-							],
-							"scriptBlockExecutionTimeout": "02:00:00"
-						}
-					},
-					{
-						"name": "Delete_LandingFile",
-						"type": "Delete",
-						"dependsOn": [
-							{
-								"activity": "Script_UpdateStatus",
-								"dependencyConditions": [
-									"Completed"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataset": {
-								"referenceName": "DS_ADLS_Landing",
-								"type": "DatasetReference",
-								"parameters": {
-									"BranchID": "@pipeline().parameters.BranchID"
-								}
-							},
-							"logStorageSettings": {
-								"linkedServiceName": {
-									"referenceName": "LS_ADLS_Gen2",
-									"type": "LinkedServiceReference"
-								},
-								"path": "curated/delete-logs"
-							},
-							"enableLogging": true,
-							"storeSettings": {
-								"type": "AzureBlobFSReadSettings",
-								"recursive": false,
-								"enablePartitionDiscovery": false
-							}
-						}
-					},
-					{
-						"name": "Fail_SLABreach",
-						"type": "Fail",
-						"dependsOn": [
-							{
-								"activity": "CopyData_ToSQL",
-								"dependencyConditions": [
-									"Failed"
-								]
-							},
-							{
-								"activity": "StoredProc_AuditLog",
-								"dependencyConditions": [
-									"Failed"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"message": "@concat('Loan processing failed for branch ',pipeline().parameters.BranchID,' on ',pipeline().parameters.RunDate)",
-							"errorCode": "LOAN_FAIL_001"
-						}
-					},
-					{
-						"name": "SetVar_FileArrived_True",
-						"type": "SetVariable",
-						"dependsOn": [
-							{
-								"activity": "SetVar_RetryCount",
-								"dependencyConditions": [
-									"Completed"
-								]
-							}
-						],
-						"policy": {
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "FileArrived",
-							"value": "true"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"BranchID": {
-						"type": "string"
-					},
-					"RunDate": {
-						"type": "string"
-					},
-					"LoanType": {
-						"type": "string"
-					}
-				},
-				"variables": {
-					"RetryCount": {
-						"type": "Integer"
-					},
-					"FileArrived": {
-						"type": "String"
-					},
-					"RejectedIDs": {
-						"type": "Array"
-					},
-					"SetVar_FileArrived_True": {
-						"type": "String"
-					}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_Node5_SQL_Loans')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Landing')]",
-				"[concat(variables('factoryId'), '/datasets/DS_AzureSQL_RateTable')]",
-				"[concat(variables('factoryId'), '/datasets/DS_AzureSQL_LoanApplications')]",
-				"[concat(variables('factoryId'), '/linkedServices/LS_AzureSQL_LoanProcessing')]",
-				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Gen2')]",
-				"[concat(variables('factoryId'), '/datasets/DS_Node5_LoanFiles')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/PL_LoanProcessing_Master')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -1730,6 +1243,523 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_SQLServer_Node5')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_LoanProcessing_Branch')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "SetVar_RetryCount",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "RetryCount",
+							"value": 0
+						}
+					},
+					{
+						"name": "WaitForFile",
+						"type": "Until",
+						"dependsOn": [
+							{
+								"activity": "SetVar_FileArrived_True",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@or(equals(variables('FileArrived'),'true'),greaterOrEquals(variables('RetryCount'),10))",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Wait_30s",
+									"type": "Wait",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"waitTimeInSeconds": 30
+									}
+								},
+								{
+									"name": "CheckFileArrived",
+									"type": "GetMetadata",
+									"dependsOn": [
+										{
+											"activity": "Wait_30s",
+											"dependencyConditions": [
+												"Completed"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "DS_Node5_LoanFiles",
+											"type": "DatasetReference",
+											"parameters": {
+												"Filename": "@concat(pipeline().parameters.BranchID,'_loans.csv')"
+											}
+										},
+										"fieldList": [
+											"exists"
+										],
+										"storeSettings": {
+											"type": "FileServerReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										},
+										"formatSettings": {
+											"type": "DelimitedTextReadSettings"
+										}
+									}
+								},
+								{
+									"name": "SetVar_FileArrived",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "CheckFileArrived",
+											"dependencyConditions": [
+												"Completed"
+											]
+										}
+									],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "FileArrived",
+										"value": {
+											"value": "@string(activity('CheckFileArrived').output.exists)",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"timeout": "0.00:06:00"
+						}
+					},
+					{
+						"name": "CopyLoanFile",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "WaitForFile",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": {
+									"value": "SELECT * FROM dbo.@{pipeline().parameters.BranchID}_loans",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings",
+									"copyBehavior": "PreserveHierarchy"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_Node5_SQL_Loans",
+								"type": "DatasetReference",
+								"parameters": {
+									"Branchid": "@pipeline().parameters.BranchID"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_ADLS_Landing",
+								"type": "DatasetReference",
+								"parameters": {
+									"BranchID": "@pipeline().parameters.BranchID"
+								}
+							}
+						]
+					},
+					{
+						"name": "Lookup_IntrestRates",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "CopyLoanFile",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT ProductCode, BaseRate FROM dbo.LoanRates WHERE EffectiveDate = CAST(GETDATE() AS DATE) AND ProductCode = '@{pipeline().parameters.LoanType}'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_AzureSQL_RateTable",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "CopyData_ToSQL",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Lookup_IntrestRates",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": {
+									"value": "DELETE FROM dbo.LoanApplications WHERE BranchID = '@{pipeline().parameters.BranchID}' AND RunDate = '@{pipeline().parameters.RunDate}'",
+									"type": "Expression"
+								},
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_ADLS_Landing",
+								"type": "DatasetReference",
+								"parameters": {
+									"BranchID": "@pipeline().parameters.BranchID"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_AzureSQL_LoanApplications",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "StoredProc_AuditLog",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "CopyData_ToSQL",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[usp_LogPipelineRun]",
+							"storedProcedureParameters": {
+								"ApprovedCount": {
+									"value": {
+										"value": "@activity('CopyData_ToSQL').output.rowsCopied",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"BranchID": {
+									"value": {
+										"value": "@pipeline().parameters.BranchID",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"PipelineRunID": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"RejectedCount": {
+									"value": "0",
+									"type": "Int32"
+								},
+								"RunDate": {
+									"value": {
+										"value": "@pipeline().parameters.RunDate",
+										"type": "Expression"
+									},
+									"type": "DateTime"
+								},
+								"Status": {
+									"value": "SUCCESS",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_AzureSQL_LoanProcessing",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Script_UpdateStatus",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "StoredProc_AuditLog",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "LS_AzureSQL_LoanProcessing",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "NonQuery",
+									"text": {
+										"value": "UPDATE dbo.LoanApplications \nSET ProcessingStatus = 'PROCESSED', UpdatedAt = GETDATE() \nWHERE BranchID = '@{pipeline().parameters.BranchID}' \nAND RunDate = '@{pipeline().parameters.RunDate}'",
+										"type": "Expression"
+									}
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					},
+					{
+						"name": "Delete_LandingFile",
+						"type": "Delete",
+						"dependsOn": [
+							{
+								"activity": "Script_UpdateStatus",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DS_ADLS_Landing",
+								"type": "DatasetReference",
+								"parameters": {
+									"BranchID": "@pipeline().parameters.BranchID"
+								}
+							},
+							"logStorageSettings": {
+								"linkedServiceName": {
+									"referenceName": "LS_ADLS_Gen2",
+									"type": "LinkedServiceReference"
+								},
+								"path": "curated/delete-logs"
+							},
+							"enableLogging": true,
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": false,
+								"enablePartitionDiscovery": false
+							}
+						}
+					},
+					{
+						"name": "Fail_SLABreach",
+						"type": "Fail",
+						"dependsOn": [
+							{
+								"activity": "CopyData_ToSQL",
+								"dependencyConditions": [
+									"Failed"
+								]
+							},
+							{
+								"activity": "StoredProc_AuditLog",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"message": {
+								"value": "@concat('Loan processing failed for branch ',pipeline().parameters.BranchID,' on ',pipeline().parameters.RunDate)",
+								"type": "Expression"
+							},
+							"errorCode": "LOAN_FAIL_001"
+						}
+					},
+					{
+						"name": "SetVar_FileArrived_True",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "SetVar_RetryCount",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "FileArrived",
+							"value": "true"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"BranchID": {
+						"type": "string"
+					},
+					"RunDate": {
+						"type": "string"
+					},
+					"LoanType": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"RetryCount": {
+						"type": "Integer"
+					},
+					"FileArrived": {
+						"type": "String"
+					},
+					"RejectedIDs": {
+						"type": "Array"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_Node5_SQL_Loans')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Landing')]",
+				"[concat(variables('factoryId'), '/datasets/DS_AzureSQL_RateTable')]",
+				"[concat(variables('factoryId'), '/datasets/DS_AzureSQL_LoanApplications')]",
+				"[concat(variables('factoryId'), '/linkedServices/LS_AzureSQL_LoanProcessing')]",
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Gen2')]",
+				"[concat(variables('factoryId'), '/datasets/DS_Node5_LoanFiles')]"
 			]
 		}
 	]
