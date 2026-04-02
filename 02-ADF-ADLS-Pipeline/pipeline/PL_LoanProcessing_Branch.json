@@ -387,11 +387,9 @@
 			{
 				"name": "Delete_LandingFile",
 				"type": "Delete",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
-						"activity": "Script_UpdateStatus",
+						"activity": "DataFlow_BronzeToSilver",
 						"dependencyConditions": [
 							"Completed"
 						]
@@ -509,6 +507,37 @@
 						}
 					],
 					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "DataFlow_BronzeToSilver",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "Script_UpdateStatus",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "DFLoanBronzeToSilver",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
 				}
 			}
 		],
