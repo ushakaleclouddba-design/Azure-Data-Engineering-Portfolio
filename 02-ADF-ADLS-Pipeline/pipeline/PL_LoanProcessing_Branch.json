@@ -128,21 +128,16 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "DelimitedTextSource",
-						"storeSettings": {
-							"type": "FileServerReadSettings",
-							"recursive": true,
-							"enablePartitionDiscovery": false
-						},
-						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
-						}
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT * FROM dbo.@{pipeline().parameters.BranchID}_loans",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
 					"sink": {
 						"type": "DelimitedTextSink",
 						"storeSettings": {
 							"type": "AzureBlobFSWriteSettings",
-							"copyBehavior": "MergeFiles"
+							"copyBehavior": "PreserveHierarchy"
 						},
 						"formatSettings": {
 							"type": "DelimitedTextWriteSettings",
@@ -162,10 +157,10 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "DS_Node5_LoanFiles",
+						"referenceName": "DS_Node5_SQL_Loans",
 						"type": "DatasetReference",
 						"parameters": {
-							"Filename": "@concat(pipeline().parameters.BranchID,'_loans.csv')"
+							"Branchid": "@pipeline().parameters.BranchID"
 						}
 					}
 				],
