@@ -1444,10 +1444,7 @@
 							"scripts": [
 								{
 									"type": "NonQuery",
-									"text": {
-										"value": "UPDATE dbo.LoanApplications \nSET ProcessingStatus = 'PROCESSED', UpdatedAt = GETDATE() \nWHERE BranchID = '@{pipeline().parameters.BranchID}' \nAND RunDate = '@{pipeline().parameters.RunDate}'",
-										"type": "Expression"
-									}
+									"text": "UPDATE dbo.LoanApplications \nSET ProcessingStatus = 'PROCESSED', UpdatedAt = GETDATE() \nWHERE BranchID = '@{pipeline().parameters.BranchID}'"
 								}
 							],
 							"scriptBlockExecutionTimeout": "02:00:00"
