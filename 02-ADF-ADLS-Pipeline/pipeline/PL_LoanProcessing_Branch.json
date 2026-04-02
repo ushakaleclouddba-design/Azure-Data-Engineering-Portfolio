@@ -253,10 +253,6 @@
 					},
 					"sink": {
 						"type": "AzureSqlSink",
-						"preCopyScript": {
-							"value": "DELETE FROM dbo.LoanApplications WHERE BranchID = '@{pipeline().parameters.BranchID}' AND RunDate = '@{pipeline().parameters.RunDate}'",
-							"type": "Expression"
-						},
 						"writeBehavior": "insert",
 						"sqlWriterUseTableLock": false,
 						"disableMetricsCollection": false
