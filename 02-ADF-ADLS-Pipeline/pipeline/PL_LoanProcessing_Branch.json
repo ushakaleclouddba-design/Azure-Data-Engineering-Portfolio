@@ -375,7 +375,10 @@
 				"typeProperties": {
 					"dataset": {
 						"referenceName": "DS_ADLS_Landing",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"BranchID": "@pipeline().parameters.BranchID"
+						}
 					},
 					"logStorageSettings": {
 						"linkedServiceName": {
