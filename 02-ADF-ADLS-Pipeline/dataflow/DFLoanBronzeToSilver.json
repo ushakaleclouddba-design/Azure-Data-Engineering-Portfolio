@@ -13,7 +13,11 @@
 				}
 			],
 			"sinks": [],
-			"transformations": [],
+			"transformations": [
+				{
+					"name": "SplitApprovedRejected"
+				}
+			],
 			"scriptLines": [
 				"source(output(",
 				"          ApplicationID as string,",
@@ -29,7 +33,10 @@
 				"     validateSchema: false,",
 				"     inferDriftedColumnTypes: true,",
 				"     ignoreNoFilesFound: false,",
-				"     wildcardPaths:['*/ *_loans.csv']) ~> LoanBronzeSource"
+				"     wildcardPaths:['*/ *_loans.csv']) ~> LoanBronzeSource",
+				"LoanBronzeSource split(toDouble(Amount) < 500000,",
+				"     toDouble(Amount) >= 500000,",
+				"     disjoint: false) ~> SplitApprovedRejected@(Approved, Rejected,  )"
 			]
 		}
 	}
