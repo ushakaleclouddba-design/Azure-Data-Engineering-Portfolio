@@ -375,7 +375,10 @@
 					"scripts": [
 						{
 							"type": "NonQuery",
-							"text": "UPDATE dbo.LoanApplications \nSET ProcessingStatus = 'PROCESSED', UpdatedAt = GETDATE() \nWHERE BranchID = '@{pipeline().parameters.BranchID}'"
+							"text": {
+								"value": "UPDATE dbo.LoanApplications \nSET ProcessingStatus = 'PROCESSED', UpdatedAt = GETDATE() \nWHERE BranchID = '@{pipeline().parameters.BranchID}'",
+								"type": "Expression"
+							}
 						}
 					],
 					"scriptBlockExecutionTimeout": "02:00:00"
@@ -384,6 +387,8 @@
 			{
 				"name": "Delete_LandingFile",
 				"type": "Delete",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Script_UpdateStatus",
@@ -497,7 +502,10 @@
 					"scripts": [
 						{
 							"type": "NonQuery",
-							"text": "DELETE FROM dbo.LoanApplications \nWHERE BranchID = '@{pipeline().parameters.BranchID}'"
+							"text": {
+								"value": "DELETE FROM dbo.LoanApplications \nWHERE BranchID = '@{pipeline().parameters.BranchID}'",
+								"type": "Expression"
+							}
 						}
 					],
 					"scriptBlockExecutionTimeout": "02:00:00"
