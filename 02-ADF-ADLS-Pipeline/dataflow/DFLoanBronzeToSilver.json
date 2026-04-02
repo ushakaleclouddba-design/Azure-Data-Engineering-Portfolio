@@ -22,7 +22,7 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "DS_ADLS_Parquet_Loans_Approved",
+						"referenceName": "DS_ADLS_Parquet_Loans_Rejected",
 						"type": "DatasetReference"
 					},
 					"name": "SinkRejected"
