@@ -331,6 +331,87 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DFLoanBronzeToSilver')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DS_ADLS_Landing_Loans",
+								"type": "DatasetReference"
+							},
+							"name": "LoanBronzeSource"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DS_ADLS_Parquet_Loans_Approved",
+								"type": "DatasetReference"
+							},
+							"name": "SinkApproved"
+						},
+						{
+							"dataset": {
+								"referenceName": "DS_ADLS_Parquet_Loans_Rejected",
+								"type": "DatasetReference"
+							},
+							"name": "SinkRejected"
+						}
+					],
+					"transformations": [
+						{
+							"name": "SplitApprovedRejected"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          ApplicationID as string,",
+						"          BranchID as string,",
+						"          LoanType as string,",
+						"          ApplicantName as string,",
+						"          Amount as string,",
+						"          CreditScore as string,",
+						"          Term as string,",
+						"          RunDate as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     inferDriftedColumnTypes: true,",
+						"     ignoreNoFilesFound: false,",
+						"     wildcardPaths:['*/ *_loans.csv']) ~> LoanBronzeSource",
+						"LoanBronzeSource split(toDouble(Amount) < 500000,",
+						"     toDouble(Amount) >= 500000,",
+						"     disjoint: false) ~> SplitApprovedRejected@(Approved, Rejected)",
+						"SplitApprovedRejected@Approved sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     partitionFileNames:['approved_loans.parquet'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> SinkApproved",
+						"SplitApprovedRejected@Rejected sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     partitionFileNames:['rejected_loans.parquet'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> SinkRejected"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL_CoreBank_SSIS_To_ADLS')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
