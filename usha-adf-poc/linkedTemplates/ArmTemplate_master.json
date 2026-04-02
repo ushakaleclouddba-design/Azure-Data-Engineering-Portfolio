@@ -79,6 +79,18 @@
 			"type": "string",
 			"defaultValue": "adfuser"
 		},
+		"LS_SQLServer_Node5_v2_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "192.168.68.25"
+		},
+		"LS_SQLServer_Node5_v2_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "LoanProcessing_Staging"
+		},
+		"LS_SQLServer_Node5_v2_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "adfuser"
+		},
 		"TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_pipelineRunDate": {
 			"type": "string",
 			"defaultValue": "@formatDateTime(trigger().scheduledTime, 'yyyy-MM-dd')"
@@ -101,18 +113,6 @@
 		},
 		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"type": "secureString"
-		},
-		"LS_SQLServer_Node5_v2_properties_typeProperties_server": {
-			"type": "string",
-			"defaultValue": "192.168.68.25"
-		},
-		"LS_SQLServer_Node5_v2_properties_typeProperties_database": {
-			"type": "string",
-			"defaultValue": "LoanProcessing_Staging"
-		},
-		"LS_SQLServer_Node5_v2_properties_typeProperties_userName": {
-			"type": "string",
-			"defaultValue": "adfuser"
 		},
 		"containerUri": {
 			"type": "string",
@@ -195,15 +195,6 @@
 					"LS_SQLServer_Node5_properties_typeProperties_userName": {
 						"value": "[parameters('LS_SQLServer_Node5_properties_typeProperties_userName')]"
 					},
-					"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
-						"value": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint')]"
-					},
-					"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
-						"value": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName')]"
-					},
-					"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
-						"value": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword')]"
-					},
 					"LS_SQLServer_Node5_v2_properties_typeProperties_server": {
 						"value": "[parameters('LS_SQLServer_Node5_v2_properties_typeProperties_server')]"
 					},
@@ -212,6 +203,15 @@
 					},
 					"LS_SQLServer_Node5_v2_properties_typeProperties_userName": {
 						"value": "[parameters('LS_SQLServer_Node5_v2_properties_typeProperties_userName')]"
+					},
+					"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
+						"value": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint')]"
+					},
+					"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
+						"value": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName')]"
+					},
+					"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
+						"value": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword')]"
 					}
 				}
 			},
