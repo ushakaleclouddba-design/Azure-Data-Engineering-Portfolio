@@ -396,11 +396,18 @@
 					"referenceName": "LS_ADLS_Gen2",
 					"type": "LinkedServiceReference"
 				},
+				"parameters": {
+					"BranchID": {
+						"type": "string"
+					}
+				},
 				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
+						"fileName": "@concat(dataset().BranchID, '_loans.csv')",
+						"folderPath": "@dataset().BranchID",
 						"fileSystem": "landing"
 					},
 					"columnDelimiter": ",",

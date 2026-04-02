@@ -528,7 +528,9 @@
 							{
 								"referenceName": "DS_ADLS_Landing",
 								"type": "DatasetReference",
-								"parameters": {}
+								"parameters": {
+									"BranchID": "@pipeline().parameters.BranchID"
+								}
 							}
 						],
 						"outputs": [
@@ -648,7 +650,9 @@
 							"dataset": {
 								"referenceName": "DS_ADLS_Landing",
 								"type": "DatasetReference",
-								"parameters": {}
+								"parameters": {
+									"BranchID": "@pipeline().parameters.BranchID"
+								}
 							},
 							"logStorageSettings": {
 								"linkedServiceName": {
