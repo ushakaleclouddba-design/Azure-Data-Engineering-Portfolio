@@ -1404,7 +1404,7 @@
 										"value": "@pipeline().parameters.RunDate",
 										"type": "Expression"
 									},
-									"type": "DateTime"
+									"type": "String"
 								},
 								"Status": {
 									"value": "SUCCESS",
