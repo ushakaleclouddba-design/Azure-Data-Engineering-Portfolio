@@ -1,0 +1,12 @@
+{
+	"name": "DS_Node5_SQL_Loans",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_SQLServer_Node5",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": []
+	}
+}
