@@ -10,6 +10,8 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
+				"fileName": "@concat(dataset().BranchID, '_loans.csv')",
+				"folderPath": "@dataset().BranchID",
 				"fileSystem": "landing"
 			},
 			"columnDelimiter": ",",
