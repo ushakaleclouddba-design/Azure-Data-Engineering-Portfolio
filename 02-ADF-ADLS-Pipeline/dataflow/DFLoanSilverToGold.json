@@ -1,0 +1,19 @@
+{
+	"name": "DFLoanSilverToGold",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"name": "LoanSilverToGold"
+				}
+			],
+			"sinks": [],
+			"transformations": [],
+			"scriptLines": [
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false) ~> LoanSilverToGold"
+			]
+		}
+	}
+}
