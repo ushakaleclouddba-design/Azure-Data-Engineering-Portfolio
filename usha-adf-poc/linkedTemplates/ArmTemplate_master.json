@@ -35,6 +35,18 @@
 			"type": "string",
 			"defaultValue": "https://ushaadfpocadls.dfs.core.windows.net/"
 		},
+		"LS_AzureSQL_LoanProcessing_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "usha-poc-sqlsvr.database.windows.net"
+		},
+		"LS_AzureSQL_LoanProcessing_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "LoanProcessing_POC"
+		},
+		"LS_AzureSQL_LoanProcessing_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "ssisadmin"
+		},
 		"LS_Databricks_Notebook_properties_typeProperties_existingClusterId": {
 			"type": "string",
 			"defaultValue": "0331-224353-06bfarhe"
@@ -85,18 +97,6 @@
 		},
 		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"type": "secureString"
-		},
-		"LS_AzureSQL_LoanProcessing_properties_typeProperties_server": {
-			"type": "string",
-			"defaultValue": "usha-poc-sqlsvr.database.windows.net"
-		},
-		"LS_AzureSQL_LoanProcessing_properties_typeProperties_database": {
-			"type": "string",
-			"defaultValue": "LoanProcessing_POC"
-		},
-		"LS_AzureSQL_LoanProcessing_properties_typeProperties_userName": {
-			"type": "string",
-			"defaultValue": "ssisadmin"
 		},
 		"containerUri": {
 			"type": "string",
@@ -152,6 +152,15 @@
 					"LS_KeyVault_POC_properties_typeProperties_baseUrl": {
 						"value": "[parameters('LS_KeyVault_POC_properties_typeProperties_baseUrl')]"
 					},
+					"LS_AzureSQL_LoanProcessing_properties_typeProperties_server": {
+						"value": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_server')]"
+					},
+					"LS_AzureSQL_LoanProcessing_properties_typeProperties_database": {
+						"value": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_database')]"
+					},
+					"LS_AzureSQL_LoanProcessing_properties_typeProperties_userName": {
+						"value": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_userName')]"
+					},
 					"LS_FileSystem_Node5_properties_typeProperties_host": {
 						"value": "[parameters('LS_FileSystem_Node5_properties_typeProperties_host')]"
 					},
@@ -175,15 +184,6 @@
 					},
 					"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 						"value": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword')]"
-					},
-					"LS_AzureSQL_LoanProcessing_properties_typeProperties_server": {
-						"value": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_server')]"
-					},
-					"LS_AzureSQL_LoanProcessing_properties_typeProperties_database": {
-						"value": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_database')]"
-					},
-					"LS_AzureSQL_LoanProcessing_properties_typeProperties_userName": {
-						"value": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_userName')]"
 					}
 				}
 			},

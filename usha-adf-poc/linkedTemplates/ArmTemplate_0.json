@@ -43,6 +43,18 @@
 			"type": "string",
 			"defaultValue": "https://usha-kv-poc.vault.azure.net/"
 		},
+		"LS_AzureSQL_LoanProcessing_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "usha-poc-sqlsvr.database.windows.net"
+		},
+		"LS_AzureSQL_LoanProcessing_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "LoanProcessing_POC"
+		},
+		"LS_AzureSQL_LoanProcessing_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "ssisadmin"
+		},
 		"LS_FileSystem_Node5_properties_typeProperties_host": {
 			"type": "string",
 			"defaultValue": "\\\\NODE5\\FNBA_Loanfiles"
@@ -73,18 +85,6 @@
 		},
 		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"type": "secureString"
-		},
-		"LS_AzureSQL_LoanProcessing_properties_typeProperties_server": {
-			"type": "string",
-			"defaultValue": "usha-poc-sqlsvr.database.windows.net"
-		},
-		"LS_AzureSQL_LoanProcessing_properties_typeProperties_database": {
-			"type": "string",
-			"defaultValue": "LoanProcessing_POC"
-		},
-		"LS_AzureSQL_LoanProcessing_properties_typeProperties_userName": {
-			"type": "string",
-			"defaultValue": "ssisadmin"
 		}
 	},
 	"variables": {
@@ -183,6 +183,145 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Gold_Approved')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_Gen2",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "approved",
+						"fileSystem": "curated"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Gen2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Gold_Rejected')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_Gen2",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "rejected",
+						"fileSystem": "curated"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Gen2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Landing')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_Gen2",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"BranchID": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@concat(dataset().BranchID, '_loans.csv')",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().BranchID",
+							"type": "Expression"
+						},
+						"fileSystem": "landing"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "TransactionID",
+						"type": "String"
+					},
+					{
+						"name": "AccountID",
+						"type": "String"
+					},
+					{
+						"name": "TransactionDate",
+						"type": "String"
+					},
+					{
+						"name": "PostedDate",
+						"type": "String"
+					},
+					{
+						"name": "TransactionType",
+						"type": "String"
+					},
+					{
+						"name": "Amount",
+						"type": "String"
+					},
+					{
+						"name": "RunningBalance",
+						"type": "String"
+					},
+					{
+						"name": "Description",
+						"type": "String"
+					},
+					{
+						"name": "ReferenceNumber",
+						"type": "String"
+					},
+					{
+						"name": "Channel",
+						"type": "String"
+					},
+					{
+						"name": "Remarks",
+						"type": "String"
+					},
+					{
+						"name": "CreatedDate",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Gen2')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Parquet_Gold')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -260,6 +399,34 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Gen2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_AzureSQL_LoanProcessing')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"server": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_server')]",
+					"database": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": false,
+					"authenticationType": "SQL",
+					"userName": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_userName')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "LS_KeyVault_POC",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "sqlPassword"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_KeyVault_POC')]"
 			]
 		},
 		{
@@ -360,363 +527,45 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/LS_AzureSQL_LoanProcessing')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureSqlDatabase",
-				"typeProperties": {
-					"server": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_server')]",
-					"database": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_database')]",
-					"encrypt": "mandatory",
-					"trustServerCertificate": false,
-					"authenticationType": "SQL",
-					"userName": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_userName')]",
-					"password": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "LS_KeyVault_POC",
-							"type": "LinkedServiceReference"
-						},
-						"secretName": "sqlPassword"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_KeyVault_POC')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Landing')]",
+			"name": "[concat(parameters('factoryName'), '/DS_AzureSQL_LoanApplications')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"linkedServiceName": {
-					"referenceName": "LS_ADLS_Gen2",
+					"referenceName": "LS_AzureSQL_LoanProcessing",
 					"type": "LinkedServiceReference"
 				},
-				"parameters": {
-					"BranchID": {
-						"type": "string"
-					}
-				},
 				"annotations": [],
-				"type": "DelimitedText",
+				"type": "AzureSqlTable",
+				"schema": [],
 				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": "@concat(dataset().BranchID, '_loans.csv')",
-						"folderPath": "@dataset().BranchID",
-						"fileSystem": "landing"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"name": "TransactionID",
-						"type": "String"
-					},
-					{
-						"name": "AccountID",
-						"type": "String"
-					},
-					{
-						"name": "TransactionDate",
-						"type": "String"
-					},
-					{
-						"name": "PostedDate",
-						"type": "String"
-					},
-					{
-						"name": "TransactionType",
-						"type": "String"
-					},
-					{
-						"name": "Amount",
-						"type": "String"
-					},
-					{
-						"name": "RunningBalance",
-						"type": "String"
-					},
-					{
-						"name": "Description",
-						"type": "String"
-					},
-					{
-						"name": "ReferenceNumber",
-						"type": "String"
-					},
-					{
-						"name": "Channel",
-						"type": "String"
-					},
-					{
-						"name": "Remarks",
-						"type": "String"
-					},
-					{
-						"name": "CreatedDate",
-						"type": "String"
-					}
-				]
+					"schema": "dbo",
+					"table": "LoanApplications"
+				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Gen2')]"
+				"[concat(variables('factoryId'), '/linkedServices/LS_AzureSQL_LoanProcessing')]"
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Gold_Approved')]",
+			"name": "[concat(parameters('factoryName'), '/DS_AzureSQL_RateTable')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"linkedServiceName": {
-					"referenceName": "LS_ADLS_Gen2",
+					"referenceName": "LS_AzureSQL_LoanProcessing",
 					"type": "LinkedServiceReference"
 				},
 				"annotations": [],
-				"type": "Parquet",
+				"type": "AzureSqlTable",
+				"schema": [],
 				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"folderPath": "approved",
-						"fileSystem": "curated"
-					},
-					"compressionCodec": "snappy"
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Gen2')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Gold_Rejected')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ADLS_Gen2",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Parquet",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"folderPath": "rejected",
-						"fileSystem": "curated"
-					},
-					"compressionCodec": "snappy"
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Gen2')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SqlServerTable1')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_SQLServer_Node5",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "SqlServerTable",
-				"schema": [
-					{
-						"name": "TransactionID",
-						"type": "bigint",
-						"precision": 19
-					},
-					{
-						"name": "AccountID",
-						"type": "int",
-						"precision": 10
-					},
-					{
-						"name": "TransactionDate",
-						"type": "datetime",
-						"precision": 23,
-						"scale": 3
-					},
-					{
-						"name": "PostedDate",
-						"type": "datetime",
-						"precision": 23,
-						"scale": 3
-					},
-					{
-						"name": "TransactionType",
-						"type": "varchar"
-					},
-					{
-						"name": "Amount",
-						"type": "decimal",
-						"precision": 18,
-						"scale": 2
-					},
-					{
-						"name": "RunningBalance",
-						"type": "decimal",
-						"precision": 18,
-						"scale": 2
-					},
-					{
-						"name": "Description",
-						"type": "varchar"
-					},
-					{
-						"name": "ReferenceNumber",
-						"type": "varchar"
-					},
-					{
-						"name": "Channel",
-						"type": "varchar"
-					},
-					{
-						"name": "Remarks",
-						"type": "nvarchar"
-					},
-					{
-						"name": "CreatedDate",
-						"type": "datetime",
-						"precision": 23,
-						"scale": 3
-					}
-				],
-				"typeProperties": {
-					"schema": "Banking",
-					"table": "Transactions"
+					"schema": "dbo",
+					"table": "LoanRates"
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_SQLServer_Node5')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DFSilverToGold')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "DS_ADLS_Parquet_Silver",
-								"type": "DatasetReference"
-							},
-							"name": "DFSilverToGold"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "DS_ADLS_Parquet_Gold",
-								"type": "DatasetReference"
-							},
-							"name": "SinkGold"
-						}
-					],
-					"transformations": [
-						{
-							"name": "aggregate1"
-						}
-					],
-					"scriptLines": [
-						"source(output(",
-						"          TransactionID as string,",
-						"          AccountID as string,",
-						"          TransactionDate as string,",
-						"          PostedDate as string,",
-						"          TransactionType as string,",
-						"          Amount as string,",
-						"          RunningBalance as string,",
-						"          Description as string,",
-						"          ReferenceNumber as string,",
-						"          Channel as string,",
-						"          Remarks as string,",
-						"          CreatedDate as string",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     ignoreNoFilesFound: false,",
-						"     format: 'parquet') ~> DFSilverToGold",
-						"DFSilverToGold aggregate(groupBy(TransactionType),",
-						"     TotalAmount = sum(toDouble(Amount)),",
-						"          TransactionCount = count(TransactionID),",
-						"          AvgAmount = avg(toDouble(Amount))) ~> aggregate1",
-						"aggregate1 sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     format: 'parquet',",
-						"     partitionFileNames:['gold_transactions.parquet'],",
-						"     umask: 0022,",
-						"     preCommands: [],",
-						"     postCommands: [],",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     partitionBy('hash', 1)) ~> SinkGold"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Parquet_Silver')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Parquet_Gold')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/dataflow1')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "DelimitedText1",
-								"type": "DatasetReference"
-							},
-							"name": "Landingcsv"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "DS_ADLS_Parquet_Silver",
-								"type": "DatasetReference"
-							},
-							"name": "SilverParquet"
-						}
-					],
-					"transformations": [],
-					"scriptLines": [
-						"source(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     ignoreNoFilesFound: false) ~> Landingcsv",
-						"Landingcsv sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     format: 'parquet',",
-						"     umask: 0022,",
-						"     preCommands: [],",
-						"     postCommands: [],",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> SilverParquet"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DelimitedText1')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Parquet_Silver')]"
+				"[concat(variables('factoryId'), '/linkedServices/LS_AzureSQL_LoanProcessing')]"
 			]
 		},
 		{
@@ -752,6 +601,29 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_FileSystem_Node5')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Node5_SQL_Loans')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_SQLServer_Node5",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Branchid": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_SQLServer_Node5')]"
 			]
 		}
 	]

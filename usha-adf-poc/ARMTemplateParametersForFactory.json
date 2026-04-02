@@ -26,6 +26,15 @@
 		"LS_ADLS_Gen2_properties_typeProperties_url": {
 			"value": "https://ushaadfpocadls.dfs.core.windows.net/"
 		},
+		"LS_AzureSQL_LoanProcessing_properties_typeProperties_server": {
+			"value": "usha-poc-sqlsvr.database.windows.net"
+		},
+		"LS_AzureSQL_LoanProcessing_properties_typeProperties_database": {
+			"value": "LoanProcessing_POC"
+		},
+		"LS_AzureSQL_LoanProcessing_properties_typeProperties_userName": {
+			"value": "ssisadmin"
+		},
 		"LS_Databricks_Notebook_properties_typeProperties_existingClusterId": {
 			"value": "0331-224353-06bfarhe"
 		},
@@ -64,15 +73,6 @@
 		},
 		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"value": ""
-		},
-		"LS_AzureSQL_LoanProcessing_properties_typeProperties_server": {
-			"value": "usha-poc-sqlsvr.database.windows.net"
-		},
-		"LS_AzureSQL_LoanProcessing_properties_typeProperties_database": {
-			"value": "LoanProcessing_POC"
-		},
-		"LS_AzureSQL_LoanProcessing_properties_typeProperties_userName": {
-			"value": "ssisadmin"
 		}
 	}
 }

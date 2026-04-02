@@ -25,45 +25,7 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/DS_AzureSQL_LoanApplications')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_AzureSQL_LoanProcessing",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": "dbo",
-					"table": "LoanApplications"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_AzureSQL_RateTable')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_AzureSQL_LoanProcessing",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": "dbo",
-					"table": "LoanRates"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_Node5_SQL_Loans')]",
+			"name": "[concat(parameters('factoryName'), '/SqlServerTable1')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -71,15 +33,185 @@
 					"referenceName": "LS_SQLServer_Node5",
 					"type": "LinkedServiceReference"
 				},
-				"parameters": {
-					"Branchid": {
-						"type": "string"
-					}
-				},
 				"annotations": [],
 				"type": "SqlServerTable",
-				"schema": [],
-				"typeProperties": {}
+				"schema": [
+					{
+						"name": "TransactionID",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "AccountID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "TransactionDate",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "PostedDate",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "TransactionType",
+						"type": "varchar"
+					},
+					{
+						"name": "Amount",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "RunningBalance",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "Description",
+						"type": "varchar"
+					},
+					{
+						"name": "ReferenceNumber",
+						"type": "varchar"
+					},
+					{
+						"name": "Channel",
+						"type": "varchar"
+					},
+					{
+						"name": "Remarks",
+						"type": "nvarchar"
+					},
+					{
+						"name": "CreatedDate",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "Banking",
+					"table": "Transactions"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DFSilverToGold')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DS_ADLS_Parquet_Silver",
+								"type": "DatasetReference"
+							},
+							"name": "DFSilverToGold"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DS_ADLS_Parquet_Gold",
+								"type": "DatasetReference"
+							},
+							"name": "SinkGold"
+						}
+					],
+					"transformations": [
+						{
+							"name": "aggregate1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          TransactionID as string,",
+						"          AccountID as string,",
+						"          TransactionDate as string,",
+						"          PostedDate as string,",
+						"          TransactionType as string,",
+						"          Amount as string,",
+						"          RunningBalance as string,",
+						"          Description as string,",
+						"          ReferenceNumber as string,",
+						"          Channel as string,",
+						"          Remarks as string,",
+						"          CreatedDate as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> DFSilverToGold",
+						"DFSilverToGold aggregate(groupBy(TransactionType),",
+						"     TotalAmount = sum(toDouble(Amount)),",
+						"          TransactionCount = count(TransactionID),",
+						"          AvgAmount = avg(toDouble(Amount))) ~> aggregate1",
+						"aggregate1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     partitionFileNames:['gold_transactions.parquet'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> SinkGold"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dataflow1')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DelimitedText1",
+								"type": "DatasetReference"
+							},
+							"name": "Landingcsv"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DS_ADLS_Parquet_Silver",
+								"type": "DatasetReference"
+							},
+							"name": "SilverParquet"
+						}
+					],
+					"transformations": [],
+					"scriptLines": [
+						"source(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> Landingcsv",
+						"Landingcsv sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> SilverParquet"
+					]
+				}
 			},
 			"dependsOn": []
 		},
@@ -265,7 +397,11 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SqlServerTable1')]",
+				"[concat(variables('factoryId'), '/dataflows/dataflow1')]",
+				"[concat(variables('factoryId'), '/dataflows/DFSilverToGold')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_LoanProcessing_Branch')]",
@@ -648,7 +784,10 @@
 							"scripts": [
 								{
 									"type": "NonQuery",
-									"text": "UPDATE dbo.LoanApplications \nSET ProcessingStatus = 'PROCESSED', UpdatedAt = GETDATE() \nWHERE BranchID = '@{pipeline().parameters.BranchID}'"
+									"text": {
+										"value": "UPDATE dbo.LoanApplications \nSET ProcessingStatus = 'PROCESSED', UpdatedAt = GETDATE() \nWHERE BranchID = '@{pipeline().parameters.BranchID}'",
+										"type": "Expression"
+									}
 								}
 							],
 							"scriptBlockExecutionTimeout": "02:00:00"
@@ -770,7 +909,10 @@
 							"scripts": [
 								{
 									"type": "NonQuery",
-									"text": "DELETE FROM dbo.LoanApplications \nWHERE BranchID = '@{pipeline().parameters.BranchID}'"
+									"text": {
+										"value": "DELETE FROM dbo.LoanApplications \nWHERE BranchID = '@{pipeline().parameters.BranchID}'",
+										"type": "Expression"
+									}
 								}
 							],
 							"scriptBlockExecutionTimeout": "02:00:00"
@@ -804,53 +946,7 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_Node5_SQL_Loans')]",
-				"[concat(variables('factoryId'), '/datasets/DS_AzureSQL_RateTable')]",
-				"[concat(variables('factoryId'), '/datasets/DS_AzureSQL_LoanApplications')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/TriggerDailySilverToGold')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Stopped",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_CoreBank_SSIS_To_ADLS",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"pipelineRunDate": "[parameters('TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_pipelineRunDate')]",
-							"silverPath": "[parameters('TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_silverPath')]",
-							"goldPath": "[parameters('TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_goldPath')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2026-04-01T12:47:00",
-						"timeZone": "Pacific Standard Time",
-						"schedule": {
-							"minutes": [
-								47
-							],
-							"hours": [
-								12
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_CoreBank_SSIS_To_ADLS')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_LoanProcessing_Master')]",
@@ -950,32 +1046,6 @@
 										"type": "LinkedServiceReference"
 									}
 								}
-							],
-							"ifTrueActivities": [
-								{
-									"name": "Execute_BranchPipeline",
-									"type": "ExecutePipeline",
-									"dependsOn": [],
-									"policy": {
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"pipeline": {
-											"referenceName": "PL_LoanProcessing_Branch",
-											"type": "PipelineReference"
-										},
-										"waitOnCompletion": true,
-										"parameters": {
-											"BranchID": "SF_Downtown",
-											"RunDate": {
-												"value": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
-												"type": "Expression"
-											},
-											"LoanType": "Mortgage"
-										}
-									}
-								}
 							]
 						}
 					},
@@ -1008,6 +1078,49 @@
 								"value": "@concat('{\"pipeline\":\"',pipeline().DataFactory,'\",\"status\":\"FAILED\",\"time\":\"',utcNow(),'\"}')",
 								"type": "Expression"
 							}
+						}
+					},
+					{
+						"name": "ForEach_Branches",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "CheckBusinessDay",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@variables('BranchList')",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Execute_BranchPipeline",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_LoanProcessing_Branch",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"BranchID": "BranchID = @item()",
+											"RunDate": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
+											"LoanType": "Mortgage"
+										}
+									}
+								}
+							]
 						}
 					}
 				],
@@ -1043,6 +1156,48 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/PL_LoanProcessing_Branch')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TriggerDailySilverToGold')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_CoreBank_SSIS_To_ADLS",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"pipelineRunDate": "[parameters('TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_pipelineRunDate')]",
+							"silverPath": "[parameters('TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_silverPath')]",
+							"goldPath": "[parameters('TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_goldPath')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2026-04-01T12:47:00",
+						"timeZone": "Pacific Standard Time",
+						"schedule": {
+							"minutes": [
+								47
+							],
+							"hours": [
+								12
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_CoreBank_SSIS_To_ADLS')]"
 			]
 		}
 	]
