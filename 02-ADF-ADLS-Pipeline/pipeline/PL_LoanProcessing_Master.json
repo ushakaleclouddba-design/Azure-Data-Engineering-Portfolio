@@ -65,7 +65,10 @@
 										"type": "String"
 									},
 									"PipelineRunID": {
-										"value": "@pipeline().RunId",
+										"value": {
+											"value": "@pipeline().RunId",
+											"type": "Expression"
+										},
 										"type": "String"
 									},
 									"RejectedCount": {
@@ -73,7 +76,10 @@
 										"type": "Int32"
 									},
 									"RunDate": {
-										"value": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
+										"value": {
+											"value": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
+											"type": "Expression"
+										},
 										"type": "DateTime"
 									},
 									"Status": {
@@ -105,7 +111,10 @@
 								"waitOnCompletion": true,
 								"parameters": {
 									"BranchID": "SF_Downtown",
-									"RunDate": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
+									"RunDate": {
+										"value": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
+										"type": "Expression"
+									},
 									"LoanType": "Mortgage"
 								}
 							}
@@ -138,7 +147,10 @@
 						"Content-Type": "application/json"
 					},
 					"url": "https://httpbin.org/post",
-					"body": "@concat('{\"pipeline\":\"',pipeline().Pipeline,'\",\"status\":\"FAILED\",\"time\":\"',utcNow(),'\"}')"
+					"body": {
+						"value": "@concat('{\"pipeline\":\"',pipeline().DataFactory,'\",\"status\":\"FAILED\",\"time\":\"',utcNow(),'\"}')",
+						"type": "Expression"
+					}
 				}
 			}
 		],
