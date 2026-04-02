@@ -1,0 +1,36 @@
+{
+	"name": "DFLoanBronzeToSilver",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_ADLS_Landing_Loans",
+						"type": "DatasetReference"
+					},
+					"name": "LoanBronzeSource"
+				}
+			],
+			"sinks": [],
+			"transformations": [],
+			"scriptLines": [
+				"source(output(",
+				"          ApplicationID as string,",
+				"          BranchID as string,",
+				"          LoanType as string,",
+				"          ApplicantName as string,",
+				"          Amount as string,",
+				"          CreditScore as string,",
+				"          Term as string,",
+				"          RunDate as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     inferDriftedColumnTypes: true,",
+				"     ignoreNoFilesFound: false,",
+				"     wildcardPaths:['*/ *_loans.csv']) ~> LoanBronzeSource"
+			]
+		}
+	}
+}
