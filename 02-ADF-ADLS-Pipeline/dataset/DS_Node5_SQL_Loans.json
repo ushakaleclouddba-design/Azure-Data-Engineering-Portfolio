@@ -5,6 +5,11 @@
 			"referenceName": "LS_SQLServer_Node5",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"Branchid": {
+				"type": "string"
+			}
+		},
 		"annotations": [],
 		"type": "SqlServerTable",
 		"schema": []
