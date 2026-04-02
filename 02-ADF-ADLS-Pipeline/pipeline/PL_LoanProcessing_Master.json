@@ -93,32 +93,6 @@
 								"type": "LinkedServiceReference"
 							}
 						}
-					],
-					"ifTrueActivities": [
-						{
-							"name": "Execute_BranchPipeline",
-							"type": "ExecutePipeline",
-							"dependsOn": [],
-							"policy": {
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"pipeline": {
-									"referenceName": "PL_LoanProcessing_Branch",
-									"type": "PipelineReference"
-								},
-								"waitOnCompletion": true,
-								"parameters": {
-									"BranchID": "SF_Downtown",
-									"RunDate": {
-										"value": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
-										"type": "Expression"
-									},
-									"LoanType": "Mortgage"
-								}
-							}
-						}
 					]
 				}
 			},
@@ -151,6 +125,40 @@
 						"value": "@concat('{\"pipeline\":\"',pipeline().DataFactory,'\",\"status\":\"FAILED\",\"time\":\"',utcNow(),'\"}')",
 						"type": "Expression"
 					}
+				}
+			},
+			{
+				"name": "ForEach_Branches",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('BranchList')",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Execute_BranchPipeline",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_LoanProcessing_Branch",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"BranchID": "BranchID = @item()"
+								}
+							}
+						}
+					]
 				}
 			}
 		],
