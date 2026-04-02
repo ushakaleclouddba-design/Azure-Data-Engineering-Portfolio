@@ -12,7 +12,15 @@
 					"name": "LoanSilverToGold"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DS_ADLS_Parquet_Loans_Gold",
+						"type": "DatasetReference"
+					},
+					"name": "SinkGoldLoans"
+				}
+			],
 			"transformations": [
 				{
 					"name": "IntrestRate"
@@ -44,7 +52,17 @@
 				"     TotalAmount = sum(toDouble(Amount)),",
 				"          LoanCount = count(ApplicationID),",
 				"          AvgCreditScore = avg(toDouble(CreditScore)),",
-				"          AvgAnnualInterest = avg(toDouble(AnnualIntrest))) ~> AggregateByBranch"
+				"          AvgAnnualInterest = avg(toDouble(AnnualIntrest))) ~> AggregateByBranch",
+				"AggregateByBranch sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     partitionFileNames:['gold_loans.parquet'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> SinkGoldLoans"
 			]
 		}
 	}
