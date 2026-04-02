@@ -5,6 +5,11 @@
 			"referenceName": "LS_ADLS_Gen2",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"BranchID": {
+				"type": "string"
+			}
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
