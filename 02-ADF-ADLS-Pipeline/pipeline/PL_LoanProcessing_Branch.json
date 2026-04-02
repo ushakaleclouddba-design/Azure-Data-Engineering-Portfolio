@@ -500,7 +500,7 @@
 					"scripts": [
 						{
 							"type": "NonQuery",
-							"text": "DELETE FROM dbo.LoanApplications \nWHERE BranchID = '@{pipeline().parameters.BranchID}' \nAND RunDate = '@{pipeline().parameters.RunDate}'"
+							"text": "DELETE FROM dbo.LoanApplications \nWHERE BranchID = '@{pipeline().parameters.BranchID}'"
 						}
 					],
 					"scriptBlockExecutionTimeout": "02:00:00"
