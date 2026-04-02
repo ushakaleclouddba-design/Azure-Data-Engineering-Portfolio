@@ -225,7 +225,7 @@
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "Lookup_IntrestRates",
+						"activity": "Script_PreCopyDelete",
 						"dependencyConditions": [
 							"Completed"
 						]
