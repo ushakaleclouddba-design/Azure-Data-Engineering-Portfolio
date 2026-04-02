@@ -161,8 +161,14 @@
 								},
 								"waitOnCompletion": true,
 								"parameters": {
-									"BranchID": "@i",
-									"RunDate": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
+									"BranchID": {
+										"value": "@item()",
+										"type": "Expression"
+									},
+									"RunDate": {
+										"value": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
+										"type": "Expression"
+									},
 									"LoanType": "Mortgage"
 								}
 							}
