@@ -7,6 +7,17 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "usha-adf-poc"
 		},
+		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
+			"type": "string",
+			"defaultValue": "usha-poc-sqlsvr.database.windows.net"
+		},
+		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
+			"type": "string",
+			"defaultValue": "ssisadmin"
+		},
+		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
+			"type": "secureString"
+		},
 		"TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_pipelineRunDate": {
 			"type": "string",
 			"defaultValue": "@formatDateTime(trigger().scheduledTime, 'yyyy-MM-dd')"
@@ -25,25 +36,43 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Parquet_Loans_Gold')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
+			"name": "[concat(parameters('factoryName'), '/AzureSSIS-IR')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ADLS_Gen2",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Parquet",
+				"type": "Managed",
+				"description": "Azure-SSIS IR for CoreBank POC",
 				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"folderPath": "loans/gold",
-						"fileSystem": "curated"
+					"computeProperties": {
+						"location": "East US",
+						"nodeSize": "Standard_D2_v3",
+						"numberOfNodes": 1,
+						"maxParallelExecutionsPerNode": 2
 					},
-					"compressionCodec": "snappy"
-				},
-				"schema": []
+					"ssisProperties": {
+						"catalogInfo": {
+							"catalogServerEndpoint": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint')]",
+							"catalogAdminUserName": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName')]",
+							"catalogAdminPassword": {
+								"type": "SecureString",
+								"value": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword')]"
+							},
+							"catalogPricingTier": "Basic"
+						},
+						"edition": "Standard",
+						"licenseType": "LicenseIncluded",
+						"dataProxyProperties": {
+							"connectVia": {
+								"type": "IntegrationRuntimeReference",
+								"referenceName": "SHIR-Node5"
+							},
+							"stagingLinkedService": {
+								"type": "LinkedServiceReference",
+								"referenceName": "LS_Blob_Staging"
+							}
+						}
+					}
+				}
 			},
 			"dependsOn": []
 		},
@@ -220,6 +249,87 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DFLoanBronzeToSilver')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DS_ADLS_Landing_Loans",
+								"type": "DatasetReference"
+							},
+							"name": "LoanBronzeSource"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DS_ADLS_Parquet_Loans_Approved",
+								"type": "DatasetReference"
+							},
+							"name": "SinkApproved"
+						},
+						{
+							"dataset": {
+								"referenceName": "DS_ADLS_Parquet_Loans_Rejected",
+								"type": "DatasetReference"
+							},
+							"name": "SinkRejected"
+						}
+					],
+					"transformations": [
+						{
+							"name": "SplitApprovedRejected"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          ApplicationID as string,",
+						"          BranchID as string,",
+						"          LoanType as string,",
+						"          ApplicantName as string,",
+						"          Amount as string,",
+						"          CreditScore as string,",
+						"          Term as string,",
+						"          RunDate as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     inferDriftedColumnTypes: true,",
+						"     ignoreNoFilesFound: false,",
+						"     wildcardPaths:['*/*_loans.csv']) ~> LoanBronzeSource",
+						"LoanBronzeSource split(toDouble(Amount) < 500000,",
+						"     toDouble(Amount) >= 500000,",
+						"     disjoint: false) ~> SplitApprovedRejected@(Approved, Rejected)",
+						"SplitApprovedRejected@Approved sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     partitionFileNames:['approved_loans.parquet'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> SinkApproved",
+						"SplitApprovedRejected@Rejected sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     partitionFileNames:['rejected_loans.parquet'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> SinkRejected"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DFSilverToGold')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -325,87 +435,6 @@
 						"     postCommands: [],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> SilverParquet"
-					]
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DFLoanBronzeToSilver')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "DS_ADLS_Landing_Loans",
-								"type": "DatasetReference"
-							},
-							"name": "LoanBronzeSource"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "DS_ADLS_Parquet_Loans_Approved",
-								"type": "DatasetReference"
-							},
-							"name": "SinkApproved"
-						},
-						{
-							"dataset": {
-								"referenceName": "DS_ADLS_Parquet_Loans_Rejected",
-								"type": "DatasetReference"
-							},
-							"name": "SinkRejected"
-						}
-					],
-					"transformations": [
-						{
-							"name": "SplitApprovedRejected"
-						}
-					],
-					"scriptLines": [
-						"source(output(",
-						"          ApplicationID as string,",
-						"          BranchID as string,",
-						"          LoanType as string,",
-						"          ApplicantName as string,",
-						"          Amount as string,",
-						"          CreditScore as string,",
-						"          Term as string,",
-						"          RunDate as string",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     inferDriftedColumnTypes: true,",
-						"     ignoreNoFilesFound: false,",
-						"     wildcardPaths:['*/*_loans.csv']) ~> LoanBronzeSource",
-						"LoanBronzeSource split(toDouble(Amount) < 500000,",
-						"     toDouble(Amount) >= 500000,",
-						"     disjoint: false) ~> SplitApprovedRejected@(Approved, Rejected)",
-						"SplitApprovedRejected@Approved sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     format: 'parquet',",
-						"     partitionFileNames:['approved_loans.parquet'],",
-						"     umask: 0022,",
-						"     preCommands: [],",
-						"     postCommands: [],",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     partitionBy('hash', 1)) ~> SinkApproved",
-						"SplitApprovedRejected@Rejected sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     format: 'parquet',",
-						"     partitionFileNames:['rejected_loans.parquet'],",
-						"     umask: 0022,",
-						"     preCommands: [],",
-						"     postCommands: [],",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     partitionBy('hash', 1)) ~> SinkRejected"
 					]
 				}
 			},
@@ -992,11 +1021,9 @@
 					{
 						"name": "Delete_LandingFile",
 						"type": "Delete",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
-								"activity": "Script_UpdateStatus",
+								"activity": "DataFlow_BronzeToSilver",
 								"dependencyConditions": [
 									"Completed"
 								]
@@ -1115,6 +1142,44 @@
 							],
 							"scriptBlockExecutionTimeout": "02:00:00"
 						}
+					},
+					{
+						"name": "DataFlow_BronzeToSilver",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "Script_UpdateStatus",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "DFLoanBronzeToSilver",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"LoanBronzeSource": {},
+									"SinkApproved": {},
+									"SinkRejected": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
 					}
 				],
 				"policy": {
@@ -1148,6 +1213,7 @@
 				"[concat(variables('factoryId'), '/datasets/DS_Node5_SQL_Loans')]",
 				"[concat(variables('factoryId'), '/datasets/DS_AzureSQL_RateTable')]",
 				"[concat(variables('factoryId'), '/datasets/DS_AzureSQL_LoanApplications')]",
+				"[concat(variables('factoryId'), '/dataflows/DFLoanBronzeToSilver')]",
 				"[concat(variables('factoryId'), '/datasets/DS_Node5_LoanFiles')]"
 			]
 		},

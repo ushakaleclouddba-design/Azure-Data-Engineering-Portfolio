@@ -702,11 +702,9 @@
 					{
 						"name": "Delete_LandingFile",
 						"type": "Delete",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
-								"activity": "Script_UpdateStatus",
+								"activity": "DataFlow_BronzeToSilver",
 								"dependencyConditions": [
 									"Completed"
 								]
@@ -825,6 +823,44 @@
 							],
 							"scriptBlockExecutionTimeout": "02:00:00"
 						}
+					},
+					{
+						"name": "DataFlow_BronzeToSilver",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "Script_UpdateStatus",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "DFLoanBronzeToSilver",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"LoanBronzeSource": {},
+									"SinkApproved": {},
+									"SinkRejected": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
 					}
 				],
 				"policy": {
@@ -860,6 +896,7 @@
 				"[concat(variables('factoryId'), '/datasets/DS_AzureSQL_RateTable')]",
 				"[concat(variables('factoryId'), '/datasets/DS_AzureSQL_LoanApplications')]",
 				"[concat(variables('factoryId'), '/linkedServices/LS_AzureSQL_LoanProcessing')]",
+				"[concat(variables('factoryId'), '/dataflows/DFLoanBronzeToSilver')]",
 				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Gen2')]",
 				"[concat(variables('factoryId'), '/datasets/DS_Node5_LoanFiles')]"
 			]
@@ -1221,6 +1258,66 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Landing_Loans')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_Gen2",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "landing"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "ApplicationID",
+						"type": "String"
+					},
+					{
+						"name": "BranchID",
+						"type": "String"
+					},
+					{
+						"name": "LoanType",
+						"type": "String"
+					},
+					{
+						"name": "ApplicantName",
+						"type": "String"
+					},
+					{
+						"name": "Amount",
+						"type": "String"
+					},
+					{
+						"name": "CreditScore",
+						"type": "String"
+					},
+					{
+						"name": "Term",
+						"type": "String"
+					},
+					{
+						"name": "RunDate",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Gen2')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Parquet_Gold')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -1237,6 +1334,81 @@
 						"fileName": "gold",
 						"folderPath": "transaction",
 						"fileSystem": "curated"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Gen2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Parquet_Loans_Approved')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_Gen2",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "loans/approved",
+						"fileSystem": "processed"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Gen2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Parquet_Loans_Gold')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_Gen2",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "loans/gold",
+						"fileSystem": "curated"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Gen2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Parquet_Loans_Rejected')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_Gen2",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "loans/rejected",
+						"fileSystem": "processed"
 					},
 					"compressionCodec": "snappy"
 				},
@@ -1769,6 +1941,91 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DFLoanBronzeToSilver')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DS_ADLS_Landing_Loans",
+								"type": "DatasetReference"
+							},
+							"name": "LoanBronzeSource"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DS_ADLS_Parquet_Loans_Approved",
+								"type": "DatasetReference"
+							},
+							"name": "SinkApproved"
+						},
+						{
+							"dataset": {
+								"referenceName": "DS_ADLS_Parquet_Loans_Rejected",
+								"type": "DatasetReference"
+							},
+							"name": "SinkRejected"
+						}
+					],
+					"transformations": [
+						{
+							"name": "SplitApprovedRejected"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          ApplicationID as string,",
+						"          BranchID as string,",
+						"          LoanType as string,",
+						"          ApplicantName as string,",
+						"          Amount as string,",
+						"          CreditScore as string,",
+						"          Term as string,",
+						"          RunDate as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     inferDriftedColumnTypes: true,",
+						"     ignoreNoFilesFound: false,",
+						"     wildcardPaths:['*/*_loans.csv']) ~> LoanBronzeSource",
+						"LoanBronzeSource split(toDouble(Amount) < 500000,",
+						"     toDouble(Amount) >= 500000,",
+						"     disjoint: false) ~> SplitApprovedRejected@(Approved, Rejected)",
+						"SplitApprovedRejected@Approved sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     partitionFileNames:['approved_loans.parquet'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> SinkApproved",
+						"SplitApprovedRejected@Rejected sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     partitionFileNames:['rejected_loans.parquet'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> SinkRejected"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Landing_Loans')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Parquet_Loans_Approved')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Parquet_Loans_Rejected')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DFSilverToGold')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -1883,226 +2140,6 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DelimitedText1')]",
 				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Parquet_Silver')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Landing_Loans')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ADLS_Gen2",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileSystem": "landing"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"name": "ApplicationID",
-						"type": "String"
-					},
-					{
-						"name": "BranchID",
-						"type": "String"
-					},
-					{
-						"name": "LoanType",
-						"type": "String"
-					},
-					{
-						"name": "ApplicantName",
-						"type": "String"
-					},
-					{
-						"name": "Amount",
-						"type": "String"
-					},
-					{
-						"name": "CreditScore",
-						"type": "String"
-					},
-					{
-						"name": "Term",
-						"type": "String"
-					},
-					{
-						"name": "RunDate",
-						"type": "String"
-					}
-				]
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Gen2')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Parquet_Loans_Approved')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ADLS_Gen2",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Parquet",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"folderPath": "loans/approved",
-						"fileSystem": "processed"
-					},
-					"compressionCodec": "snappy"
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Gen2')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Parquet_Loans_Rejected')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ADLS_Gen2",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Parquet",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"folderPath": "loans/rejected",
-						"fileSystem": "Processed"
-					},
-					"compressionCodec": "snappy"
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Gen2')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Parquet_Loans_Gold')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ADLS_Gen2",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Parquet",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"folderPath": "loans/gold",
-						"fileSystem": "curated"
-					},
-					"compressionCodec": "snappy"
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Gen2')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DFLoanBronzeToSilver')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "DS_ADLS_Landing_Loans",
-								"type": "DatasetReference"
-							},
-							"name": "LoanBronzeSource"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "DS_ADLS_Parquet_Loans_Approved",
-								"type": "DatasetReference"
-							},
-							"name": "SinkApproved"
-						},
-						{
-							"dataset": {
-								"referenceName": "DS_ADLS_Parquet_Loans_Rejected",
-								"type": "DatasetReference"
-							},
-							"name": "SinkRejected"
-						}
-					],
-					"transformations": [
-						{
-							"name": "SplitApprovedRejected"
-						}
-					],
-					"scriptLines": [
-						"source(output(",
-						"          ApplicationID as string,",
-						"          BranchID as string,",
-						"          LoanType as string,",
-						"          ApplicantName as string,",
-						"          Amount as string,",
-						"          CreditScore as string,",
-						"          Term as string,",
-						"          RunDate as string",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     inferDriftedColumnTypes: true,",
-						"     ignoreNoFilesFound: false,",
-						"     wildcardPaths:['*/*_loans.csv']) ~> LoanBronzeSource",
-						"LoanBronzeSource split(toDouble(Amount) < 500000,",
-						"     toDouble(Amount) >= 500000,",
-						"     disjoint: false) ~> SplitApprovedRejected@(Approved, Rejected)",
-						"SplitApprovedRejected@Approved sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     format: 'parquet',",
-						"     partitionFileNames:['approved_loans.parquet'],",
-						"     umask: 0022,",
-						"     preCommands: [],",
-						"     postCommands: [],",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     partitionBy('hash', 1)) ~> SinkApproved",
-						"SplitApprovedRejected@Rejected sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     format: 'parquet',",
-						"     partitionFileNames:['rejected_loans.parquet'],",
-						"     umask: 0022,",
-						"     preCommands: [],",
-						"     postCommands: [],",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     partitionBy('hash', 1)) ~> SinkRejected"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Landing_Loans')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Parquet_Loans_Approved')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Parquet_Loans_Rejected')]"
 			]
 		}
 	]
