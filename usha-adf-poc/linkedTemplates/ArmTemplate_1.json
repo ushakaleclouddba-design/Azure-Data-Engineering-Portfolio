@@ -1114,7 +1114,7 @@
 										},
 										"waitOnCompletion": true,
 										"parameters": {
-											"BranchID": "BranchID = @item()",
+											"BranchID": "@i",
 											"RunDate": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
 											"LoanType": "Mortgage"
 										}
