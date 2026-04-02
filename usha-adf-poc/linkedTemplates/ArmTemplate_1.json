@@ -817,6 +817,8 @@
 					{
 						"name": "Delete_LandingFile",
 						"type": "Delete",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "Script_UpdateStatus",
