@@ -12,7 +12,22 @@
 					"name": "LoanBronzeSource"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DS_ADLS_Parquet_Loans_Approved",
+						"type": "DatasetReference"
+					},
+					"name": "SinkApproved"
+				},
+				{
+					"dataset": {
+						"referenceName": "DS_ADLS_Parquet_Loans_Approved",
+						"type": "DatasetReference"
+					},
+					"name": "SinkRejected"
+				}
+			],
 			"transformations": [
 				{
 					"name": "SplitApprovedRejected"
@@ -36,7 +51,27 @@
 				"     wildcardPaths:['*/ *_loans.csv']) ~> LoanBronzeSource",
 				"LoanBronzeSource split(toDouble(Amount) < 500000,",
 				"     toDouble(Amount) >= 500000,",
-				"     disjoint: false) ~> SplitApprovedRejected@(Approved, Rejected)"
+				"     disjoint: false) ~> SplitApprovedRejected@(Approved, Rejected)",
+				"SplitApprovedRejected@Approved sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     partitionFileNames:['approved_loans.parquet'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> SinkApproved",
+				"SplitApprovedRejected@Rejected sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     partitionFileNames:['approved_loans.parquet'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> SinkRejected"
 			]
 		}
 	}
