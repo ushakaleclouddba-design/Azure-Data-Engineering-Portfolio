@@ -1,0 +1,55 @@
+{
+	"name": "DS_ADLS_Landing_Loans",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLS_Gen2",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileSystem": "landing"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "ApplicationID",
+				"type": "String"
+			},
+			{
+				"name": "BranchID",
+				"type": "String"
+			},
+			{
+				"name": "LoanType",
+				"type": "String"
+			},
+			{
+				"name": "ApplicantName",
+				"type": "String"
+			},
+			{
+				"name": "Amount",
+				"type": "String"
+			},
+			{
+				"name": "CreditScore",
+				"type": "String"
+			},
+			{
+				"name": "Term",
+				"type": "String"
+			},
+			{
+				"name": "RunDate",
+				"type": "String"
+			}
+		]
+	}
+}
