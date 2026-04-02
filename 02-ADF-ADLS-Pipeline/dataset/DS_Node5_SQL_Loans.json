@@ -2,7 +2,7 @@
 	"name": "DS_Node5_SQL_Loans",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "LS_SQLServer_Node5",
+			"referenceName": "LS_SQLServer_Node5_v2",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
