@@ -65,7 +65,7 @@
 				"SplitApprovedRejected@Rejected sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'parquet',",
-				"     partitionFileNames:['approved_loans.parquet'],",
+				"     partitionFileNames:['rejected_loans.parquet'],",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
