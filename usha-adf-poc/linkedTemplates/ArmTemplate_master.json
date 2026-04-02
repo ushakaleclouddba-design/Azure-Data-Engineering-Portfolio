@@ -41,7 +41,7 @@
 		},
 		"LS_FileSystem_Node5_properties_typeProperties_host": {
 			"type": "string",
-			"defaultValue": "c:\\FNBA_Loanfiles"
+			"defaultValue": "\\\\NODE5\\FNBA_Loanfiles"
 		},
 		"LS_FileSystem_Node5_properties_typeProperties_userId": {
 			"type": "string",
@@ -57,11 +57,11 @@
 		},
 		"LS_SQLServer_Node5_properties_typeProperties_database": {
 			"type": "string",
-			"defaultValue": "CoreBank_onPrem_Poc"
+			"defaultValue": "LoanProcessing_Staging"
 		},
 		"LS_SQLServer_Node5_properties_typeProperties_userName": {
 			"type": "string",
-			"defaultValue": "ushadc0\\ushakale"
+			"defaultValue": "adfuser"
 		},
 		"TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_pipelineRunDate": {
 			"type": "string",

@@ -30,7 +30,7 @@
 			"value": "0331-224353-06bfarhe"
 		},
 		"LS_FileSystem_Node5_properties_typeProperties_host": {
-			"value": "c:\\FNBA_Loanfiles"
+			"value": "\\\\NODE5\\FNBA_Loanfiles"
 		},
 		"LS_FileSystem_Node5_properties_typeProperties_userId": {
 			"value": "ushadc0\\ushakale"
@@ -42,10 +42,10 @@
 			"value": "Node5"
 		},
 		"LS_SQLServer_Node5_properties_typeProperties_database": {
-			"value": "CoreBank_onPrem_Poc"
+			"value": "LoanProcessing_Staging"
 		},
 		"LS_SQLServer_Node5_properties_typeProperties_userName": {
-			"value": "ushadc0\\ushakale"
+			"value": "adfuser"
 		},
 		"TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_pipelineRunDate": {
 			"value": "@formatDateTime(trigger().scheduledTime, 'yyyy-MM-dd')"
