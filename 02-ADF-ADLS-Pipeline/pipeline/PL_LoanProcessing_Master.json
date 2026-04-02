@@ -65,11 +65,11 @@
 										"type": "String"
 									},
 									"PipelineRunID": {
-										"value": "",
+										"value": "@pipeline().RunId",
 										"type": "String"
 									},
 									"RejectedCount": {
-										"value": "@pipeline().RunId",
+										"value": "0",
 										"type": "Int32"
 									},
 									"RunDate": {
