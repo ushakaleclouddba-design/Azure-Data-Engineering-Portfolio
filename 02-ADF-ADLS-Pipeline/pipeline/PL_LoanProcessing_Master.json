@@ -130,7 +130,14 @@
 			{
 				"name": "ForEach_Branches",
 				"type": "ForEach",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "CheckBusinessDay",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
@@ -154,7 +161,9 @@
 								},
 								"waitOnCompletion": true,
 								"parameters": {
-									"BranchID": "BranchID = @item()"
+									"BranchID": "BranchID = @item()",
+									"RunDate": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
+									"LoanType": "Mortgage"
 								}
 							}
 						}
