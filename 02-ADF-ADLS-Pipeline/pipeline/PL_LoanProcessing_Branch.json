@@ -75,6 +75,7 @@
 								],
 								"storeSettings": {
 									"type": "FileServerReadSettings",
+									"recursive": true,
 									"enablePartitionDiscovery": false
 								},
 								"formatSettings": {
@@ -100,7 +101,10 @@
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "FileArrived",
-								"value": "@string(activity('CheckFileArrived').output.exists)"
+								"value": {
+									"value": "@string(activity('CheckFileArrived').output.exists)",
+									"type": "Expression"
+								}
 							}
 						}
 					],
@@ -129,7 +133,10 @@
 				"typeProperties": {
 					"source": {
 						"type": "SqlServerSource",
-						"sqlReaderQuery": "SELECT * FROM dbo.@{pipeline().parameters.BranchID}_loans",
+						"sqlReaderQuery": {
+							"value": "SELECT * FROM dbo.@{pipeline().parameters.BranchID}_loans",
+							"type": "Expression"
+						},
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -167,7 +174,10 @@
 				"outputs": [
 					{
 						"referenceName": "DS_ADLS_Landing",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"BranchID": "@pipeline().parameters.BranchID"
+						}
 					}
 				]
 			},
@@ -193,7 +203,10 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": "SELECT ProductCode, BaseRate FROM dbo.LoanRates WHERE EffectiveDate = CAST(GETDATE() AS DATE) AND ProductCode = '@{pipeline().parameters.LoanType}'",
+						"sqlReaderQuery": {
+							"value": "SELECT ProductCode, BaseRate FROM dbo.LoanRates WHERE EffectiveDate = CAST(GETDATE() AS DATE) AND ProductCode = '@{pipeline().parameters.LoanType}'",
+							"type": "Expression"
+						},
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -236,7 +249,10 @@
 					},
 					"sink": {
 						"type": "AzureSqlSink",
-						"preCopyScript": "DELETE FROM dbo.LoanApplications WHERE BranchID = '@{pipeline().parameters.BranchID}' AND RunDate = '@{pipeline().parameters.RunDate}'",
+						"preCopyScript": {
+							"value": "DELETE FROM dbo.LoanApplications WHERE BranchID = '@{pipeline().parameters.BranchID}' AND RunDate = '@{pipeline().parameters.RunDate}'",
+							"type": "Expression"
+						},
 						"writeBehavior": "insert",
 						"sqlWriterUseTableLock": false,
 						"disableMetricsCollection": false
@@ -290,15 +306,24 @@
 					"storedProcedureName": "[dbo].[usp_LogPipelineRun]",
 					"storedProcedureParameters": {
 						"ApprovedCount": {
-							"value": "@activity('CopyData_ToSQL').output.rowsCopied",
+							"value": {
+								"value": "@activity('CopyData_ToSQL').output.rowsCopied",
+								"type": "Expression"
+							},
 							"type": "Int32"
 						},
 						"BranchID": {
-							"value": "@pipeline().parameters.BranchID",
+							"value": {
+								"value": "@pipeline().parameters.BranchID",
+								"type": "Expression"
+							},
 							"type": "String"
 						},
 						"PipelineRunID": {
-							"value": "@pipeline().RunId",
+							"value": {
+								"value": "@pipeline().RunId",
+								"type": "Expression"
+							},
 							"type": "String"
 						},
 						"RejectedCount": {
@@ -306,7 +331,10 @@
 							"type": "Int32"
 						},
 						"RunDate": {
-							"value": "@pipeline().parameters.RunDate",
+							"value": {
+								"value": "@pipeline().parameters.RunDate",
+								"type": "Expression"
+							},
 							"type": "DateTime"
 						},
 						"Status": {
@@ -347,7 +375,10 @@
 					"scripts": [
 						{
 							"type": "NonQuery",
-							"text": "UPDATE dbo.LoanApplications \nSET ProcessingStatus = 'PROCESSED', UpdatedAt = GETDATE() \nWHERE BranchID = '@{pipeline().parameters.BranchID}' \nAND RunDate = '@{pipeline().parameters.RunDate}'"
+							"text": {
+								"value": "UPDATE dbo.LoanApplications \nSET ProcessingStatus = 'PROCESSED', UpdatedAt = GETDATE() \nWHERE BranchID = '@{pipeline().parameters.BranchID}' \nAND RunDate = '@{pipeline().parameters.RunDate}'",
+								"type": "Expression"
+							}
 						}
 					],
 					"scriptBlockExecutionTimeout": "02:00:00"
@@ -414,7 +445,10 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
-					"message": "@concat('Loan processing failed for branch ',pipeline().parameters.BranchID,' on ',pipeline().parameters.RunDate)",
+					"message": {
+						"value": "@concat('Loan processing failed for branch ',pipeline().parameters.BranchID,' on ',pipeline().parameters.RunDate)",
+						"type": "Expression"
+					},
 					"errorCode": "LOAN_FAIL_001"
 				}
 			},
@@ -460,9 +494,6 @@
 			},
 			"RejectedIDs": {
 				"type": "Array"
-			},
-			"SetVar_FileArrived_True": {
-				"type": "String"
 			}
 		},
 		"annotations": []
