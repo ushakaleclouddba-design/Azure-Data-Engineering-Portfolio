@@ -46,6 +46,8 @@
 						{
 							"name": "CheckFileArrived",
 							"type": "GetMetadata",
+							"state": "Inactive",
+							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "Wait_30s",
@@ -86,6 +88,8 @@
 						{
 							"name": "SetVar_FileArrived",
 							"type": "SetVariable",
+							"state": "Inactive",
+							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "CheckFileArrived",
