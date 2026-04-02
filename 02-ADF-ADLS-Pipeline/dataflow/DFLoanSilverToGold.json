@@ -5,14 +5,46 @@
 		"typeProperties": {
 			"sources": [
 				{
+					"dataset": {
+						"referenceName": "DS_ADLS_Parquet_Loans_Approved",
+						"type": "DatasetReference"
+					},
 					"name": "LoanSilverToGold"
 				}
 			],
 			"sinks": [],
-			"transformations": [],
+			"transformations": [
+				{
+					"name": "IntrestRate"
+				},
+				{
+					"name": "AggregateByBranch"
+				}
+			],
 			"scriptLines": [
-				"source(allowSchemaDrift: true,",
-				"     validateSchema: false) ~> LoanSilverToGold"
+				"source(output(",
+				"          ApplicationID as string,",
+				"          BranchID as string,",
+				"          LoanType as string,",
+				"          ApplicantName as string,",
+				"          Amount as string,",
+				"          CreditScore as string,",
+				"          Term as string,",
+				"          RunDate as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     inferDriftedColumnTypes: true,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> LoanSilverToGold",
+				"LoanSilverToGold derive(BaseRate = case(LoanType == 'Mortgage', 6.875,       LoanType == 'Auto', 8.250,       LoanType == 'Personal', 12.500, 0.0),",
+				"          AnnualIntrest = toDouble(Amount) * case(LoanType == 'Mortgage', 6.875, LoanType == 'Auto', 8.250, LoanType == 'Personal', 12.500, 0.0) / 100) ~> IntrestRate",
+				"IntrestRate aggregate(groupBy(BranchID,",
+				"          LoanType),",
+				"     TotalAmount = sum(toDouble(Amount)),",
+				"          LoanCount = count(ApplicationID),",
+				"          AvgCreditScore = avg(toDouble(CreditScore)),",
+				"          AvgAnnualInterest = avg(toDouble(AnnualIntrest))) ~> AggregateByBranch"
 			]
 		}
 	}
