@@ -63,187 +63,6 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/PL_LoanProcessing_Master')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "AKV_GetSecrets",
-						"type": "WebActivity",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"method": "GET",
-							"headers": {},
-							"url": "https://usha-kv-poc.vault.azure.net/secrets/sqlPassword/?api-version=7.0",
-							"authentication": {
-								"type": "MSI",
-								"resource": "https://vault.azure.net"
-							}
-						}
-					},
-					{
-						"name": "CheckBusinessDay",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "AKV_GetSecrets",
-								"dependencyConditions": [
-									"Completed"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@and(and(not(equals(dayOfWeek(utcNow()),0)),not(equals(dayOfWeek(utcNow()),6))),not(contains(variables('HolidayList'),formatDateTime(utcNow(),'yyyy-MM-dd'))))",
-								"type": "Expression"
-							},
-							"ifFalseActivities": [
-								{
-									"name": "LogNonBusinessDay",
-									"type": "SqlServerStoredProcedure",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"storedProcedureName": "[[dbo].[usp_LogPipelineRun]",
-										"storedProcedureParameters": {
-											"ApprovedCount": {
-												"value": "0",
-												"type": "Int32"
-											},
-											"BranchID": {
-												"value": "Master",
-												"type": "String"
-											},
-											"PipelineRunID": {
-												"value": "@pipeline().RunId",
-												"type": "String"
-											},
-											"RejectedCount": {
-												"value": "0",
-												"type": "Int32"
-											},
-											"RunDate": {
-												"value": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
-												"type": "DateTime"
-											},
-											"Status": {
-												"value": "skipped",
-												"type": "String"
-											}
-										}
-									},
-									"linkedServiceName": {
-										"referenceName": "LS_AzureSQL_LoanProcessing",
-										"type": "LinkedServiceReference"
-									}
-								}
-							],
-							"ifTrueActivities": [
-								{
-									"name": "Execute_BranchPipeline",
-									"type": "ExecutePipeline",
-									"dependsOn": [],
-									"policy": {
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"pipeline": {
-											"referenceName": "PL_LoanProcessing_Branch",
-											"type": "PipelineReference"
-										},
-										"waitOnCompletion": true,
-										"parameters": {
-											"BranchID": "SF_Downtown",
-											"RunDate": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
-											"LoanType": "Mortgage"
-										}
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "AlertOnFailure",
-						"type": "WebActivity",
-						"dependsOn": [
-							{
-								"activity": "CheckBusinessDay",
-								"dependencyConditions": [
-									"Failed"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"method": "POST",
-							"headers": {
-								"Content-Type": "application/json"
-							},
-							"url": "https://httpbin.org/post",
-							"body": "@concat('{\"pipeline\":\"',pipeline().Pipeline,'\",\"status\":\"FAILED\",\"time\":\"',utcNow(),'\"}')"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"variables": {
-					"BranchList": {
-						"type": "Array",
-						"defaultValue": [
-							"SF_Downtown",
-							"SanRamon_EastBay",
-							"Oakland_Financial"
-						]
-					},
-					"HolidayList": {
-						"type": "Array",
-						"defaultValue": [
-							"2026-01-01",
-							"2026-05-25",
-							"2026-07-04",
-							"2026-09-07",
-							"2026-11-26",
-							"2026-12-25"
-						]
-					},
-					"PipelineStatus": {
-						"type": "String",
-						"defaultValue": "RUNNING"
-					}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_LoanProcessing_Branch')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/DS_Node5_SQL_Loans')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -1001,6 +820,199 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/PL_CoreBank_SSIS_To_ADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_LoanProcessing_Master')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "AKV_GetSecrets",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"method": "GET",
+							"headers": {},
+							"url": "https://usha-kv-poc.vault.azure.net/secrets/sqlPassword/?api-version=7.0",
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://vault.azure.net"
+							}
+						}
+					},
+					{
+						"name": "CheckBusinessDay",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "AKV_GetSecrets",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@and(and(not(equals(dayOfWeek(utcNow()),0)),not(equals(dayOfWeek(utcNow()),6))),not(contains(variables('HolidayList'),formatDateTime(utcNow(),'yyyy-MM-dd'))))",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "LogNonBusinessDay",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[[dbo].[usp_LogPipelineRun]",
+										"storedProcedureParameters": {
+											"ApprovedCount": {
+												"value": "0",
+												"type": "Int32"
+											},
+											"BranchID": {
+												"value": "Master",
+												"type": "String"
+											},
+											"PipelineRunID": {
+												"value": {
+													"value": "@pipeline().RunId",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"RejectedCount": {
+												"value": "0",
+												"type": "Int32"
+											},
+											"RunDate": {
+												"value": {
+													"value": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
+													"type": "Expression"
+												},
+												"type": "DateTime"
+											},
+											"Status": {
+												"value": "skipped",
+												"type": "String"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "LS_AzureSQL_LoanProcessing",
+										"type": "LinkedServiceReference"
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "Execute_BranchPipeline",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_LoanProcessing_Branch",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"BranchID": "SF_Downtown",
+											"RunDate": {
+												"value": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
+												"type": "Expression"
+											},
+											"LoanType": "Mortgage"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "AlertOnFailure",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "CheckBusinessDay",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"method": "POST",
+							"headers": {
+								"Content-Type": "application/json"
+							},
+							"url": "https://httpbin.org/post",
+							"body": {
+								"value": "@concat('{\"pipeline\":\"',pipeline().DataFactory,'\",\"status\":\"FAILED\",\"time\":\"',utcNow(),'\"}')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"BranchList": {
+						"type": "Array",
+						"defaultValue": [
+							"SF_Downtown",
+							"SanRamon_EastBay",
+							"Oakland_Financial"
+						]
+					},
+					"HolidayList": {
+						"type": "Array",
+						"defaultValue": [
+							"2026-01-01",
+							"2026-05-25",
+							"2026-07-04",
+							"2026-09-07",
+							"2026-11-26",
+							"2026-12-25"
+						]
+					},
+					"PipelineStatus": {
+						"type": "String",
+						"defaultValue": "RUNNING"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_LoanProcessing_Branch')]"
 			]
 		}
 	]
