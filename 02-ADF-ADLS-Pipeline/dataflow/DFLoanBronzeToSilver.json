@@ -36,7 +36,7 @@
 				"     wildcardPaths:['*/ *_loans.csv']) ~> LoanBronzeSource",
 				"LoanBronzeSource split(toDouble(Amount) < 500000,",
 				"     toDouble(Amount) >= 500000,",
-				"     disjoint: false) ~> SplitApprovedRejected@(Approved, Rejected,  )"
+				"     disjoint: false) ~> SplitApprovedRejected@(Approved, Rejected)"
 			]
 		}
 	}
