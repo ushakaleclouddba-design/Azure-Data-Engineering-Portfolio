@@ -25,6 +25,27 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_Node5_SQL_Loans')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_SQLServer_Node5",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Branchid": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/SqlServerTable1')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -946,7 +967,51 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_Node5_SQL_Loans')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TriggerDailySilverToGold')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "PL_CoreBank_SSIS_To_ADLS",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"pipelineRunDate": "[parameters('TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_pipelineRunDate')]",
+							"silverPath": "[parameters('TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_silverPath')]",
+							"goldPath": "[parameters('TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_goldPath')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2026-04-01T12:47:00",
+						"timeZone": "Pacific Standard Time",
+						"schedule": {
+							"minutes": [
+								47
+							],
+							"hours": [
+								12
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_CoreBank_SSIS_To_ADLS')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_LoanProcessing_Master')]",
@@ -1114,8 +1179,14 @@
 										},
 										"waitOnCompletion": true,
 										"parameters": {
-											"BranchID": "@i",
-											"RunDate": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
+											"BranchID": {
+												"value": "@item()",
+												"type": "Expression"
+											},
+											"RunDate": {
+												"value": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
+												"type": "Expression"
+											},
 											"LoanType": "Mortgage"
 										}
 									}
@@ -1156,48 +1227,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/PL_LoanProcessing_Branch')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/TriggerDailySilverToGold')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Stopped",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "PL_CoreBank_SSIS_To_ADLS",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"pipelineRunDate": "[parameters('TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_pipelineRunDate')]",
-							"silverPath": "[parameters('TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_silverPath')]",
-							"goldPath": "[parameters('TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_goldPath')]"
-						}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2026-04-01T12:47:00",
-						"timeZone": "Pacific Standard Time",
-						"schedule": {
-							"minutes": [
-								47
-							],
-							"hours": [
-								12
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/PL_CoreBank_SSIS_To_ADLS')]"
 			]
 		}
 	]

@@ -23,6 +23,9 @@
 		"LS_SQLServer_Node5_password": {
 			"value": ""
 		},
+		"LS_SQLServer_Node5_v2_password": {
+			"value": ""
+		},
 		"LS_ADLS_Gen2_properties_typeProperties_url": {
 			"value": "https://ushaadfpocadls.dfs.core.windows.net/"
 		},
@@ -73,6 +76,15 @@
 		},
 		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"value": ""
+		},
+		"LS_SQLServer_Node5_v2_properties_typeProperties_server": {
+			"value": "192.168.68.25"
+		},
+		"LS_SQLServer_Node5_v2_properties_typeProperties_database": {
+			"value": "LoanProcessing_Staging"
+		},
+		"LS_SQLServer_Node5_v2_properties_typeProperties_userName": {
+			"value": "adfuser"
 		}
 	}
 }
