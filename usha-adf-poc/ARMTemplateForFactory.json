@@ -883,12 +883,12 @@
 						"userProperties": [],
 						"typeProperties": {
 							"dataflow": {
-								"referenceName": "DFSilverToGold",
+								"referenceName": "DFLoanSilverToGold",
 								"type": "DataFlowReference",
 								"parameters": {},
 								"datasetParameters": {
-									"DFSilverToGold": {},
-									"SinkGold": {}
+									"LoanSilverToGold": {},
+									"SinkGoldLoans": {}
 								}
 							},
 							"staging": {},
@@ -934,7 +934,7 @@
 				"[concat(variables('factoryId'), '/datasets/DS_AzureSQL_LoanApplications')]",
 				"[concat(variables('factoryId'), '/linkedServices/LS_AzureSQL_LoanProcessing')]",
 				"[concat(variables('factoryId'), '/dataflows/DFLoanBronzeToSilver')]",
-				"[concat(variables('factoryId'), '/dataflows/DFSilverToGold')]",
+				"[concat(variables('factoryId'), '/dataflows/DFLoanSilverToGold')]",
 				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Gen2')]",
 				"[concat(variables('factoryId'), '/datasets/DS_Node5_LoanFiles')]"
 			]
