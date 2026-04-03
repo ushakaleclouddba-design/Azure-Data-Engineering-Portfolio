@@ -389,13 +389,11 @@
 						"AggregateByBranch sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'parquet',",
-						"     partitionFileNames:['gold_loans.parquet'],",
 						"     umask: 0022,",
 						"     preCommands: [],",
 						"     postCommands: [],",
 						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     partitionBy('hash', 1)) ~> SinkGoldLoans"
+						"     skipDuplicateMapOutputs: true) ~> SinkGoldLoans"
 					]
 				}
 			},
