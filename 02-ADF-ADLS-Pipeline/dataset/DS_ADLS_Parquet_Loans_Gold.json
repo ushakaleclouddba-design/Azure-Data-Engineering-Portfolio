@@ -13,7 +13,7 @@
 				"folderPath": "loans/gold",
 				"fileSystem": "curated"
 			},
-			"compressionCodec": "snappy"
+			"compressionCodec": "none"
 		},
 		"schema": []
 	}
