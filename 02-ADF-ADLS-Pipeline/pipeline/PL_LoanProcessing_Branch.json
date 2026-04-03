@@ -561,7 +561,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "DFSilverToGold",
+						"referenceName": "DFLoanSilverToGold",
 						"type": "DataFlowReference"
 					},
 					"compute": {
