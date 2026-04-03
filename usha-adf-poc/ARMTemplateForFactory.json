@@ -2194,7 +2194,7 @@
 						"aggregate1 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'parquet',",
-						"     partitionFileNames:['gold_transactions.parquet'],",
+						"     partitionFileNames:['gold_loans.parquet'],",
 						"     umask: 0022,",
 						"     preCommands: [],",
 						"     postCommands: [],",
