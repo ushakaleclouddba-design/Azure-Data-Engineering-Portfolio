@@ -31,10 +31,6 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'LS_SQLServer_Node5'"
 		},
-		"LS_SQLServer_Node5_v2_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'LS_SQLServer_Node5_v2'"
-		},
 		"LS_ADLS_Gen2_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://ushaadfpocadls.dfs.core.windows.net/"
@@ -46,6 +42,17 @@
 		"LS_KeyVault_POC_properties_typeProperties_baseUrl": {
 			"type": "string",
 			"defaultValue": "https://usha-kv-poc.vault.azure.net/"
+		},
+		"AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
+			"type": "string",
+			"defaultValue": "usha-sqlmi-poc.0f3157bbdbf7.database.windows.net"
+		},
+		"AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
+			"type": "string",
+			"defaultValue": "ssisadmin"
+		},
+		"AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
+			"type": "secureString"
 		},
 		"LS_AzureSQL_LoanProcessing_properties_typeProperties_server": {
 			"type": "string",
@@ -76,18 +83,6 @@
 			"defaultValue": "LoanProcessing_Staging"
 		},
 		"LS_SQLServer_Node5_properties_typeProperties_userName": {
-			"type": "string",
-			"defaultValue": "adfuser"
-		},
-		"LS_SQLServer_Node5_v2_properties_typeProperties_server": {
-			"type": "string",
-			"defaultValue": "192.168.68.25"
-		},
-		"LS_SQLServer_Node5_v2_properties_typeProperties_database": {
-			"type": "string",
-			"defaultValue": "LoanProcessing_Staging"
-		},
-		"LS_SQLServer_Node5_v2_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "adfuser"
 		}
@@ -184,6 +179,41 @@
 				"type": "SelfHosted",
 				"description": "Self-Hosted IR for Node5 VirtualBox lab",
 				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSSIS-IR-SQLMI')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "Managed",
+				"description": "SSIS Integration Environment for MAnaged Instance",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "West US 2",
+						"nodeSize": "Standard_D2_v3",
+						"numberOfNodes": 1,
+						"maxParallelExecutionsPerNode": 1,
+						"vNetProperties": {
+							"subnetId": "/subscriptions/26f7a991-84b3-47b7-966b-f19cbb0379bf/resourceGroups/Usha_SQLMI_POC/providers/Microsoft.Network/virtualNetworks/vnet-usha-sqlmi-poc/subnets/AzureSSIS-Subnet"
+						}
+					},
+					"ssisProperties": {
+						"catalogInfo": {
+							"catalogServerEndpoint": "[parameters('AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint')]",
+							"catalogAdminUserName": "[parameters('AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName')]",
+							"catalogAdminPassword": {
+								"type": "SecureString",
+								"value": "[parameters('AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword')]"
+							},
+							"catalogPricingTier": null
+						},
+						"edition": "Standard",
+						"runtimeVersion": "2017",
+						"licenseType": "LicenseIncluded"
+					}
+				}
 			},
 			"dependsOn": []
 		},
@@ -611,34 +641,6 @@
 					"password": {
 						"type": "SecureString",
 						"value": "[parameters('LS_SQLServer_Node5_password')]"
-					}
-				},
-				"connectVia": {
-					"referenceName": "SHIR-Node5",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/SHIR-Node5')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_SQLServer_Node5_v2')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "SqlServer",
-				"typeProperties": {
-					"server": "[parameters('LS_SQLServer_Node5_v2_properties_typeProperties_server')]",
-					"database": "[parameters('LS_SQLServer_Node5_v2_properties_typeProperties_database')]",
-					"encrypt": "mandatory",
-					"trustServerCertificate": true,
-					"authenticationType": "SQL",
-					"userName": "[parameters('LS_SQLServer_Node5_v2_properties_typeProperties_userName')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('LS_SQLServer_Node5_v2_password')]"
 					}
 				},
 				"connectVia": {

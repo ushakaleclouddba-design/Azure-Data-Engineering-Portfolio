@@ -114,6 +114,17 @@
 		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"type": "secureString"
 		},
+		"AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
+			"type": "string",
+			"defaultValue": "usha-sqlmi-poc.0f3157bbdbf7.database.windows.net"
+		},
+		"AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
+			"type": "string",
+			"defaultValue": "ssisadmin"
+		},
+		"AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
+			"type": "secureString"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -159,9 +170,6 @@
 					"LS_SQLServer_Node5_password": {
 						"value": "[parameters('LS_SQLServer_Node5_password')]"
 					},
-					"LS_SQLServer_Node5_v2_password": {
-						"value": "[parameters('LS_SQLServer_Node5_v2_password')]"
-					},
 					"LS_ADLS_Gen2_properties_typeProperties_url": {
 						"value": "[parameters('LS_ADLS_Gen2_properties_typeProperties_url')]"
 					},
@@ -170,6 +178,15 @@
 					},
 					"LS_KeyVault_POC_properties_typeProperties_baseUrl": {
 						"value": "[parameters('LS_KeyVault_POC_properties_typeProperties_baseUrl')]"
+					},
+					"AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
+						"value": "[parameters('AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint')]"
+					},
+					"AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
+						"value": "[parameters('AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName')]"
+					},
+					"AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
+						"value": "[parameters('AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword')]"
 					},
 					"LS_AzureSQL_LoanProcessing_properties_typeProperties_server": {
 						"value": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_server')]"
@@ -194,15 +211,6 @@
 					},
 					"LS_SQLServer_Node5_properties_typeProperties_userName": {
 						"value": "[parameters('LS_SQLServer_Node5_properties_typeProperties_userName')]"
-					},
-					"LS_SQLServer_Node5_v2_properties_typeProperties_server": {
-						"value": "[parameters('LS_SQLServer_Node5_v2_properties_typeProperties_server')]"
-					},
-					"LS_SQLServer_Node5_v2_properties_typeProperties_database": {
-						"value": "[parameters('LS_SQLServer_Node5_v2_properties_typeProperties_database')]"
-					},
-					"LS_SQLServer_Node5_v2_properties_typeProperties_userName": {
-						"value": "[parameters('LS_SQLServer_Node5_v2_properties_typeProperties_userName')]"
 					}
 				}
 			},
@@ -221,6 +229,18 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"LS_SQLServer_Node5_v2_password": {
+						"value": "[parameters('LS_SQLServer_Node5_v2_password')]"
+					},
+					"LS_SQLServer_Node5_v2_properties_typeProperties_server": {
+						"value": "[parameters('LS_SQLServer_Node5_v2_properties_typeProperties_server')]"
+					},
+					"LS_SQLServer_Node5_v2_properties_typeProperties_database": {
+						"value": "[parameters('LS_SQLServer_Node5_v2_properties_typeProperties_database')]"
+					},
+					"LS_SQLServer_Node5_v2_properties_typeProperties_userName": {
+						"value": "[parameters('LS_SQLServer_Node5_v2_properties_typeProperties_userName')]"
 					},
 					"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
 						"value": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint')]"

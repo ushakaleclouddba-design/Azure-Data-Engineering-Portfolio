@@ -85,6 +85,15 @@
 		},
 		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"value": ""
+		},
+		"AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
+			"value": "usha-sqlmi-poc.0f3157bbdbf7.database.windows.net"
+		},
+		"AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
+			"value": "ssisadmin"
+		},
+		"AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
+			"value": ""
 		}
 	}
 }

@@ -113,6 +113,17 @@
 		},
 		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"type": "secureString"
+		},
+		"AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
+			"type": "string",
+			"defaultValue": "usha-sqlmi-poc.0f3157bbdbf7.database.windows.net"
+		},
+		"AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
+			"type": "string",
+			"defaultValue": "ssisadmin"
+		},
+		"AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
+			"type": "secureString"
 		}
 	},
 	"variables": {
@@ -2251,6 +2262,118 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DelimitedText1')]",
 				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Parquet_Silver')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSSIS-IR-SQLMI')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "Managed",
+				"description": "SSIS Integration Environment for MAnaged Instance",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "West US 2",
+						"nodeSize": "Standard_D2_v3",
+						"numberOfNodes": 1,
+						"maxParallelExecutionsPerNode": 1,
+						"vNetProperties": {
+							"subnetId": "/subscriptions/26f7a991-84b3-47b7-966b-f19cbb0379bf/resourceGroups/Usha_SQLMI_POC/providers/Microsoft.Network/virtualNetworks/vnet-usha-sqlmi-poc/subnets/AzureSSIS-Subnet"
+						}
+					},
+					"ssisProperties": {
+						"catalogInfo": {
+							"catalogServerEndpoint": "[parameters('AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint')]",
+							"catalogAdminUserName": "[parameters('AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName')]",
+							"catalogAdminPassword": {
+								"type": "SecureString",
+								"value": "[parameters('AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword')]"
+							},
+							"catalogPricingTier": null
+						},
+						"edition": "Standard",
+						"runtimeVersion": "2017",
+						"licenseType": "LicenseIncluded"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_SSIS_MI_Validation')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Run_PKG04_CrossDatabase",
+						"type": "ExecuteSSISPackage",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"packageLocation": {
+								"packagePath": "MigrationStressTest/MigrationStressTest/PKG_04_CrossDatabase.dtsx",
+								"type": "SSISDB"
+							},
+							"environmentPath": null,
+							"connectVia": {
+								"referenceName": "AzureSSIS-IR-SQLMI",
+								"type": "IntegrationRuntimeReference"
+							},
+							"loggingLevel": "Basic",
+							"projectConnectionManagers": {},
+							"packageConnectionManagers": {}
+						}
+					},
+					{
+						"name": "Run_PKG07_CLR",
+						"type": "ExecuteSSISPackage",
+						"dependsOn": [
+							{
+								"activity": "Run_PKG04_CrossDatabase",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"packageLocation": {
+								"packagePath": "MigrationStressTest/MigrationStressTest/PKG_07_CLR.dtsx",
+								"type": "SSISDB"
+							},
+							"environmentPath": null,
+							"connectVia": {
+								"referenceName": "AzureSSIS-IR-SQLMI",
+								"type": "IntegrationRuntimeReference"
+							},
+							"loggingLevel": "Basic",
+							"projectConnectionManagers": {},
+							"packageConnectionManagers": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/AzureSSIS-IR-SQLMI')]"
 			]
 		}
 	]
