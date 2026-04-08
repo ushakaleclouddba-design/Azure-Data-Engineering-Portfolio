@@ -1,0 +1,200 @@
+<?xml version="1.0"?>
+<DTS:Executable xmlns:DTS="www.microsoft.com/SqlServer/Dts"
+  DTS:refId="Package"
+  DTS:CreationDate="4/7/2026 1:55:00 PM"
+  DTS:CreationName="Microsoft.Package"
+  DTS:CreatorComputerName="NODE5"
+  DTS:CreatorName="USHADC0\ushakale"
+  DTS:DTSID="{0D4304C2-7FC2-4100-B74A-EE29DAC13876}"
+  DTS:ExecutableType="Microsoft.Package"
+  DTS:LastModifiedProductVersion="17.0.1010.2"
+  DTS:LocaleID="1033"
+  DTS:ObjectName="Package1"
+  DTS:PackageType="5"
+  DTS:VersionBuild="2"
+  DTS:VersionGUID="{6F5252E3-6B77-46F6-A811-9BB595527330}">
+  <DTS:Property
+    DTS:Name="PackageFormatVersion">8</DTS:Property>
+  <DTS:ConnectionManagers>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Node5.BankingDW_DB]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{B772BF27-DB13-47FC-BA86-2D7624611FCD}"
+      DTS:ObjectName="Node5.BankingDW_DB">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=Node5;Initial Catalog=BankingDW_DB;Provider=SQLNCLI11.1;Integrated Security=SSPI;Application Name=SSIS-Package1-{B772BF27-DB13-47FC-BA86-2D7624611FCD}Node5.BankingDW_DB;Auto Translate=False;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[node5.master]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{BFD14A0F-EC84-49D5-A70A-E56AC0BC6F9E}"
+      DTS:ObjectName="node5.master">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=node5;Initial Catalog=master;Provider=SQLNCLI11.1;Integrated Security=SSPI;Application Name=SSIS-Package1-{BFD14A0F-EC84-49D5-A70A-E56AC0BC6F9E}node5.master;Auto Translate=False;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+  </DTS:ConnectionManagers>
+  <DTS:Variables />
+  <DTS:Executables>
+    <DTS:Executable
+      DTS:refId="Package\SQL_EnableXpCmdShell"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{B5730AB6-C0A4-4F41-8497-C856343B839F}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL_EnableXpCmdShell"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2025; © 2025 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{BFD14A0F-EC84-49D5-A70A-E56AC0BC6F9E}"
+          SQLTask:SqlStatementSource="-- Enable xp_cmdshell&#xA;-- DMA flags this as migration blocker in SQL MI&#xA;EXEC sp_configure 'show advanced options', 1;&#xA;RECONFIGURE;&#xA;EXEC sp_configure 'xp_cmdshell', 1;&#xA;RECONFIGURE;" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL_LogXpCmdResult"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{979A0372-E769-4FE4-BC4A-E15919DCE669}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL_LogXpCmdResult"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2025; © 2025 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{B772BF27-DB13-47FC-BA86-2D7624611FCD}"
+          SQLTask:SqlStatementSource="INSERT INTO dbo.ETL_PipelineLog &#xA;    (PackageName, StepName, SourceSystem, StartTime, Status, ExecutedBy)&#xA;VALUES &#xA;    ('PKG_03_XpCmdShell', 'xp_cmdshell OS Command Complete', &#xA;     'NODE5', GETDATE(), 'Success', SYSTEM_USER);" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL_RunOSCommand"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{26D6443D-A3A7-4A9A-9DBB-6BE14B066D9A}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL_RunOSCommand"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2025; © 2025 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{BFD14A0F-EC84-49D5-A70A-E56AC0BC6F9E}"
+          SQLTask:SqlStatementSource="-- Run OS command via xp_cmdshell&#xA;-- This is a hard blocker in Azure SQL MI&#xA;DECLARE @output TABLE (output NVARCHAR(255));&#xA;&#xA;INSERT INTO @output&#xA;EXEC xp_cmdshell 'dir C:\SSIS_Output\*.csv';&#xA;&#xA;SELECT * FROM @output;" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+  </DTS:Executables>
+  <DTS:PrecedenceConstraints>
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Constraint]"
+      DTS:CreationName=""
+      DTS:DTSID="{520B3355-6DF3-4966-BC05-1BD81D3A528D}"
+      DTS:From="Package\SQL_EnableXpCmdShell"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Constraint"
+      DTS:To="Package\SQL_RunOSCommand" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Constraint 1]"
+      DTS:CreationName=""
+      DTS:DTSID="{9786F4F3-AACC-4F28-812A-1F3F64670222}"
+      DTS:From="Package\SQL_RunOSCommand"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Constraint 1"
+      DTS:To="Package\SQL_LogXpCmdResult" />
+  </DTS:PrecedenceConstraints>
+  <DTS:DesignTimeProperties><![CDATA[<?xml version="1.0"?>
+<!--This CDATA section contains the layout information of the package. The section includes information such as (x,y) coordinates, width, and height.-->
+<!--If you manually edit this section and make a mistake, you can delete it. -->
+<!--The package will still be able to load normally but the previous layout information will be lost and the designer will automatically re-arrange the elements on the design surface.-->
+<Objects
+  Version="8">
+  <!--Each node below will contain properties that do not affect runtime behavior.-->
+  <Package
+    design-time-name="Package">
+    <LayoutInfo>
+      <GraphLayout
+        Capacity="8" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph" xmlns:mssgle="clr-namespace:Microsoft.SqlServer.Graph.LayoutEngine;assembly=Microsoft.SqlServer.Graph" xmlns:assembly="http://schemas.microsoft.com/winfx/2006/xaml">
+        <NodeLayout
+          Size="170,42"
+          Id="Package\SQL_EnableXpCmdShell"
+          TopLeft="205.857142857143,50" />
+        <NodeLayout
+          Size="194,42"
+          Id="Package\SQL_RunOSCommand"
+          TopLeft="212,120.142857142857" />
+        <NodeLayout
+          Size="193,42"
+          Id="Package\SQL_LogXpCmdResult"
+          TopLeft="208.571428571429,194.571428571428" />
+        <EdgeLayout
+          Id="Package.PrecedenceConstraints[Constraint]"
+          TopLeft="290.857142857143,92">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="18.1428571428571,28.1428571428571"
+              Start="0,0"
+              End="18.1428571428571,20.6428571428571">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,10.0714285714285" />
+                  <mssgle:CubicBezierSegment
+                    Point1="0,10.0714285714285"
+                    Point2="0,14.0714285714285"
+                    Point3="4,14.0714285714285" />
+                  <mssgle:LineSegment
+                    End="14.1428571428571,14.0714285714285" />
+                  <mssgle:CubicBezierSegment
+                    Point1="14.1428571428571,14.0714285714285"
+                    Point2="18.1428571428571,14.0714285714285"
+                    Point3="18.1428571428571,18.0714285714285" />
+                  <mssgle:LineSegment
+                    End="18.1428571428571,20.6428571428571" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package.PrecedenceConstraints[Constraint 1]"
+          TopLeft="307.035714285714,162.142857142857">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,32.4285714285712"
+              Start="0,0"
+              End="0,24.9285714285712">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,24.9285714285712" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+      </GraphLayout>
+    </LayoutInfo>
+  </Package>
+</Objects>]]></DTS:DesignTimeProperties>
+</DTS:Executable>

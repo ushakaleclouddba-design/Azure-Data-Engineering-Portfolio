@@ -1,0 +1,743 @@
+<?xml version="1.0"?>
+<DTS:Executable xmlns:DTS="www.microsoft.com/SqlServer/Dts"
+  DTS:refId="Package"
+  DTS:CreationDate="4/7/2026 2:01:07 PM"
+  DTS:CreationName="Microsoft.Package"
+  DTS:CreatorComputerName="NODE5"
+  DTS:CreatorName="USHADC0\ushakale"
+  DTS:DTSID="{144FFA64-C86E-43F4-A787-32134D6D7362}"
+  DTS:ExecutableType="Microsoft.Package"
+  DTS:LastModifiedProductVersion="17.0.1010.2"
+  DTS:LocaleID="1033"
+  DTS:ObjectName="Package1"
+  DTS:PackageType="5"
+  DTS:VersionBuild="4"
+  DTS:VersionGUID="{374515C9-35B9-4E66-8B43-FE7D7D257CB1}">
+  <DTS:Property
+    DTS:Name="PackageFormatVersion">8</DTS:Property>
+  <DTS:ConnectionManagers>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Node5.AutoLoans_DB]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{D7AB9630-A062-4FF4-BBE1-8690C6BBE205}"
+      DTS:ObjectName="Node5.AutoLoans_DB">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=usha-sqlmi-poc.public.0f3157bbdbf7.database.windows.net,3342;User ID=ssisadmin;Initial Catalog=AutoLoans_DB;Provider=SQLNCLI11.1;Persist Security Info=True;Auto Translate=False;Application Name=SSIS-Package1-{D7AB9630-A062-4FF4-BBE1-8690C6BBE205}Node5.AutoLoans_DB;">
+          <DTS:Password
+            DTS:Name="Password"
+            Sensitive="1"
+            Encrypted="1">AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAWrpDe6Aa8kWl1MLpQscEIwAAAAAIAAAARABUAFMAAAADZgAAwAAAABAAAAASqlimF2kCjTW04ac2FK3SAAAAAASAAACgAAAAEAAAAEUUPT6J6PZZZ2fU9jbyhM4wAAAAZWeazNvPQpDMo6k4KZjt9L/tcWlxG2DanViDcdSumbt1+b6Jk0pRPGknLdAjYJx7FAAAAE0EO5OcnwgkbtuziELW9dFPBtoj</DTS:Password>
+        </DTS:ConnectionManager>
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Node5.BankingDW_DB]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{313A1EF7-FA61-4BEC-8C8A-939BEB005406}"
+      DTS:ObjectName="Node5.BankingDW_DB">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=usha-sqlmi-poc.public.0f3157bbdbf7.database.windows.net,3342;User ID=ssisadmin;Initial Catalog=BankingDW_DB;Provider=SQLNCLI11.1;Persist Security Info=True;Auto Translate=False;Application Name=SSIS-Package1-{313A1EF7-FA61-4BEC-8C8A-939BEB005406}Node5.BankingDW_DB;">
+          <DTS:Password
+            DTS:Name="Password"
+            Sensitive="1"
+            Encrypted="1">AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAWrpDe6Aa8kWl1MLpQscEIwAAAAAIAAAARABUAFMAAAADZgAAwAAAABAAAAA917V4DxMAgpoQ2mC8OHR5AAAAAASAAACgAAAAEAAAAP5JpGY0Tkq16ahi2h/VQagwAAAAmGUueGyAnUOZji+0Gh0WQarFX7Ykb0AufiI2JzQX1Ai71f5TvYkN+OjDtDZK8wuIFAAAAIcFjC01stLmmScaaaboZdjcmSkb</DTS:Password>
+        </DTS:ConnectionManager>
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+  </DTS:ConnectionManagers>
+  <DTS:Variables />
+  <DTS:Executables>
+    <DTS:Executable
+      DTS:refId="Package\DFT_CrossDatabaseExtract"
+      DTS:CreationName="Microsoft.Pipeline"
+      DTS:Description="Data Flow Task"
+      DTS:DTSID="{AA765CDB-1EE9-4234-8569-777F882AEBE7}"
+      DTS:ExecutableType="Microsoft.Pipeline"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="DFT_CrossDatabaseExtract"
+      DTS:TaskContact="Performs high-performance data extraction, transformation and loading;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <pipeline
+          version="1">
+          <components>
+            <component
+              refId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults"
+              componentClassID="Microsoft.OLEDBDestination"
+              contactInfo="OLE DB Destination;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;4"
+              description="OLE DB Destination"
+              name="DEST_CrossDBResults"
+              usesDispositions="true"
+              version="4">
+              <properties>
+                <property
+                  dataType="System.Int32"
+                  description="The number of seconds before a command times out.  A value of 0 indicates an infinite time-out."
+                  name="CommandTimeout">0</property>
+                <property
+                  dataType="System.String"
+                  description="Specifies the name of the database object used to open a rowset."
+                  name="OpenRowset">[dbo].[ETL_ErrorLog]</property>
+                <property
+                  dataType="System.String"
+                  description="Specifies the variable that contains the name of the database object used to open a rowset."
+                  name="OpenRowsetVariable"></property>
+                <property
+                  dataType="System.String"
+                  description="The SQL command to be executed."
+                  name="SqlCommand"
+                  UITypeEditor="Microsoft.DataTransformationServices.Controls.ModalMultilineStringEditor"></property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the column code page to use when code page information is unavailable from the data source."
+                  name="DefaultCodePage">1252</property>
+                <property
+                  dataType="System.Boolean"
+                  description="Forces the use of the DefaultCodePage property value when describing character data."
+                  name="AlwaysUseDefaultCodePage">false</property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the mode used to access the database."
+                  name="AccessMode"
+                  typeConverter="AccessMode">3</property>
+                <property
+                  dataType="System.Boolean"
+                  description="Indicates whether the values supplied for identity columns will be copied to the destination. If false, values for identity columns will be auto-generated at the destination. Applies only if fast load is turned on."
+                  name="FastLoadKeepIdentity">false</property>
+                <property
+                  dataType="System.Boolean"
+                  description="Indicates whether the columns containing null will have null inserted in the destination. If false, columns containing null will have their default values inserted at the destination. Applies only if fast load is turned on."
+                  name="FastLoadKeepNulls">false</property>
+                <property
+                  dataType="System.String"
+                  description="Specifies options to be used with fast load.  Applies only if fast load is turned on."
+                  name="FastLoadOptions">TABLOCK,CHECK_CONSTRAINTS</property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies when commits are issued during data insertion.  A value of 0 specifies that one commit will be issued at the end of data insertion.  Applies only if fast load is turned on."
+                  name="FastLoadMaxInsertCommitSize">2147483647</property>
+              </properties>
+              <connections>
+                <connection
+                  refId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Connections[OleDbConnection]"
+                  connectionManagerID="Package.ConnectionManagers[Node5.BankingDW_DB]"
+                  connectionManagerRefId="Package.ConnectionManagers[Node5.BankingDW_DB]"
+                  description="The OLE DB runtime connection used to access the database."
+                  name="OleDbConnection" />
+              </connections>
+              <inputs>
+                <input
+                  refId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Inputs[OLE DB Destination Input]"
+                  errorOrTruncationOperation="Insert"
+                  errorRowDisposition="FailComponent"
+                  hasSideEffects="true"
+                  name="OLE DB Destination Input">
+                  <inputColumns>
+                    <inputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Inputs[OLE DB Destination Input].Columns[CustomerID]"
+                      cachedDataType="i4"
+                      cachedName="CustomerID"
+                      externalMetadataColumnId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Inputs[OLE DB Destination Input].ExternalColumns[ErrorCode]"
+                      lineageId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].Columns[CustomerID]" />
+                    <inputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Inputs[OLE DB Destination Input].Columns[FirstName]"
+                      cachedDataType="wstr"
+                      cachedLength="50"
+                      cachedName="FirstName"
+                      externalMetadataColumnId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Inputs[OLE DB Destination Input].ExternalColumns[PackageName]"
+                      lineageId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].Columns[FirstName]" />
+                    <inputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Inputs[OLE DB Destination Input].Columns[AlertType]"
+                      cachedDataType="wstr"
+                      cachedLength="50"
+                      cachedName="AlertType"
+                      externalMetadataColumnId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Inputs[OLE DB Destination Input].ExternalColumns[StepName]"
+                      lineageId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].Columns[AlertType]" />
+                    <inputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Inputs[OLE DB Destination Input].Columns[Amount]"
+                      cachedDataType="numeric"
+                      cachedName="Amount"
+                      cachedPrecision="18"
+                      cachedScale="2"
+                      externalMetadataColumnId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Inputs[OLE DB Destination Input].ExternalColumns[ErrorDescription]"
+                      lineageId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].Columns[Amount]" />
+                  </inputColumns>
+                  <externalMetadataColumns
+                    isUsed="True">
+                    <externalMetadataColumn
+                      refId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Inputs[OLE DB Destination Input].ExternalColumns[ErrorID]"
+                      dataType="i4"
+                      name="ErrorID" />
+                    <externalMetadataColumn
+                      refId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Inputs[OLE DB Destination Input].ExternalColumns[PackageName]"
+                      dataType="wstr"
+                      length="200"
+                      name="PackageName" />
+                    <externalMetadataColumn
+                      refId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Inputs[OLE DB Destination Input].ExternalColumns[StepName]"
+                      dataType="wstr"
+                      length="200"
+                      name="StepName" />
+                    <externalMetadataColumn
+                      refId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Inputs[OLE DB Destination Input].ExternalColumns[ErrorCode]"
+                      dataType="i4"
+                      name="ErrorCode" />
+                    <externalMetadataColumn
+                      refId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Inputs[OLE DB Destination Input].ExternalColumns[ErrorDescription]"
+                      dataType="nText"
+                      name="ErrorDescription" />
+                    <externalMetadataColumn
+                      refId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Inputs[OLE DB Destination Input].ExternalColumns[SourceRecord]"
+                      dataType="nText"
+                      name="SourceRecord" />
+                    <externalMetadataColumn
+                      refId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Inputs[OLE DB Destination Input].ExternalColumns[ErrorDate]"
+                      dataType="dbTimeStamp"
+                      name="ErrorDate" />
+                    <externalMetadataColumn
+                      refId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Inputs[OLE DB Destination Input].ExternalColumns[IsResolved]"
+                      dataType="bool"
+                      name="IsResolved" />
+                  </externalMetadataColumns>
+                </input>
+              </inputs>
+              <outputs>
+                <output
+                  refId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Outputs[OLE DB Destination Error Output]"
+                  exclusionGroup="1"
+                  isErrorOut="true"
+                  name="OLE DB Destination Error Output"
+                  synchronousInputId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Inputs[OLE DB Destination Input]">
+                  <outputColumns>
+                    <outputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Outputs[OLE DB Destination Error Output].Columns[ErrorCode]"
+                      dataType="i4"
+                      lineageId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Outputs[OLE DB Destination Error Output].Columns[ErrorCode]"
+                      name="ErrorCode"
+                      specialFlags="1" />
+                    <outputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Outputs[OLE DB Destination Error Output].Columns[ErrorColumn]"
+                      dataType="i4"
+                      lineageId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Outputs[OLE DB Destination Error Output].Columns[ErrorColumn]"
+                      name="ErrorColumn"
+                      specialFlags="2" />
+                  </outputColumns>
+                  <externalMetadataColumns />
+                </output>
+              </outputs>
+            </component>
+            <component
+              refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase"
+              componentClassID="Microsoft.OLEDBSource"
+              contactInfo="OLE DB Source;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;7"
+              description="OLE DB Source"
+              name="SRC_CrossDatabase"
+              usesDispositions="true"
+              version="7">
+              <properties>
+                <property
+                  dataType="System.Int32"
+                  description="The number of seconds before a command times out.  A value of 0 indicates an infinite time-out."
+                  name="CommandTimeout">0</property>
+                <property
+                  dataType="System.String"
+                  description="Specifies the name of the database object used to open a rowset."
+                  name="OpenRowset"></property>
+                <property
+                  dataType="System.String"
+                  description="Specifies the variable that contains the name of the database object used to open a rowset."
+                  name="OpenRowsetVariable"></property>
+                <property
+                  dataType="System.String"
+                  description="The SQL command to be executed."
+                  name="SqlCommand"
+                  UITypeEditor="Microsoft.DataTransformationServices.Controls.ModalMultilineStringEditor">-- Cross database query joining 3 databases
+-- DMA flags this as migration warning for SQL MI
+SELECT 
+    c.CustomerID,
+    c.FirstName,
+    c.LastName,
+    c.CustomerType,
+    f.AlertType,
+    f.RiskScore,
+    f.Amount,
+    cc.CardType,
+    cc.CreditLimit
+FROM RetailBanking_DB.dbo.Customers c
+JOIN FraudDetection_DB.dbo.FraudAlerts f 
+    ON f.AccountNumber LIKE 'ACC-%'
+JOIN CreditCards_DB.dbo.CreditCards cc 
+    ON cc.CardHolderID = c.CustomerID</property>
+                <property
+                  dataType="System.String"
+                  description="The variable that contains the SQL command to be executed."
+                  name="SqlCommandVariable"></property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the column code page to use when code page information is unavailable from the data source."
+                  name="DefaultCodePage">1252</property>
+                <property
+                  dataType="System.Boolean"
+                  description="Forces the use of the DefaultCodePage property value when describing character data."
+                  name="AlwaysUseDefaultCodePage">false</property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the mode used to access the database."
+                  name="AccessMode"
+                  typeConverter="AccessMode">2</property>
+                <property
+                  dataType="System.String"
+                  description="The mappings between the parameters in the SQL command and variables."
+                  name="ParameterMapping"></property>
+              </properties>
+              <connections>
+                <connection
+                  refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Connections[OleDbConnection]"
+                  connectionManagerID="Package.ConnectionManagers[Node5.BankingDW_DB]"
+                  connectionManagerRefId="Package.ConnectionManagers[Node5.BankingDW_DB]"
+                  description="The OLE DB runtime connection used to access the database."
+                  name="OleDbConnection" />
+              </connections>
+              <outputs>
+                <output
+                  refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output]"
+                  name="OLE DB Source Output">
+                  <outputColumns>
+                    <outputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].Columns[CustomerID]"
+                      dataType="i4"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].ExternalColumns[CustomerID]"
+                      lineageId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].Columns[CustomerID]"
+                      name="CustomerID"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].Columns[FirstName]"
+                      dataType="wstr"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].ExternalColumns[FirstName]"
+                      length="50"
+                      lineageId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].Columns[FirstName]"
+                      name="FirstName"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].Columns[LastName]"
+                      dataType="wstr"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].ExternalColumns[LastName]"
+                      length="50"
+                      lineageId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].Columns[LastName]"
+                      name="LastName"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].Columns[CustomerType]"
+                      dataType="wstr"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].ExternalColumns[CustomerType]"
+                      length="20"
+                      lineageId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].Columns[CustomerType]"
+                      name="CustomerType"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].Columns[AlertType]"
+                      dataType="wstr"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].ExternalColumns[AlertType]"
+                      length="50"
+                      lineageId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].Columns[AlertType]"
+                      name="AlertType"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].Columns[RiskScore]"
+                      dataType="numeric"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].ExternalColumns[RiskScore]"
+                      lineageId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].Columns[RiskScore]"
+                      name="RiskScore"
+                      precision="5"
+                      scale="2"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].Columns[Amount]"
+                      dataType="numeric"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].ExternalColumns[Amount]"
+                      lineageId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].Columns[Amount]"
+                      name="Amount"
+                      precision="18"
+                      scale="2"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].Columns[CardType]"
+                      dataType="wstr"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].ExternalColumns[CardType]"
+                      length="20"
+                      lineageId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].Columns[CardType]"
+                      name="CardType"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].Columns[CreditLimit]"
+                      dataType="numeric"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].ExternalColumns[CreditLimit]"
+                      lineageId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].Columns[CreditLimit]"
+                      name="CreditLimit"
+                      precision="18"
+                      scale="2"
+                      truncationRowDisposition="FailComponent" />
+                  </outputColumns>
+                  <externalMetadataColumns
+                    isUsed="True">
+                    <externalMetadataColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].ExternalColumns[CustomerID]"
+                      dataType="i4"
+                      name="CustomerID" />
+                    <externalMetadataColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].ExternalColumns[FirstName]"
+                      dataType="wstr"
+                      length="50"
+                      name="FirstName" />
+                    <externalMetadataColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].ExternalColumns[LastName]"
+                      dataType="wstr"
+                      length="50"
+                      name="LastName" />
+                    <externalMetadataColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].ExternalColumns[CustomerType]"
+                      dataType="wstr"
+                      length="20"
+                      name="CustomerType" />
+                    <externalMetadataColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].ExternalColumns[AlertType]"
+                      dataType="wstr"
+                      length="50"
+                      name="AlertType" />
+                    <externalMetadataColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].ExternalColumns[RiskScore]"
+                      dataType="numeric"
+                      name="RiskScore"
+                      precision="5"
+                      scale="2" />
+                    <externalMetadataColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].ExternalColumns[Amount]"
+                      dataType="numeric"
+                      name="Amount"
+                      precision="18"
+                      scale="2" />
+                    <externalMetadataColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].ExternalColumns[CardType]"
+                      dataType="wstr"
+                      length="20"
+                      name="CardType" />
+                    <externalMetadataColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output].ExternalColumns[CreditLimit]"
+                      dataType="numeric"
+                      name="CreditLimit"
+                      precision="18"
+                      scale="2" />
+                  </externalMetadataColumns>
+                </output>
+                <output
+                  refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Error Output]"
+                  isErrorOut="true"
+                  name="OLE DB Source Error Output">
+                  <outputColumns>
+                    <outputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Error Output].Columns[CustomerID]"
+                      dataType="i4"
+                      lineageId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Error Output].Columns[CustomerID]"
+                      name="CustomerID" />
+                    <outputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Error Output].Columns[FirstName]"
+                      dataType="wstr"
+                      length="50"
+                      lineageId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Error Output].Columns[FirstName]"
+                      name="FirstName" />
+                    <outputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Error Output].Columns[LastName]"
+                      dataType="wstr"
+                      length="50"
+                      lineageId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Error Output].Columns[LastName]"
+                      name="LastName" />
+                    <outputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Error Output].Columns[CustomerType]"
+                      dataType="wstr"
+                      length="20"
+                      lineageId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Error Output].Columns[CustomerType]"
+                      name="CustomerType" />
+                    <outputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Error Output].Columns[AlertType]"
+                      dataType="wstr"
+                      length="50"
+                      lineageId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Error Output].Columns[AlertType]"
+                      name="AlertType" />
+                    <outputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Error Output].Columns[RiskScore]"
+                      dataType="numeric"
+                      lineageId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Error Output].Columns[RiskScore]"
+                      name="RiskScore"
+                      precision="5"
+                      scale="2" />
+                    <outputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Error Output].Columns[Amount]"
+                      dataType="numeric"
+                      lineageId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Error Output].Columns[Amount]"
+                      name="Amount"
+                      precision="18"
+                      scale="2" />
+                    <outputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Error Output].Columns[CardType]"
+                      dataType="wstr"
+                      length="20"
+                      lineageId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Error Output].Columns[CardType]"
+                      name="CardType" />
+                    <outputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Error Output].Columns[CreditLimit]"
+                      dataType="numeric"
+                      lineageId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Error Output].Columns[CreditLimit]"
+                      name="CreditLimit"
+                      precision="18"
+                      scale="2" />
+                    <outputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Error Output].Columns[ErrorCode]"
+                      dataType="i4"
+                      lineageId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Error Output].Columns[ErrorCode]"
+                      name="ErrorCode"
+                      specialFlags="1" />
+                    <outputColumn
+                      refId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Error Output].Columns[ErrorColumn]"
+                      dataType="i4"
+                      lineageId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Error Output].Columns[ErrorColumn]"
+                      name="ErrorColumn"
+                      specialFlags="2" />
+                  </outputColumns>
+                  <externalMetadataColumns />
+                </output>
+              </outputs>
+            </component>
+          </components>
+          <paths>
+            <path
+              refId="Package\DFT_CrossDatabaseExtract.Paths[OLE DB Source Output]"
+              endId="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults.Inputs[OLE DB Destination Input]"
+              name="OLE DB Source Output"
+              startId="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase.Outputs[OLE DB Source Output]" />
+          </paths>
+        </pipeline>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL_CreateCrossDBView"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{046C4812-D2F1-46BC-AB75-F47D82C377F5}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL_CreateCrossDBView"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2025; © 2025 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{313A1EF7-FA61-4BEC-8C8A-939BEB005406}"
+          SQLTask:SqlStatementSource="-- Create cross-database view&#xA;-- DMA flags cross-database dependencies as migration warning&#xA;IF EXISTS (SELECT * FROM sys.views WHERE name = 'vw_CrossDB_CustomerFraud')&#xA;    DROP VIEW dbo.vw_CrossDB_CustomerFraud;&#xA;&#xA;EXEC('&#xA;CREATE VIEW dbo.vw_CrossDB_CustomerFraud AS&#xA;SELECT &#xA;    c.CustomerID,&#xA;    c.FirstName,&#xA;    c.LastName,&#xA;    c.CustomerType,&#xA;    f.AlertType,&#xA;    f.RiskScore,&#xA;    f.Amount,&#xA;    cc.CardType,&#xA;    cc.CreditLimit&#xA;FROM RetailBanking_DB.dbo.Customers c&#xA;JOIN FraudDetection_DB.dbo.FraudAlerts f &#xA;    ON f.AccountNumber LIKE ''ACC-%''&#xA;JOIN CreditCards_DB.dbo.CreditCards cc &#xA;    ON cc.CardHolderID = c.CustomerID&#xA;');" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL_LogCrossDBResult"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{12711415-AEBF-4EA9-AA4D-7AB4DFC1F1F6}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL_LogCrossDBResult"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2025; © 2025 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{313A1EF7-FA61-4BEC-8C8A-939BEB005406}"
+          SQLTask:SqlStatementSource="INSERT INTO dbo.ETL_PipelineLog &#xA;    (PackageName, StepName, SourceSystem, StartTime, Status, ExecutedBy)&#xA;VALUES &#xA;    ('PKG_04_CrossDatabase', 'Cross Database Extract Complete', &#xA;     'MultiDB', GETDATE(), 'Success', SYSTEM_USER);" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+  </DTS:Executables>
+  <DTS:PrecedenceConstraints>
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Constraint]"
+      DTS:CreationName=""
+      DTS:DTSID="{B9356768-D2A6-4E63-B3F9-BC51460122C9}"
+      DTS:From="Package\SQL_CreateCrossDBView"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Constraint"
+      DTS:To="Package\DFT_CrossDatabaseExtract" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Constraint 1]"
+      DTS:CreationName=""
+      DTS:DTSID="{F546E67A-D4C7-4455-AC0E-E712F3797C42}"
+      DTS:From="Package\DFT_CrossDatabaseExtract"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Constraint 1"
+      DTS:To="Package\SQL_LogCrossDBResult" />
+  </DTS:PrecedenceConstraints>
+  <DTS:DesignTimeProperties><![CDATA[<?xml version="1.0"?>
+<!--This CDATA section contains the layout information of the package. The section includes information such as (x,y) coordinates, width, and height.-->
+<!--If you manually edit this section and make a mistake, you can delete it. -->
+<!--The package will still be able to load normally but the previous layout information will be lost and the designer will automatically re-arrange the elements on the design surface.-->
+<Objects
+  Version="8">
+  <!--Each node below will contain properties that do not affect runtime behavior.-->
+  <Package
+    design-time-name="Package">
+    <LayoutInfo>
+      <GraphLayout
+        Capacity="8" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph" xmlns:mssgle="clr-namespace:Microsoft.SqlServer.Graph.LayoutEngine;assembly=Microsoft.SqlServer.Graph" xmlns:assembly="http://schemas.microsoft.com/winfx/2006/xaml">
+        <NodeLayout
+          Size="196,42"
+          Id="Package\DFT_CrossDatabaseExtract"
+          TopLeft="296,148" />
+        <NodeLayout
+          Size="208,42"
+          Id="Package\SQL_CreateCrossDBView"
+          TopLeft="285,62" />
+        <NodeLayout
+          Size="205,42"
+          Id="Package\SQL_LogCrossDBResult"
+          TopLeft="298,241" />
+        <EdgeLayout
+          Id="Package.PrecedenceConstraints[Constraint]"
+          TopLeft="391.5,104">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,44"
+              Start="0,0"
+              End="0,36.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,36.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package.PrecedenceConstraints[Constraint 1]"
+          TopLeft="397.25,190">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,51"
+              Start="0,0"
+              End="0,43.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,43.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+      </GraphLayout>
+    </LayoutInfo>
+  </Package>
+  <TaskHost
+    design-time-name="Package\DFT_CrossDatabaseExtract">
+    <LayoutInfo>
+      <GraphLayout
+        Capacity="4" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph" xmlns:mssgle="clr-namespace:Microsoft.SqlServer.Graph.LayoutEngine;assembly=Microsoft.SqlServer.Graph" xmlns:assembly="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:mssgm="clr-namespace:Microsoft.SqlServer.Graph.Model;assembly=Microsoft.SqlServer.Graph">
+        <NodeLayout
+          Size="184,42"
+          Id="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase"
+          TopLeft="314,77" />
+        <NodeLayout
+          Size="195,42"
+          Id="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults"
+          TopLeft="309,181" />
+        <EdgeLayout
+          Id="Package\DFT_CrossDatabaseExtract.Paths[OLE DB Source Output]"
+          TopLeft="406,119">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="-8.5,62"
+              Start="0,0"
+              End="-8.5,54.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,27" />
+                  <mssgle:CubicBezierSegment
+                    Point1="0,27"
+                    Point2="0,31"
+                    Point3="-4,31" />
+                  <mssgle:LineSegment
+                    End="-4.5,31" />
+                  <mssgle:CubicBezierSegment
+                    Point1="-4.5,31"
+                    Point2="-8.5,31"
+                    Point3="-8.5,35" />
+                  <mssgle:LineSegment
+                    End="-8.5,54.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <mssgm:EdgeLabel
+              BoundingBox="0,0,0,0"
+              RelativePosition="Any" />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+      </GraphLayout>
+    </LayoutInfo>
+  </TaskHost>
+  <PipelineComponentMetadata
+    design-time-name="Package\DFT_CrossDatabaseExtract\DEST_CrossDBResults">
+    <Properties>
+      <Property>
+        <Name>DataSourceViewID</Name>
+      </Property>
+      <Property>
+        <Name>TableInfoObjectType</Name>
+        <Value
+          type="q2:string">Table</Value>
+      </Property>
+    </Properties>
+  </PipelineComponentMetadata>
+  <PipelineComponentMetadata
+    design-time-name="Package\DFT_CrossDatabaseExtract\SRC_CrossDatabase">
+    <Properties>
+      <Property>
+        <Name>DataSourceViewID</Name>
+      </Property>
+    </Properties>
+  </PipelineComponentMetadata>
+</Objects>]]></DTS:DesignTimeProperties>
+</DTS:Executable>

@@ -1,0 +1,222 @@
+﻿<?xml version="1.0"?>
+<DTS:Executable xmlns:DTS="www.microsoft.com/SqlServer/Dts"
+  DTS:refId="Package"
+  DTS:CreationDate="4/7/2026 2:09:26 PM"
+  DTS:CreationName="Microsoft.Package"
+  DTS:CreatorComputerName="NODE5"
+  DTS:CreatorName="USHADC0\ushakale"
+  DTS:DTSID="{33FE1BB5-2749-474A-A091-771652B4217C}"
+  DTS:ExecutableType="Microsoft.Package"
+  DTS:LastModifiedProductVersion="17.0.1010.2"
+  DTS:LocaleID="1033"
+  DTS:ObjectName="Package1"
+  DTS:PackageType="5"
+  DTS:VersionBuild="6"
+  DTS:VersionGUID="{9AA2D113-9203-43DD-B983-98496600AEBD}">
+  <DTS:Property
+    DTS:Name="PackageFormatVersion">8</DTS:Property>
+  <DTS:ConnectionManagers>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Node5.BankingDW_DB]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{D7F464C1-39DD-4C2B-BAB2-303AA9502E49}"
+      DTS:ObjectName="Node5.BankingDW_DB">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=usha-sqlmi-poc.public.0f3157bbdbf7.database.windows.net,3342;User ID=ssisadmin;Initial Catalog=BankingDW_DB;Provider=SQLNCLI11.1;Persist Security Info=True;Auto Translate=False;Application Name=SSIS-Package1-{D7F464C1-39DD-4C2B-BAB2-303AA9502E49}Node5.BankingDW_DB;">
+          <DTS:Password
+            DTS:Name="Password"
+            Sensitive="1"
+            Encrypted="1">AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAWrpDe6Aa8kWl1MLpQscEIwAAAAAIAAAARABUAFMAAAADZgAAwAAAABAAAACzeUGv61oGCcmY94f1LOFwAAAAAASAAACgAAAAEAAAAECkb2/A4+K3Uc434em4JzIwAAAArJH99rPivhb4Ce986zuxyFHtx396dMcgXkdTPtgJwIjXViqKUb8wRXBSfL3qeab9FAAAALKl3CkHT/RwYPWZ4XAmwxKebuOL</DTS:Password>
+        </DTS:ConnectionManager>
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Node5.BankingDW_DB 1]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{00256C71-99C3-4532-9BB9-B553807904F0}"
+      DTS:ObjectName="Node5.BankingDW_DB 1">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=usha-sqlmi-poc.public.0f3157bbdbf7.database.windows.net,3342;User ID=ssisadmin;Initial Catalog=BankingDW_DB;Provider=SQLNCLI11.1;Auto Translate=False;Application Name=SSIS-Package1-{00256C71-99C3-4532-9BB9-B553807904F0}Node5.BankingDW_DB 1;">
+          <DTS:Password
+            DTS:Name="Password"
+            Sensitive="1"
+            Encrypted="1">AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAWrpDe6Aa8kWl1MLpQscEIwAAAAAIAAAARABUAFMAAAADZgAAwAAAABAAAACjlsFYFVL+o13CWovWlQfXAAAAAASAAACgAAAAEAAAABJtH5FYK0D3E/41Y5HHd+YwAAAA/r9+PUluwYQtOvyOFv9apMoQOGs4QHnm0AkjQz4GScyzjaPwiQ1taWJOZLG0nb5iFAAAABrA54TlkWifYb+vF+szS8jbrxHG</DTS:Password>
+        </DTS:ConnectionManager>
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+  </DTS:ConnectionManagers>
+  <DTS:Variables />
+  <DTS:Executables>
+    <DTS:Executable
+      DTS:refId="Package\SQL_CallCLRProcedure"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{F100F8B9-138E-4FB5-8B8A-1067684AA87D}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL_CallCLRProcedure"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2025; © 2025 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{D7F464C1-39DD-4C2B-BAB2-303AA9502E49}"
+          SQLTask:SqlStatementSource="-- Call CLR stored procedure&#xA;-- DMA flags CLR dependencies as migration warning&#xA;-- CLR assemblies require re-signing in Azure SQL MI&#xA;DECLARE @FormattedAmount NVARCHAR(50);&#xA;&#xA;EXEC dbo.usp_CLR_FormatCurrency&#xA;    @Amount = 1234567.89,&#xA;    @FormattedAmount = @FormattedAmount OUTPUT;&#xA;&#xA;SELECT @FormattedAmount AS FormattedCurrencyOutput;" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL_LogCLRResult"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{29E21DE6-224C-4C37-95F6-8C98A6488D73}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL_LogCLRResult"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2025; © 2025 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{D7F464C1-39DD-4C2B-BAB2-303AA9502E49}"
+          SQLTask:SqlStatementSource="INSERT INTO dbo.ETL_PipelineLog &#xA;    (PackageName, StepName, SourceSystem, StartTime, Status, ExecutedBy)&#xA;VALUES &#xA;    ('PKG_07_CLR', 'CLR Procedure Execution Complete', &#xA;     'BankingDW_DB', GETDATE(), 'Success', SYSTEM_USER);" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL_VerifyCLROutput"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{26263B67-B910-4F15-B81E-2BE997C8E403}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL_VerifyCLROutput"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2025; © 2025 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{D7F464C1-39DD-4C2B-BAB2-303AA9502E49}"
+          SQLTask:SqlStatementSource="-- Verify CLR procedure ran successfully&#xA;-- Check ETL log for CLR execution record&#xA;SELECT TOP 1&#xA;    PackageName,&#xA;    StepName,&#xA;    Status,&#xA;    StartTime&#xA;FROM dbo.ETL_PipelineLog&#xA;WHERE PackageName = 'CLR_Dependency'&#xA;ORDER BY StartTime DESC;" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+  </DTS:Executables>
+  <DTS:PrecedenceConstraints>
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Constraint]"
+      DTS:CreationName=""
+      DTS:DTSID="{A36E516F-6835-48B2-B9F9-68A0B1EDBDD6}"
+      DTS:From="Package\SQL_CallCLRProcedure"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Constraint"
+      DTS:To="Package\SQL_VerifyCLROutput" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Constraint 1]"
+      DTS:CreationName=""
+      DTS:DTSID="{2BD8B5C4-AD2F-4BDF-8F24-47DCCC9C1F5C}"
+      DTS:From="Package\SQL_VerifyCLROutput"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Constraint 1"
+      DTS:To="Package\SQL_LogCLRResult" />
+  </DTS:PrecedenceConstraints>
+  <DTS:DesignTimeProperties><![CDATA[<?xml version="1.0"?>
+<!--This CDATA section contains the layout information of the package. The section includes information such as (x,y) coordinates, width, and height.-->
+<!--If you manually edit this section and make a mistake, you can delete it. -->
+<!--The package will still be able to load normally but the previous layout information will be lost and the designer will automatically re-arrange the elements on the design surface.-->
+<Objects
+  Version="8">
+  <!--Each node below will contain properties that do not affect runtime behavior.-->
+  <Package
+    design-time-name="Package">
+    <LayoutInfo>
+      <GraphLayout
+        Capacity="8" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph" xmlns:mssgle="clr-namespace:Microsoft.SqlServer.Graph.LayoutEngine;assembly=Microsoft.SqlServer.Graph" xmlns:assembly="http://schemas.microsoft.com/winfx/2006/xaml">
+        <NodeLayout
+          Size="199,42"
+          Id="Package\SQL_CallCLRProcedure"
+          TopLeft="330,58" />
+        <NodeLayout
+          Size="179,42"
+          Id="Package\SQL_LogCLRResult"
+          TopLeft="306,300" />
+        <NodeLayout
+          Size="179,42"
+          Id="Package\SQL_VerifyCLROutput"
+          TopLeft="352,190" />
+        <EdgeLayout
+          Id="Package.PrecedenceConstraints[Constraint]"
+          TopLeft="429.5,100">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="12,90"
+              Start="0,0"
+              End="12,82.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,41" />
+                  <mssgle:CubicBezierSegment
+                    Point1="0,41"
+                    Point2="0,45"
+                    Point3="4,45" />
+                  <mssgle:LineSegment
+                    End="8,45" />
+                  <mssgle:CubicBezierSegment
+                    Point1="8,45"
+                    Point2="12,45"
+                    Point3="12,49" />
+                  <mssgle:LineSegment
+                    End="12,82.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package.PrecedenceConstraints[Constraint 1]"
+          TopLeft="441.5,232">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="-46,68"
+              Start="0,0"
+              End="-46,60.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,30" />
+                  <mssgle:CubicBezierSegment
+                    Point1="0,30"
+                    Point2="0,34"
+                    Point3="-4,34" />
+                  <mssgle:LineSegment
+                    End="-42,34" />
+                  <mssgle:CubicBezierSegment
+                    Point1="-42,34"
+                    Point2="-46,34"
+                    Point3="-46,38" />
+                  <mssgle:LineSegment
+                    End="-46,60.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+      </GraphLayout>
+    </LayoutInfo>
+  </Package>
+</Objects>]]></DTS:DesignTimeProperties>
+</DTS:Executable>

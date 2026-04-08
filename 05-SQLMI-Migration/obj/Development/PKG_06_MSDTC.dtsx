@@ -1,0 +1,360 @@
+<?xml version="1.0"?>
+<DTS:Executable xmlns:DTS="www.microsoft.com/SqlServer/Dts"
+  DTS:refId="Package"
+  DTS:CreationDate="4/7/2026 2:10:23 PM"
+  DTS:CreationName="Microsoft.Package"
+  DTS:CreatorComputerName="NODE5"
+  DTS:CreatorName="USHADC0\ushakale"
+  DTS:DTSID="{A8D28143-C004-4C16-8320-FB9AFCBBA43D}"
+  DTS:ExecutableType="Microsoft.Package"
+  DTS:LastModifiedProductVersion="17.0.1010.2"
+  DTS:LocaleID="1033"
+  DTS:ObjectName="Package1"
+  DTS:PackageType="5"
+  DTS:VersionBuild="4"
+  DTS:VersionGUID="{300E743C-0A2C-478C-9B8A-4E445E109EF3}">
+  <DTS:Property
+    DTS:Name="PackageFormatVersion">8</DTS:Property>
+  <DTS:ConnectionManagers>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Node1.master]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{5938186E-2618-47E3-B44D-5F9173FF6C05}"
+      DTS:ObjectName="Node1.master">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=Node1;Initial Catalog=master;Provider=SQLNCLI11.1;Integrated Security=SSPI;Application Name=SSIS-Package1-{5938186E-2618-47E3-B44D-5F9173FF6C05}Node1.master;Auto Translate=False;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Node5.BankingDW_DB]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{7EB1CAA0-093E-402F-A7D0-ADCE3AADE223}"
+      DTS:ObjectName="Node5.BankingDW_DB">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=Node5;Initial Catalog=BankingDW_DB;Provider=SQLNCLI11.1;Integrated Security=SSPI;Application Name=SSIS-Package1-{7EB1CAA0-093E-402F-A7D0-ADCE3AADE223}Node5.BankingDW_DB;Auto Translate=False;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[node5.master]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{98D4F288-81F5-4CA8-AB0D-549C29CBF88C}"
+      DTS:ObjectName="node5.master">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=node5;Initial Catalog=master;Provider=SQLNCLI11.1;Integrated Security=SSPI;Application Name=SSIS-Package1-{98D4F288-81F5-4CA8-AB0D-549C29CBF88C}node5.master;Auto Translate=False;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+  </DTS:ConnectionManagers>
+  <DTS:Variables />
+  <DTS:Executables>
+    <DTS:Executable
+      DTS:refId="Package\SEQ_DistributedLoad"
+      DTS:CreationName="STOCK:SEQUENCE"
+      DTS:Description="Sequence Container"
+      DTS:DTSID="{429C17D3-D353-4A6F-9C3E-5A67A4E07E6F}"
+      DTS:ExecutableType="STOCK:SEQUENCE"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SEQ_DistributedLoad"
+      DTS:TransactionOption="2">
+      <DTS:Variables />
+      <DTS:Executables>
+        <DTS:Executable
+          DTS:refId="Package\SEQ_DistributedLoad\SQL_InsertNode1"
+          DTS:CreationName="Microsoft.ExecuteSQLTask"
+          DTS:Description="Execute SQL Task"
+          DTS:DTSID="{CB90E703-B3F7-4201-AE64-86E415757D5C}"
+          DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+          DTS:LocaleID="-1"
+          DTS:ObjectName="SQL_InsertNode1"
+          DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2025; © 2025 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+          DTS:ThreadHint="0">
+          <DTS:Variables />
+          <DTS:ObjectData>
+            <SQLTask:SqlTaskData
+              SQLTask:Connection="{5938186E-2618-47E3-B44D-5F9173FF6C05}"
+              SQLTask:SqlStatementSource="INSERT INTO master.dbo.spt_values &#xA;SELECT TOP 1 name, number, type, low, high, status &#xA;FROM master.dbo.spt_values &#xA;WHERE 1=2;" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+          </DTS:ObjectData>
+        </DTS:Executable>
+        <DTS:Executable
+          DTS:refId="Package\SEQ_DistributedLoad\SQL_InsertNode5"
+          DTS:CreationName="Microsoft.ExecuteSQLTask"
+          DTS:Description="Execute SQL Task"
+          DTS:DTSID="{7A887419-4584-4506-A041-86787A4AAD82}"
+          DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+          DTS:LocaleID="-1"
+          DTS:ObjectName="SQL_InsertNode5"
+          DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2025; © 2025 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+          DTS:ThreadHint="0">
+          <DTS:Variables />
+          <DTS:ObjectData>
+            <SQLTask:SqlTaskData
+              SQLTask:Connection="{7EB1CAA0-093E-402F-A7D0-ADCE3AADE223}"
+              SQLTask:SqlStatementSource="-- Insert into Node5 as part of distributed transaction&#xA;INSERT INTO dbo.ETL_PipelineLog &#xA;    (PackageName, StepName, SourceSystem, StartTime, Status, ExecutedBy)&#xA;VALUES &#xA;    ('PKG_06_MSDTC', 'Distributed Insert Node5', &#xA;     'NODE5', GETDATE(), 'Running', SYSTEM_USER);" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+          </DTS:ObjectData>
+        </DTS:Executable>
+      </DTS:Executables>
+      <DTS:PrecedenceConstraints>
+        <DTS:PrecedenceConstraint
+          DTS:refId="Package\SEQ_DistributedLoad.PrecedenceConstraints[Constraint]"
+          DTS:CreationName=""
+          DTS:DTSID="{1F6226D5-1515-424F-B05A-8E4DE59873C8}"
+          DTS:From="Package\SEQ_DistributedLoad\SQL_InsertNode5"
+          DTS:LogicalAnd="True"
+          DTS:ObjectName="Constraint"
+          DTS:To="Package\SEQ_DistributedLoad\SQL_InsertNode1" />
+      </DTS:PrecedenceConstraints>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL_BeginDistributedTran"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{FB9A4FED-5B84-4418-8885-849BC31CCFD4}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL_BeginDistributedTran"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2025; © 2025 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{98D4F288-81F5-4CA8-AB0D-549C29CBF88C}"
+          SQLTask:SqlStatementSource="-- Begin distributed transaction&#xA;-- MSDTC not supported in Azure SQL MI&#xA;-- DMA flags this as hard blocker&#xA;BEGIN DISTRIBUTED TRANSACTION;" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL_CommitDistributedTran"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{9424974A-F311-4464-BC32-4CA3DCD73CF5}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL_CommitDistributedTran"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2025; © 2025 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{98D4F288-81F5-4CA8-AB0D-549C29CBF88C}"
+          SQLTask:SqlStatementSource="-- Commit distributed transaction across Node5 and Node1&#xA;-- MSDTC coordinates the 2-phase commit&#xA;COMMIT TRANSACTION;" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL_LogMSDTCResult"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{2E2634DC-9D29-4010-A788-0FEF6A433D3A}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL_LogMSDTCResult"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2025; © 2025 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{7EB1CAA0-093E-402F-A7D0-ADCE3AADE223}"
+          SQLTask:SqlStatementSource="INSERT INTO dbo.ETL_PipelineLog &#xA;    (PackageName, StepName, SourceSystem, StartTime, Status, ExecutedBy)&#xA;VALUES &#xA;    ('PKG_06_MSDTC', 'Distributed Transaction Complete', &#xA;     'NODE5+NODE1', GETDATE(), 'Success', SYSTEM_USER);" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+  </DTS:Executables>
+  <DTS:PrecedenceConstraints>
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Constraint]"
+      DTS:CreationName=""
+      DTS:DTSID="{C64C60D3-CCC2-42C4-B559-F3A60E269994}"
+      DTS:From="Package\SQL_BeginDistributedTran"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Constraint"
+      DTS:To="Package\SEQ_DistributedLoad" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Constraint 1]"
+      DTS:CreationName=""
+      DTS:DTSID="{055D2B4E-D686-4025-AF35-E3B88562D147}"
+      DTS:From="Package\SEQ_DistributedLoad"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Constraint 1"
+      DTS:To="Package\SQL_CommitDistributedTran" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Constraint 2]"
+      DTS:CreationName=""
+      DTS:DTSID="{38722328-9C56-4AD2-A696-888395FF9B16}"
+      DTS:From="Package\SQL_CommitDistributedTran"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Constraint 2"
+      DTS:To="Package\SQL_LogMSDTCResult" />
+  </DTS:PrecedenceConstraints>
+  <DTS:DesignTimeProperties><![CDATA[<?xml version="1.0"?>
+<!--This CDATA section contains the layout information of the package. The section includes information such as (x,y) coordinates, width, and height.-->
+<!--If you manually edit this section and make a mistake, you can delete it. -->
+<!--The package will still be able to load normally but the previous layout information will be lost and the designer will automatically re-arrange the elements on the design surface.-->
+<Objects
+  Version="8">
+  <!--Each node below will contain properties that do not affect runtime behavior.-->
+  <Package
+    design-time-name="Package">
+    <LayoutInfo>
+      <GraphLayout
+        Capacity="16" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph" xmlns:mssgle="clr-namespace:Microsoft.SqlServer.Graph.LayoutEngine;assembly=Microsoft.SqlServer.Graph" xmlns:assembly="http://schemas.microsoft.com/winfx/2006/xaml">
+        <NodeLayout
+          Size="170,42"
+          Id="Package\SQL_BeginDistributedTran"
+          TopLeft="254.461538461538,13.3076923076923" />
+        <NodeLayout
+          Size="170,42"
+          Id="Package\SEQ_DistributedLoad\SQL_InsertNode5"
+          TopLeft="12.1538461538461,6.46153846153845" />
+        <NodeLayout
+          Size="167,42"
+          Id="Package\SEQ_DistributedLoad\SQL_InsertNode1"
+          TopLeft="21.1923076923077,90.5641025641025" />
+        <EdgeLayout
+          Id="Package\SEQ_DistributedLoad.PrecedenceConstraints[Constraint]"
+          TopLeft="100.923076923077,48.4615384615385">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,42.1025641025641"
+              Start="0,0"
+              End="0,34.6025641025641">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,34.6025641025641" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <ContainerLayout
+          HeaderHeight="43"
+          IsExpanded="True"
+          PanelSize="237,188"
+          Size="237,231"
+          Id="Package\SEQ_DistributedLoad"
+          TopLeft="264,88.6153846153846" />
+        <NodeLayout
+          Size="179,42"
+          Id="Package\SQL_CommitDistributedTran"
+          TopLeft="473.615384615385,343.282051282051" />
+        <NodeLayout
+          Size="196,42"
+          Id="Package\SQL_LogMSDTCResult"
+          TopLeft="288.782051282051,421.102564102564" />
+        <EdgeLayout
+          Id="Package.PrecedenceConstraints[Constraint]"
+          TopLeft="339.461538461538,55.3076923076923">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="43.0384615384615,33.3076923076923"
+              Start="0,0"
+              End="43.0384615384615,25.8076923076923">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,12.6538461538461" />
+                  <mssgle:CubicBezierSegment
+                    Point1="0,12.6538461538461"
+                    Point2="0,16.6538461538461"
+                    Point3="4,16.6538461538461" />
+                  <mssgle:LineSegment
+                    End="39.0384615384615,16.6538461538461" />
+                  <mssgle:CubicBezierSegment
+                    Point1="39.0384615384615,16.6538461538461"
+                    Point2="43.0384615384615,16.6538461538461"
+                    Point3="43.0384615384615,20.6538461538461" />
+                  <mssgle:LineSegment
+                    End="43.0384615384615,25.8076923076923" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package.PrecedenceConstraints[Constraint 1]"
+          TopLeft="382.5,319.615384615385">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="180.615384615385,23.6666666666666"
+              Start="0,0"
+              End="180.615384615385,16.1666666666666">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,7.83333333333331" />
+                  <mssgle:CubicBezierSegment
+                    Point1="0,7.83333333333331"
+                    Point2="0,11.8333333333333"
+                    Point3="4,11.8333333333333" />
+                  <mssgle:LineSegment
+                    End="176.615384615385,11.8333333333333" />
+                  <mssgle:CubicBezierSegment
+                    Point1="176.615384615385,11.8333333333333"
+                    Point2="180.615384615385,11.8333333333333"
+                    Point3="180.615384615385,15.8333333333333" />
+                  <mssgle:LineSegment
+                    End="180.615384615385,16.1666666666666" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package.PrecedenceConstraints[Constraint 2]"
+          TopLeft="563.115384615385,385.282051282051">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="-176.333333333333,35.8205128205128"
+              Start="0,0"
+              End="-176.333333333333,28.3205128205128">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,13.9102564102564" />
+                  <mssgle:CubicBezierSegment
+                    Point1="0,13.9102564102564"
+                    Point2="0,17.9102564102564"
+                    Point3="-4,17.9102564102564" />
+                  <mssgle:LineSegment
+                    End="-172.333333333333,17.9102564102564" />
+                  <mssgle:CubicBezierSegment
+                    Point1="-172.333333333333,17.9102564102564"
+                    Point2="-176.333333333333,17.9102564102564"
+                    Point3="-176.333333333333,21.9102564102564" />
+                  <mssgle:LineSegment
+                    End="-176.333333333333,28.3205128205128" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+      </GraphLayout>
+    </LayoutInfo>
+  </Package>
+</Objects>]]></DTS:DesignTimeProperties>
+</DTS:Executable>
