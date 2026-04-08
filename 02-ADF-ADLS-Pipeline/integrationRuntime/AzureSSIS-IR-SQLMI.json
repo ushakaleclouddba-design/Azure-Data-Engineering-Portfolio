@@ -1,0 +1,32 @@
+{
+	"name": "AzureSSIS-IR-SQLMI",
+	"properties": {
+		"type": "Managed",
+		"description": "SSIS Integration Environment for MAnaged Instance",
+		"typeProperties": {
+			"computeProperties": {
+				"location": "West US 2",
+				"nodeSize": "Standard_D2_v3",
+				"numberOfNodes": 1,
+				"maxParallelExecutionsPerNode": 1,
+				"vNetProperties": {
+					"subnetId": "/subscriptions/26f7a991-84b3-47b7-966b-f19cbb0379bf/resourceGroups/Usha_SQLMI_POC/providers/Microsoft.Network/virtualNetworks/vnet-usha-sqlmi-poc/subnets/AzureSSIS-Subnet"
+				}
+			},
+			"ssisProperties": {
+				"catalogInfo": {
+					"catalogServerEndpoint": "usha-sqlmi-poc.0f3157bbdbf7.database.windows.net",
+					"catalogAdminUserName": "ssisadmin",
+					"catalogAdminPassword": {
+						"type": "SecureString",
+						"value": "**********"
+					},
+					"catalogPricingTier": null
+				},
+				"edition": "Standard",
+				"runtimeVersion": "2017",
+				"licenseType": "LicenseIncluded"
+			}
+		}
+	}
+}
