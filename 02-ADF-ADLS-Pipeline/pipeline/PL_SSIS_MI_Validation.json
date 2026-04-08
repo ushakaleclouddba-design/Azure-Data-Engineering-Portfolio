@@ -1,0 +1,65 @@
+{
+	"name": "PL_SSIS_MI_Validation",
+	"properties": {
+		"activities": [
+			{
+				"name": "Run_PKG04_CrossDatabase",
+				"type": "ExecuteSSISPackage",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"packageLocation": {
+						"packagePath": "MigrationStressTest/MigrationStressTest/PKG_04_CrossDatabase.dtsx",
+						"type": "SSISDB"
+					},
+					"environmentPath": null,
+					"connectVia": {
+						"referenceName": "AzureSSIS-IR-SQLMI",
+						"type": "IntegrationRuntimeReference"
+					},
+					"loggingLevel": "Basic"
+				}
+			},
+			{
+				"name": "Run_PKG07_CLR",
+				"type": "ExecuteSSISPackage",
+				"dependsOn": [
+					{
+						"activity": "Run_PKG04_CrossDatabase",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"packageLocation": {
+						"packagePath": "MigrationStressTest/MigrationStressTest/PKG_07_CLR.dtsx",
+						"type": "SSISDB"
+					},
+					"environmentPath": null,
+					"connectVia": {
+						"referenceName": "AzureSSIS-IR-SQLMI",
+						"type": "IntegrationRuntimeReference"
+					},
+					"loggingLevel": "Basic"
+				}
+			}
+		],
+		"annotations": []
+	}
+}
