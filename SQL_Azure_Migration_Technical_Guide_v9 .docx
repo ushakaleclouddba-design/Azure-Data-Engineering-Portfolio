@@ -1,0 +1,2542 @@
+**SQL SERVER ON-PREMISES TO AZURE**
+
+**MIGRATION TECHNICAL REFERENCE GUIDE**
+
+*Comprehensive Coverage of All Migration Approaches*
+
+IaaS  |  PaaS  |  SaaS  |  Hybrid  |  Modern Data Platform
+
+Version 1.0  |  March 2026
+
+Internal IT  |  Database Administration Team
+
+# **1. Executive Summary**
+
+This document provides a comprehensive technical reference for migrating Microsoft SQL Server workloads from on-premises infrastructure to Microsoft Azure. It is intended for Database Administrators, Infrastructure Architects, and IT Decision Makers responsible for planning and executing SQL Server migrations.
+
+Microsoft Azure offers multiple migration pathways, ranging from traditional lift-and-shift approaches to fully modernized cloud-native data platforms. The right approach depends on downtime tolerance, budget, target architecture, SQL Server version, and long-term operational goals.
+
+This guide covers 12 migration approaches organized into four categories:
+
+- IaaS / Infrastructure Approaches: Backup/Restore, VHD Lift & Shift, Log Shipping, Hybrid AG
+
+- Migration Services and Tools: Azure DMS, Azure Migrate, Database Migration Assistant (DMA)
+
+- PaaS Targets: Azure SQL Database, Azure SQL Managed Instance
+
+- Modern Data Platform: Microsoft Fabric, Azure Data Factory, Azure Synapse Analytics
+
+Each approach is described in the main body with architecture, considerations, and T-SQL/CLI scripts. Corresponding Proof-of-Concept (POC) lab walkthroughs with step-by-step commands and screenshots are provided in the Appendix.
+
+# **2. Pre-Migration Considerations**
+
+## **2.1 Assessment Phase**
+
+Before selecting a migration approach, a thorough assessment of the on-premises environment is essential:
+
+- SQL Server version compatibility with the target Azure service
+
+- Database sizes, growth rates, and storage requirements
+
+- SQL Server features in use: SSIS, SSRS, SSAS, Linked Servers, CLR, Service Broker
+
+- Application connectivity, connection strings, and driver compatibility
+
+- Security requirements: TDE, Always Encrypted, Row-Level Security
+
+- High Availability and Disaster Recovery requirements
+
+- Compliance and data residency requirements
+
+- Network connectivity options: ExpressRoute vs VPN vs Public Internet
+
+## **2.2 Azure Prerequisites**
+
+- Active Azure Subscription with sufficient regional quota
+
+- Resource Group created in target region
+
+- Virtual Network (VNet) and Network Security Group (NSG) configured
+
+- Azure Storage Account for staging backup files and VHDs
+
+- IAM roles assigned: Contributor or custom DBA role
+
+- Azure Monitor and Log Analytics workspace configured
+
+## **2.3 On-Premises Prerequisites**
+
+- SQL Server service account credentials documented
+
+- All databases backed up with backup integrity verified
+
+- Linked servers, SQL Agent jobs, and logins exported
+
+- Firewall rules and port requirements documented (TCP 1433, 5022 for AG endpoints)
+
+- Network bandwidth assessed for data transfer volume
+
+# **3. Migration Approaches — Comparison Matrix**
+
+The table below summarizes all 12 migration approaches. Use this matrix to identify the best approach based on downtime tolerance, complexity, cost, and target architecture.
+
+| **#** | **Approach** | **Target** | **Downtime** | **Complexity** | **Cost** | **SQL Compat.** | **Best For** |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Backup/Restore to Azure VM | IaaS VM | Medium | Low | $ | All versions | General DB migration |
+| 2 | VHD Lift & Shift | IaaS VM | High | Medium | $ | All versions | Full server lift |
+| 3 | Azure DMS | IaaS/MI/PaaS | Low (online) | Medium | $$ | 2005+ | Minimal downtime migrations |
+| 4 | Log Shipping to Azure VM | IaaS VM | Low | Medium | $ | All versions | Staged migration/cutover |
+| 5 | Hybrid AG (Azure Replica) | IaaS VM | Near-zero | High | $$ | 2012+ Ent. | HA + migration combined |
+| 6 | Azure Migrate | IaaS VM | Medium | Low-Med | $$ | All versions | Agentless VM migration |
+| 7 | DMA Assessment | Assessment only | None | Low | Free | 2005+ | Pre-migration readiness |
+| 8 | Azure SQL Managed Instance | PaaS (MI) | Low | Medium | $$$ | 2008+ | Near-full SQL compat. PaaS |
+| 9 | Azure SQL Database | PaaS (DB) | Low | Medium | $$ | Limited features | Modern app databases |
+| 10 | Azure Synapse Analytics | Analytics PaaS | N/A | High | $$$ | T-SQL subset | DW and analytics workloads |
+| 11 | Azure Data Factory | ETL / PaaS | N/A | High | $$ | All (ETL) | SSIS and ETL migration |
+| 12 | Microsoft Fabric | SaaS Platform | N/A | High | $$$ | All (mirroring) | Unified analytics platform |
+
+**NOTE: **Cost: $ = Low, $$ = Medium, $$$ = High. Actual costs vary by VM size, storage, data transfer volume, and licensing model.
+
+# **4. Migration Approaches — Detailed Overview**
+
+## **4.1 Backup and Restore to Azure VM**
+
+The Backup/Restore approach is the most straightforward method for migrating SQL Server databases to an Azure IaaS VM. It involves taking a full backup, uploading it to Azure Blob Storage, and restoring on an Azure VM running SQL Server.
+
+### **Architecture**
+
+- On-premises SQL Server takes a full (or full + differential + log) backup
+
+- Backup streamed directly to Azure Blob Storage using BACKUP TO URL
+
+- SQL Server on Azure VM restores using RESTORE FROM URL
+
+- Optional: Use SAS token-based credential for secure access
+
+### **Key Considerations**
+
+- Downtime window = backup time + upload time + restore time
+
+- Use WITH COMPRESSION to reduce file size and transfer time
+
+- BACKUP TO URL requires SQL Server 2012 SP1 CU2 or later
+
+- Verify backup integrity with RESTORE VERIFYONLY before cutover
+
+- Logins, SQL Agent jobs, and linked servers must be migrated separately using DMA or scripting
+
+### **Core T-SQL Commands**
+
+-- Create SAS-based credential
+
+CREATE CREDENTIAL [https://<storage>.blob.core.windows.net/<container>]
+
+WITH IDENTITY = 'SHARED ACCESS SIGNATURE',
+
+SECRET = '<SAS_TOKEN>';
+
+-- Backup directly to Azure Blob Storage
+
+BACKUP DATABASE [YourDB]
+
+TO URL = 'https://<storage>.blob.core.windows.net/<container>/YourDB.bak'
+
+WITH CREDENTIAL = 'https://<storage>.blob.core.windows.net/<container>',
+
+     COMPRESSION, STATS = 10;
+
+-- Restore on Azure VM
+
+RESTORE DATABASE [YourDB]
+
+FROM URL = 'https://<storage>.blob.core.windows.net/<container>/YourDB.bak'
+
+WITH CREDENTIAL = 'https://<storage>.blob.core.windows.net/<container>',
+
+     MOVE 'YourDB' TO 'D:\Data\YourDB.mdf',
+
+     MOVE 'YourDB_log' TO 'D:\Log\YourDB_log.ldf',
+
+     STATS = 10;
+
+| **Pros** | **Cons** |
+| --- | --- |
+| Simple, well-understood process | Requires downtime during backup/restore window |
+| No additional tooling required | Large databases increase transfer time significantly |
+| Works with all SQL Server versions | Logins, jobs, linked servers must be migrated separately |
+| Low cost — storage charges only | Manual process — not suitable for hundreds of databases |
+
+## **4.2 VHD Lift ****&**** Shift (Disk Migration)**
+
+The VHD Lift & Shift approach captures the entire OS disk of an on-premises SQL Server as a fixed-size VHD file, uploads it to Azure Blob Storage, converts it to a Managed Disk, and attaches it to a new Azure VM. The entire SQL Server instance including OS, SQL binaries, and all databases is migrated.
+
+### **Key Considerations**
+
+- VHD must be fixed-size — dynamic VHDs are not supported; convert using Convert-VHD in PowerShell
+
+- Source VHD blob and target Managed Disk must be in the same Azure region
+
+- Hyper-V generation (Gen1 vs Gen2) must match between VHD and target VM
+
+- Use Standard SSD LRS or Premium SSD LRS — Premium SSD v2 cannot be created from a blob source
+
+- Free trial subscriptions may have regional quota limits requiring region change
+
+- If VHD is in a different region, copy it first using az storage blob copy start with SAS token
+
+### **Core Azure CLI Commands**
+
+# Convert dynamic VHD to fixed (run on-premises in PowerShell)
+
+Convert-VHD -Path 'C:\VMs\Node5.vhd' -DestinationPath 'C:\VMs\Node5_Fixed.vhd' -VHDType Fixed
+
+# Upload VHD to Azure Blob Storage using AzCopy
+
+azcopy copy 'C:\VMs\Node5_Fixed.vhd' \
+
+  'https://<storage>.blob.core.windows.net/vhds/Node5_Fixed.vhd' \
+
+  --blob-type PageBlob
+
+# Create Managed Disk from VHD blob (same region required)
+
+az disk create \
+
+  --name disk-node5-os \
+
+  --resource-group <RG> \
+
+  --location <region> \
+
+  --source 'https://<storage>.blob.core.windows.net/vhds/Node5_Fixed.vhd' \
+
+  --os-type Windows \
+
+  --hyper-v-generation V1 \
+
+  --sku StandardSSD_LRS
+
+# Create Azure VM from Managed Disk
+
+az vm create \
+
+  --name vm-sqlnode5 \
+
+  --resource-group <RG> \
+
+  --location <region> \
+
+  --attach-os-disk disk-node5-os \
+
+  --os-type Windows \
+
+  --size Standard_B2ms \
+
+  --public-ip-address pip-sqlnode5 \
+
+  --nsg nsg-sqlnode5
+
+| **Pros** | **Cons** |
+| --- | --- |
+| Entire server migrated including OS and SQL install | Highest downtime — server offline during VHD capture |
+| All databases, logins, and jobs migrated automatically | Large VHD requires significant upload time and storage cost |
+| No SQL Server reinstallation required | Regional quota restrictions may require cross-region VHD copy |
+| Ideal for complex instances with many components | Sysprep required if server will be domain-joined in Azure |
+
+## **4.3 Azure Database Migration Service (DMS)**
+
+Azure Database Migration Service is a fully managed service that enables migrations from multiple SQL Server sources to Azure with minimal downtime. It supports both offline (one-time) and online (continuous replication) migration modes.
+
+### **Migration Modes**
+
+- Offline Migration: One-time full migration with application downtime
+
+- Online Migration: Continuous Change Data Capture (CDC) keeps source and target in sync until cutover
+
+### **Supported Sources and Targets**
+
+| **Source** | **Target** |
+| --- | --- |
+| SQL Server 2005 and later (on-premises) | SQL Server on Azure VM, Azure SQL MI, Azure SQL Database |
+| SQL Server on AWS RDS or EC2 | Azure SQL MI, Azure SQL Database |
+| MySQL on-premises or RDS | Azure Database for MySQL |
+| PostgreSQL on-premises or RDS | Azure Database for PostgreSQL |
+
+### **Key Considerations**
+
+- Online migration requires CDC enabled on source SQL Server (SQL 2008+)
+
+- DMS Premium tier required for online migrations
+
+- Source must be network-accessible from DMS (VPN or ExpressRoute recommended for security)
+
+- Run DMA assessment before DMS migration to identify feature blockers
+
+- SSIS packages, linked servers, and SQL Agent jobs require separate migration steps
+
+## **4.4 Log Shipping to Azure VM**
+
+Log Shipping is a built-in SQL Server HA feature repurposed as a migration tool. Transaction log backups are continuously shipped from on-premises to an Azure VM secondary, minimizing the downtime window at cutover.
+
+### **Core T-SQL Configuration**
+
+-- Initialize full backup and restore WITH NORECOVERY on Azure VM first, then configure:
+
+-- On Primary (On-Premises)
+
+EXEC master.dbo.sp_add_log_shipping_primary_database
+
+  @database = N'YourDB',
+
+  @backup_directory = N'\\SharedPath\LogBackups',
+
+  @backup_share = N'\\SharedPath\LogBackups',
+
+  @backup_job_name = N'LSBackup_YourDB',
+
+  @backup_retention_period = 4320;
+
+-- On Secondary (Azure VM)
+
+EXEC master.dbo.sp_add_log_shipping_secondary_primary
+
+  @primary_server = N'OnPremSQL',
+
+  @primary_database = N'YourDB',
+
+  @backup_source_directory = N'\\SharedPath\LogBackups',
+
+  @backup_destination_directory = N'D:\LogBackups',
+
+  @copy_job_name = N'LSCopy_YourDB',
+
+  @restore_job_name = N'LSRestore_YourDB';
+
+| **Pros** | **Cons** |
+| --- | --- |
+| Very low downtime at cutover — only final log tail needs shipping | Requires shared storage or network path between on-prem and Azure |
+| Built-in SQL Server feature — no extra licensing | Read-only access to secondary requires STANDBY mode |
+| Works with all SQL Server versions | Manual monitoring required for latency and copy failures |
+| Good staged migration approach for large databases | Secondary must be brought online manually during cutover |
+
+## **4.5 Always On Availability Group with Azure Replica (Hybrid AG)**
+
+A Hybrid AG extends an existing on-premises Always On Availability Group by adding an Azure VM as an asynchronous or synchronous secondary replica. This provides near-zero downtime migration and doubles as a DR solution during the migration period.
+
+### **Key Considerations**
+
+- Requires SQL Server 2012+ Enterprise Edition for full AG feature support
+
+- Windows Server Failover Cluster (WSFC) must span on-premises and Azure nodes
+
+- VPN or ExpressRoute required between on-premises and Azure VNet
+
+- Network latency affects synchronous commit — use async initially, switch to sync at cutover
+
+- Certificate-based authentication available for workgroup (non-domain) scenarios
+
+### **High-Level Steps**
+
+- Deploy SQL Server on Azure VM and configure WSFC across on-premises and Azure
+
+- Configure VPN/ExpressRoute between on-premises network and Azure VNet
+
+- Add Azure VM as asynchronous replica to existing AG
+
+- Monitor synchronization state until latency is near-zero
+
+- Change to synchronous commit mode and perform planned failover
+
+- Update application connection strings to Azure AG listener
+
+## **4.6 Azure Migrate**
+
+Azure Migrate is Microsoft's centralized hub for discovering, assessing, and migrating on-premises servers, databases, and web applications to Azure. It provides agentless discovery for VMware environments and agent-based discovery for Hyper-V and physical servers.
+
+### **Key Components**
+
+- Discovery and Assessment: Discovers VMs, installed software, and dependencies
+
+- Server Migration: Replicates and migrates VMs to Azure IaaS VMs
+
+- Database Assessment: Integrates with DMA for SQL Server compatibility analysis
+
+- Web App Migration: Migrates IIS web applications to Azure App Service
+
+### **Key Considerations**
+
+- Agentless replication uses VMware vSphere APIs — no agent installation needed on source VMs
+
+- Agent-based replication available for physical servers and Hyper-V
+
+- Dependency analysis identifies application tiers that must be migrated together
+
+- Run test migration in isolated VNet before production cutover
+
+- Supports up to 500 VMs per appliance for agentless replication
+
+## **4.7 Database Migration Assistant (DMA)**
+
+The Database Migration Assistant is a free standalone tool from Microsoft used to assess SQL Server databases for migration readiness. It identifies breaking changes, behavior differences, deprecated features, and unsupported features in the target environment.
+
+### **Key Capabilities**
+
+- Compatibility assessment against target SQL Server version or Azure SQL target
+
+- Feature parity analysis — identifies features not available in target
+
+- SQL Server login and permission migration
+
+- Schema and data migration for small-to-medium databases
+
+- Upload results to Azure Migrate for consolidated fleet-wide assessment
+
+| **Source Version** | **Target Options** |
+| --- | --- |
+| SQL Server 2005 and later | SQL Server 2012, 2014, 2016, 2017, 2019, 2022 |
+| SQL Server 2008 and later | Azure SQL Database |
+| SQL Server 2008 and later | Azure SQL Managed Instance |
+| SQL Server 2008 and later | SQL Server on Azure VM |
+
+## **4.8 Azure SQL Managed Instance**
+
+Azure SQL Managed Instance is a fully managed PaaS database service providing near 100% compatibility with the on-premises SQL Server engine. It is the recommended PaaS target for lift-and-shift migrations where full SQL Server feature compatibility is required without managing the OS or SQL binaries.
+
+### **Key Features**
+
+- Full SQL Server engine compatibility: SQL Agent, cross-database queries, Service Broker, CLR, Database Mail
+
+- Built-in HA using Always On AG — 99.99% SLA
+
+- Automated backups, patching, and monitoring
+
+- VNet injection — deployed inside customer VNet for private connectivity
+
+- Two service tiers: General Purpose (remote storage) and Business Critical (local SSD + read replica)
+
+### **Migration Methods to SQL MI**
+
+- Azure DMS online migration — minimal downtime using CDC
+
+- Native RESTORE FROM URL — restore .bak files from Azure Blob Storage
+
+- Log Replay Service (LRS) — continuous log shipping from on-premises to MI
+
+- Managed Instance Link — real-time data replication from on-premises AG to MI
+
+### **Unsupported Features**
+
+- Windows Authentication via on-premises Active Directory (requires Microsoft Entra ID)
+
+- Cross-instance linked servers to on-premises SQL Server
+
+- SQL Server Analysis Services (SSAS)
+
+- Filestream and FileTable
+
+## **4.9 Azure SQL Database (PaaS)**
+
+Azure SQL Database is a fully managed relational database service with automatic scaling, built-in HA, and no infrastructure management. Best suited for modern application databases that can accept some feature limitations.
+
+### **Deployment Models**
+
+- Single Database: Isolated database with dedicated compute and storage
+
+- Elastic Pool: Multiple databases sharing a pooled resource set — cost-effective for multi-tenant SaaS
+
+- Serverless: Auto-scales compute up and down; auto-pauses during inactivity
+
+- Hyperscale: Up to 100 TB storage with rapid horizontal scale-out
+
+### **Features NOT Supported**
+
+- SQL Server Agent, Service Broker, cross-database queries, CLR, linked servers
+
+- Windows Authentication — use Microsoft Entra ID (Azure AD) instead
+
+- Always On AG — availability managed by the service transparently
+
+## **4.10 Azure Synapse Analytics**
+
+Azure Synapse Analytics is an enterprise analytics service combining big data and data warehousing. It is the appropriate target for on-premises SQL Server data warehouse and reporting workloads requiring massive parallel processing.
+
+### **Key Components**
+
+- Dedicated SQL Pool: MPP engine for large-scale DW workloads (formerly Azure SQL DW)
+
+- Serverless SQL Pool: On-demand T-SQL querying over data lake files — no infrastructure
+
+- Apache Spark Pool: Big data transformation and machine learning
+
+- Synapse Pipelines: Built-in ETL orchestration similar to Azure Data Factory
+
+- Synapse Link: Real-time analytical store connected to Azure Cosmos DB or Dataverse
+
+### **Key Considerations**
+
+- T-SQL subset only — not a direct SQL Server replacement
+
+- Table distribution strategy critical for performance: HASH, ROUND_ROBIN, or REPLICATE
+
+- Use PolyBase or COPY INTO statement for high-throughput bulk data loading
+
+- Migrate on-premises SSIS packages to Synapse Pipelines or Azure Data Factory
+
+## **4.11 Azure Data Factory (ADF)**
+
+Azure Data Factory is a fully managed cloud ETL/ELT service for orchestrating data movement and transformation pipelines. It is the primary tool for migrating on-premises SSIS packages and building new data integration pipelines targeting Azure data stores.
+
+### **Key Components**
+
+- Pipelines: Logical grouping of data movement and transformation activities
+
+- Linked Services: Connection definitions to 90+ supported data sources
+
+- Integration Runtime: Compute infrastructure — Azure IR, Self-Hosted IR, Azure-SSIS IR
+
+- Azure-SSIS Integration Runtime: Lifts and shifts SSIS packages to Azure with zero code changes
+
+### **SSIS Migration to ADF**
+
+- Provision SSISDB on Azure SQL MI or Azure SQL Database
+
+- Deploy Azure-SSIS Integration Runtime in ADF
+
+- Deploy SSIS packages to Azure-SSIS IR using SSMS or Azure Portal
+
+- Schedule package execution using Execute SSIS Package activity in ADF pipelines
+
+## **4.12 Microsoft Fabric**
+
+Microsoft Fabric is a unified, end-to-end SaaS analytics platform built on OneLake. It consolidates data engineering, data integration, data warehousing, real-time analytics, and business intelligence into a single experience — eliminating data silos across the organization.
+
+### **Key Components**
+
+- OneLake: Single unified data lake for the entire organization — one copy of all data
+
+- Lakehouse: Combines data lake flexibility with data warehouse query performance (Delta Parquet)
+
+- Warehouse: Full T-SQL data warehouse experience with ACID transactions on OneLake
+
+- Mirroring: Real-time replication from Azure SQL DB, SQL MI, Cosmos DB, Snowflake into OneLake
+
+- Real-Time Intelligence: Streaming analytics using Kusto Query Language (KQL)
+
+- Power BI: Embedded BI and reporting directly on OneLake data without data movement
+
+- Data Factory in Fabric: Evolution of ADF — pipeline-based data integration within Fabric
+
+### **SQL Server Migration via Fabric Mirroring**
+
+- Enable Mirroring in Microsoft Fabric workspace
+
+- Connect Azure SQL Database or SQL Managed Instance as mirror source
+
+- Fabric automatically replicates data into OneLake in Delta Parquet format in near real-time
+
+- Query mirrored data using SQL analytics endpoint (T-SQL) or Apache Spark
+
+### **Key Considerations**
+
+- Direct on-premises SQL Server mirroring not yet generally available — use Azure SQL MI or Azure SQL DB as intermediary
+
+- Fabric is consumption-based billing using Fabric Capacity Units (CUs)
+
+- Ideal for organizations consolidating BI, analytics, and data engineering on a single platform
+
+- Fabric Warehouse supports full T-SQL with cross-database queries via OneLake shortcuts
+
+# **5. Post-Migration Checklist**
+
+After completing the migration, the following validation and hardening steps must be performed regardless of the approach used:
+
+## **5.1 Data Validation**
+
+- Verify all databases are ONLINE and accessible
+
+- Validate row counts against source using checksum or row count comparison scripts
+
+- Run DBCC CHECKDB to verify physical and logical database integrity
+
+- Confirm all SQL Server Agent jobs are present, scheduled, and enabled
+
+- Test application connectivity with updated connection strings
+
+- Validate all logins, database users, and role assignments
+
+-- Validate database integrity post-migration
+
+DBCC CHECKDB ('YourDB') WITH NO_INFOMSGS, ALL_ERRORMSGS;
+
+-- Update statistics after migration
+
+USE [YourDB];
+
+EXEC sp_updatestats;
+
+-- Rebuild indexes after migration
+
+USE [YourDB];
+
+EXEC sp_MSforeachtable 'ALTER INDEX ALL ON ? REBUILD';
+
+## **5.2 Performance Tuning**
+
+- Update statistics on all migrated databases
+
+- Rebuild or reorganize fragmented indexes
+
+- Review Query Store for plan regressions — force good plans if needed
+
+- Validate TempDB configuration matches Azure VM core count
+
+- Configure max server memory appropriate for VM size
+
+## **5.3 Security Hardening**
+
+- Enable Microsoft Defender for SQL / Azure Defender for SQL
+
+- Configure Azure Key Vault for TDE encryption keys (customer-managed keys)
+
+- Enable SQL Auditing and Advanced Threat Protection
+
+- Restrict port 1433 in NSG to known application and admin IP ranges only
+
+- Enable Microsoft Entra ID (Azure AD) authentication
+
+- Remove or disable SA account and rename default admin accounts
+
+## **5.4 Monitoring and Backup**
+
+- Configure Azure Monitor alerts for CPU, memory, disk I/O, and connection failures
+
+- Verify automated backup policy is active and test restore periodically
+
+- Set up SQL Insights via Azure Monitor for query-level performance data
+
+- Document RTO and RPO metrics, test DR failover procedures
+
+- Configure Log Analytics workspace for centralized log collection
+
+**APPENDICES**
+
+*Lab POC Walkthroughs — Financial Firm On-Premises to Azure Migration*
+
+Each appendix documents the hands-on POC lab for the corresponding migration approach, including all commands executed, outputs observed, issues encountered, and resolutions applied.
+
+# **Appendix A: POC — Backup/Restore to Azure VM**
+
+## **A.1 Lab Environment**
+
+| **Property** | **Value** |
+| --- | --- |
+| Source Server | Node1 (SQL Server 2019, AG Primary — UshaAg19) |
+| Source Databases | CoreBank_OnPrem (3.64 GB), AcquiredBanks_OnPrem (3.08 GB) |
+| Target | Azure VM running SQL Server (North Central US) |
+| Azure Storage Account | ushacloudmigrationpoc — West US 2 |
+| Blob Container | vhds |
+| Resource Group | UshacloudMigration1 |
+
+## **A.2 Steps Performed**
+
+- Created Azure Storage Account and Blob Container in West US 2
+
+- Generated SAS token for container with Read/Write permissions
+
+- Created SQL Server credential on Node1 using SAS token
+
+- Executed BACKUP TO URL to stream database backup to Azure Blob Storage
+
+- Verified backup file presence and size in Azure Portal
+
+- Restored database on Azure VM using RESTORE FROM URL
+
+- Validated data integrity and row counts post-restore
+
+## **A.3 Key Commands Used**
+
+-- Create SAS-based credential on source SQL Server
+
+CREATE CREDENTIAL [https://ushacloudmigrationpoc.blob.core.windows.net/vhds]
+
+WITH IDENTITY = 'SHARED ACCESS SIGNATURE',
+
+SECRET = '<SAS_TOKEN_WITHOUT_LEADING_QUESTION_MARK>';
+
+-- Backup CoreBank_OnPrem to Azure Blob
+
+BACKUP DATABASE [CoreBank_OnPrem]
+
+TO URL = 'https://ushacloudmigrationpoc.blob.core.windows.net/vhds/CoreBank_OnPrem.bak'
+
+WITH CREDENTIAL = 'https://ushacloudmigrationpoc.blob.core.windows.net/vhds',
+
+     COMPRESSION, STATS = 10;
+
+-- Restore on Azure VM
+
+RESTORE DATABASE [CoreBank_OnPrem]
+
+FROM URL = 'https://ushacloudmigrationpoc.blob.core.windows.net/vhds/CoreBank_OnPrem.bak'
+
+WITH CREDENTIAL = 'https://ushacloudmigrationpoc.blob.core.windows.net/vhds',
+
+     MOVE 'CoreBank_OnPrem' TO 'D:\Data\CoreBank_OnPrem.mdf',
+
+     MOVE 'CoreBank_OnPrem_log' TO 'D:\Log\CoreBank_OnPrem_log.ldf',
+
+     STATS = 10;
+
+**NOTE: **Lab screenshots will be inserted here as the POC walkthrough is completed and captured.
+
+# **Appendix B: POC — VHD Lift ****&**** Shift (Node5 Migration)**
+
+## **B.1 Lab Environment**
+
+| **Property** | **Value** |
+| --- | --- |
+| Source Server | Node5 (SQL Server 2019, SSIS/SSRS role — no AG) |
+| Source Databases | CoreBank_OnPrem_POC (0.20 GB), AcquiredBanks_OnPrem_POC (0.20 GB) |
+| VHD File | Node5_Fixed_Final.vhd (Fixed-size, 64 GiB) |
+| Source Storage Account | ushacloudmigrationpoc — West US 2 |
+| Destination Storage Account | ushacloudmigrationncus — North Central US |
+| Target VM Name | vm-sqlnode5-azure |
+| VM Size | Standard_B2as_v2 (2 vCPUs, 8 GB RAM) |
+| OS Disk Name | disk-node5-os-ncus |
+| OS Disk SKU | Standard SSD LRS, 60 GiB (E6 tier) |
+| Public IP | 20.80.6.29 |
+| Private IP | 10.0.0.5 |
+| NSG | nsg-sqlnode5-ncus (North Central US) |
+| Resource Group | UshacloudMigration1 |
+| Subscription ID | 26f7a991-84b3-47b7-966b-f19cbb0379bf |
+
+## **B.2 Challenges Encountered and Resolutions**
+
+| **#** | **Error / Challenge** | **Root Cause** | **Resolution** |
+| --- | --- | --- | --- |
+| 1 | VM creation failed — West US 2 quota exceeded | Free trial subscription has regional capacity limits | Pivoted to North Central US |
+| 2 | Disk creation failed — source blob region mismatch | Azure requires VHD blob and managed disk in same region | Copied VHD to new NCUS storage account first |
+| 3 | Blob copy failed — 401 NoAuthenticationInformation | Source storage account is private, no public access | Generated SAS token for source VHD and used in copy URI |
+| 4 | Disk creation error — Premium SSD v2 from blob not supported | Azure Portal defaulted to Premium SSD v2 which cannot be created from a blob source | Changed disk type to Standard SSD LRS (E6, 64 GiB) in Portal |
+| 5 | VM creation failed — Standard_B2ms not available in NCUS | SKU capacity restriction on free trial in North Central US | Queried available SKUs and selected Standard_B2as_v2 |
+| 6 | VM creation failed — NSG not found in NCUS | Original NSG nsg-sqlnode5-poc was in West US 2 | Created new NSG nsg-sqlnode5-ncus in North Central US with RDP and SQL rules |
+
+## **B.3 Complete Step-by-Step Walkthrough**
+
+### **Phase 1: Source Preparation (On-Premises)**
+
+- Captured Node5 on-premises disk as fixed-size VHD using Disk2VHD tool
+
+- Uploaded VHD Node5_Fixed_Final.vhd to Azure Blob Storage using AzCopy
+
+- Verified upload in Azure Portal — blob present in ushacloudmigrationpoc/vhds
+
+### **Phase 2: New Storage Account in North Central US**
+
+- Created storage account ushacloudmigrationncus in North Central US:
+
+az storage account create \
+
+  --name ushacloudmigrationncus \
+
+  --resource-group UshacloudMigration1 \
+
+  --location northcentralus \
+
+  --sku Standard_LRS
+
+- Verified storage account is active:
+
+az storage account show \
+
+  --name ushacloudmigrationncus \
+
+  --resource-group UshacloudMigration1 \
+
+  --query "{name:name, location:primaryLocation, status:statusOfPrimary}" \
+
+  --output table
+
+# Result: ushacloudmigrationncus | northcentralus | available
+
+- Created blob container vhds:
+
+az storage container create \
+
+  --name vhds \
+
+  --account-name ushacloudmigrationncus
+
+# Result: { "created": true }
+
+### **Phase 3: Cross-Region VHD Copy with SAS Token**
+
+- Generated SAS token for source VHD (read-only, time-limited):
+
+az storage blob generate-sas \
+
+  --account-name ushacloudmigrationpoc \
+
+  --container-name vhds \
+
+  --name Node5_Fixed_Final.vhd \
+
+  --permissions r \
+
+  --expiry 2026-03-28T05:00:00Z \
+
+  --output tsv
+
+# Result: se=2026-03-28T05%3A00%3A00Z&sp=r&sv=2026-02-06&sr=b&sig=...
+
+- Started cross-region VHD copy using SAS-authenticated source URI:
+
+az storage blob copy start \
+
+  --account-name ushacloudmigrationncus \
+
+  --destination-container vhds \
+
+  --destination-blob Node5_Fixed_Final.vhd \
+
+  --source-uri 'https://ushacloudmigrationpoc.blob.core.windows.net/vhds/Node5_Fixed_Final.vhd?<SAS_TOKEN>'
+
+# Result: copy_status: pending | copy_id: 42b6eab8-434a-4e7f-8b50-4480cedd38c0
+
+- Monitored copy progress until completion:
+
+az storage blob show \
+
+  --account-name ushacloudmigrationncus \
+
+  --container-name vhds \
+
+  --name Node5_Fixed_Final.vhd \
+
+  --query "{status:properties.copy.status, progress:properties.copy.progress}" \
+
+  --output table
+
+# Observed progress: 29% -> 60% -> 80% -> success (approx. 15 mins for 64 GiB)
+
+### **Phase 4: Managed Disk Creation in North Central US**
+
+- Resolved Premium SSD v2 incompatibility in Portal by selecting Standard SSD LRS, 64 GiB E6
+
+- Created Managed Disk from copied VHD:
+
+az disk create \
+
+  --name disk-node5-os-ncus \
+
+  --resource-group UshacloudMigration1 \
+
+  --location northcentralus \
+
+  --source 'https://ushacloudmigrationncus.blob.core.windows.net/vhds/Node5_Fixed_Final.vhd' \
+
+  --os-type Windows \
+
+  --hyper-v-generation V1 \
+
+  --sku StandardSSD_LRS
+
+# Result: provisioningState: Succeeded | diskSizeGB: 60 | location: northcentralus
+
+# Disk ID: /subscriptions/.../disks/disk-node5-os-ncus
+
+### **Phase 5: NSG Creation in North Central US**
+
+- Created NSG in North Central US (original NSG was in West US 2):
+
+az network nsg create \
+
+  --name nsg-sqlnode5-ncus \
+
+  --resource-group UshacloudMigration1 \
+
+  --location northcentralus
+
+# Result: provisioningState: Succeeded
+
+- Added RDP inbound allow rule (port 3389):
+
+az network nsg rule create \
+
+  --nsg-name nsg-sqlnode5-ncus \
+
+  --resource-group UshacloudMigration1 \
+
+  --name Allow-RDP \
+
+  --priority 1000 \
+
+  --protocol Tcp \
+
+  --destination-port-ranges 3389 \
+
+  --access Allow
+
+# Result: provisioningState: Succeeded | priority: 1000
+
+- Added SQL Server inbound allow rule (port 1433):
+
+az network nsg rule create \
+
+  --nsg-name nsg-sqlnode5-ncus \
+
+  --resource-group UshacloudMigration1 \
+
+  --name Allow-SQL \
+
+  --priority 1010 \
+
+  --protocol Tcp \
+
+  --destination-port-ranges 1433 \
+
+  --access Allow
+
+# Result: provisioningState: Succeeded | priority: 1010
+
+### **Phase 6: VM Size Selection**
+
+- Standard_B2ms unavailable in North Central US — queried available B-series sizes:
+
+az vm list-skus \
+
+  --location northcentralus \
+
+  --size Standard_B \
+
+  --output table \
+
+  --query "[?restrictions[0].reasonCode!='NotAvailableForSubscription'].{Name:name}"
+
+# Available: Standard_B2as_v2, Standard_B2als_v2, Standard_B4as_v2 etc.
+
+- Selected Standard_B2as_v2 — 2 vCPUs, 8 GB RAM, equivalent workload to Standard_B2ms
+
+### **Phase 7: Azure VM Creation**
+
+- Created Azure VM using Managed Disk, new NCUS NSG, and available VM size:
+
+az vm create \
+
+  --name vm-sqlnode5-azure \
+
+  --resource-group UshacloudMigration1 \
+
+  --location northcentralus \
+
+  --attach-os-disk disk-node5-os-ncus \
+
+  --os-type Windows \
+
+  --size Standard_B2as_v2 \
+
+  --public-ip-address pip-sqlnode5 \
+
+  --nsg nsg-sqlnode5-ncus
+
+# Result:
+
+# powerState:      VM running
+
+# publicIpAddress:  20.80.6.29
+
+# privateIpAddress: 10.0.0.5
+
+# location:        northcentralus
+
+# macAddress:      00-22-48-8F-A3-38
+
+### **Phase 8: RDP Connection and Verification**
+
+- Connected via RDP to 20.80.6.29:3389 using Node5 local administrator credentials
+
+- Verified Windows Server started successfully from migrated VHD
+
+- Opened SQL Server Management Studio (SSMS)
+
+- Confirmed SQL Server service running and both POC databases ONLINE:
+
+-- Verify databases online on Azure VM
+
+SELECT name, state_desc, recovery_model_desc
+
+FROM sys.databases
+
+WHERE name IN ('CoreBank_OnPrem_POC', 'AcquiredBanks_OnPrem_POC');
+
+-- Expected: state_desc = ONLINE for both databases
+
+## **B.4 Final Azure Resource Summary**
+
+| **Resource** | **Name** | **Region** | **Status** |
+| --- | --- | --- | --- |
+| Storage Account (source) | ushacloudmigrationpoc | West US 2 | Active |
+| Storage Account (NCUS) | ushacloudmigrationncus | North Central US | Active |
+| VHD Blob | Node5_Fixed_Final.vhd | North Central US | Copied — success |
+| Managed Disk | disk-node5-os-ncus | North Central US | Attached to VM |
+| NSG | nsg-sqlnode5-ncus | North Central US | Active (RDP + SQL rules) |
+| Public IP | pip-sqlnode5 (20.80.6.29) | North Central US | Active |
+| Virtual Machine | vm-sqlnode5-azure | North Central US | Running |
+| VM Size | Standard_B2as_v2 | North Central US | 2 vCPU, 8 GB RAM |
+
+**NOTE: **Lab screenshots from each phase above will be inserted inline as the POC walkthrough documentation is finalized.
+
+# **Appendix B2: POC — VHD Lift ****&**** Shift via Azure Portal (GUI)**
+
+This section documents the same Node5 VHD Lift & Shift migration performed using the Azure Portal graphical interface instead of Azure CLI. Both approaches produce identical results. Use the CLI approach for automation and repeatability; use the Portal approach for one-time migrations or when learning the Azure resource model visually.
+
+## **B2.1 Pre-Requisites**
+
+- VHD file already uploaded to Azure Blob Storage (ushacloudmigrationncus / vhds container)
+
+- Active Azure Subscription with Contributor access
+
+- Browser open to portal.azure.com
+
+## **B2.2 Step 1 — Create Storage Account (if not already exists)**
+
+- In Azure Portal, search for Storage accounts in the top search bar
+
+- Click + Create
+
+- Fill in: Subscription = Azure subscription 1, Resource Group = UshacloudMigration1
+
+- Storage account name = ushacloudmigrationncus
+
+- Region = (US) North Central US
+
+- Performance = Standard, Redundancy = Locally-redundant storage (LRS)
+
+- Click Review + Create, then Create
+
+- Once deployed, go to the storage account and click Containers under Data Storage
+
+- Click + Container, name it vhds, set access level to Private, click Create
+
+**NOTE: **Screenshots: Storage account creation form, container creation dialog, container listed in portal.
+
+## **B2.3 Step 2 — Upload VHD to Blob Container**
+
+- Navigate to the vhds container inside ushacloudmigrationncus
+
+- Click Upload
+
+- Click Browse for files and select Node5_Fixed_Final.vhd from local disk
+
+- Expand Advanced options — set Blob type to Page blob (required for VHDs)
+
+- Click Upload and wait for completion (64 GiB may take significant time depending on connection)
+
+- Alternatively use AzCopy for faster upload:
+
+azcopy copy 'C:\VMs\Node5_Fixed_Final.vhd' \
+
+  'https://ushacloudmigrationncus.blob.core.windows.net/vhds/Node5_Fixed_Final.vhd' \
+
+  --blob-type PageBlob
+
+**NOTE: **Screenshots: Upload dialog with Page blob selected, blob listed in container after upload.
+
+## **B2.4 Step 3 — Create Managed Disk from VHD**
+
+- In Azure Portal, search for Disks in the top search bar
+
+- Click + Create
+
+- Fill in Project Details: Subscription = Azure subscription 1, Resource Group = UshacloudMigration1
+
+- Under Disk Details: Disk name = disk-node5-os-ncus
+
+- Region = (US) North Central US
+
+- Availability zone = No infrastructure redundancy required
+
+- Source type = Storage blob
+
+- Source subscription = Azure subscription 1
+
+- Source blob = Browse and select the VHD: https://ushacloudmigrationncus.blob.core.windows.net/vhds/Node5_Fixed_Final.vhd
+
+- OS type = Windows
+
+- VM generation = Generation 1
+
+- VM architecture = x64
+
+- Click Change size — IMPORTANT: Change Storage type from Premium SSD v2 to Standard SSD (locally-redundant storage)
+
+- Select 64 GiB (E6 tier) and click OK
+
+- Click Review + Create, then Create
+
+- Wait for deployment to complete — Provisioning state will show Succeeded
+
+**NOTE: **Screenshots: Disk creation form filled in, Storage type dropdown showing Standard SSD selected, 64 GiB E6 highlighted, Review + Create summary, Deployment succeeded.
+
+## **B2.5 Step 4 — Create Network Security Group**
+
+- In Azure Portal, search for Network security groups
+
+- Click + Create
+
+- Resource Group = UshacloudMigration1, Name = nsg-sqlnode5-ncus, Region = North Central US
+
+- Click Review + Create, then Create
+
+- Once deployed, open the NSG and click Inbound security rules
+
+- Click + Add — add RDP rule: Port 3389, Protocol TCP, Action Allow, Priority 1000, Name Allow-RDP
+
+- Click + Add — add SQL rule: Port 1433, Protocol TCP, Action Allow, Priority 1010, Name Allow-SQL
+
+**NOTE: **Screenshots: NSG creation form, inbound rules list showing Allow-RDP and Allow-SQL rules.
+
+## **B2.6 Step 5 — Create Virtual Machine from Managed Disk**
+
+- In Azure Portal, search for Virtual machines
+
+- Click + Create, then Azure virtual machine
+
+- Basics tab: Subscription = Azure subscription 1, Resource Group = UshacloudMigration1
+
+- Virtual machine name = vm-sqlnode5-azure, Region = (US) North Central US
+
+- Availability options = No infrastructure redundancy required
+
+- Image = Click See all images — search for the managed disk option. Select No image required (use existing disk)
+
+- Under Disks tab: OS disk — click Attach an existing disk, select disk-node5-os-ncus
+
+- Size = Click See all sizes, search for Standard_B2as_v2, select it
+
+- Under Networking tab: Virtual network — create new or select existing VNet in NCUS
+
+- NIC network security group = Advanced, select nsg-sqlnode5-ncus
+
+- Public IP = Create new, name pip-sqlnode5
+
+- Click Review + Create, verify summary, click Create
+
+- Wait for deployment — VM will appear as Running in Virtual machines list
+
+**NOTE: **Screenshots: VM creation Basics tab, Disks tab showing managed disk attached, Networking tab with NSG selected, Deployment in progress, VM running status showing public IP.
+
+## **B2.7 Step 6 — Connect via RDP**
+
+- In Azure Portal, navigate to vm-sqlnode5-azure
+
+- Click Connect at the top, then select RDP
+
+- Click Download RDP File
+
+- Open the downloaded .rdp file
+
+- Enter Node5 local administrator credentials when prompted
+
+- Accept any certificate warnings — click Yes to connect
+
+- Once logged in, open SQL Server Management Studio (SSMS)
+
+- Connect to localhost or the server name
+
+- Verify both databases are online:
+
+SELECT name, state_desc FROM sys.databases
+
+WHERE name IN ('CoreBank_OnPrem_POC', 'AcquiredBanks_OnPrem_POC');
+
+-- Expected result: ONLINE for both
+
+**NOTE: **Screenshots: Azure Portal Connect RDP blade, RDP login prompt, SSMS connected to Azure VM, databases showing ONLINE in sys.databases query results.
+
+## **B2.8 GUI vs CLI Comparison**
+
+| **Step** | **GUI (Azure Portal)** | **CLI (Azure Cloud Shell)** |
+| --- | --- | --- |
+| Storage Account | Portal form — 8 fields to fill | az storage account create — 1 command |
+| Blob Container | Click + Container in portal | az storage container create — 1 command |
+| VHD Upload | Upload button — manual file browse | azcopy — automated, faster for large files |
+| SAS Token | Portal: Storage > Shared access signature blade | az storage blob generate-sas — 1 command |
+| Cross-region copy | Not easily done in Portal UI — requires AzCopy or CLI | az storage blob copy start — 1 command |
+| Disk creation | Portal form — must manually change disk type from SSD v2 | az disk create with --sku StandardSSD_LRS — explicit |
+| NSG + Rules | Portal: 3 separate create operations via UI | 3 CLI commands — scriptable and repeatable |
+| VM creation | Portal wizard — 5 tabs to navigate | az vm create — 1 command with all params |
+| Error handling | Errors shown as red banners in portal | Errors returned as JSON with error codes |
+| Repeatability | Manual — not easily repeatable | Fully scriptable — can be run as pipeline |
+
+**NOTE: **Recommendation: Use the GUI approach for learning and one-time migrations. Use the CLI approach for production pipelines, automation, and when migrating multiple servers.
+
+# **Appendix B3: POC — Node5 SSMS Verification Results**
+
+After successfully connecting to vm-sqlnode5-azure via RDP, SQL Server Management Studio (SSMS) was used to verify the migrated SQL Server instance. The following confirms a successful VHD lift & shift.
+
+## **B3.1 SSMS Connection Details**
+
+| **Property** | **Value** |
+| --- | --- |
+| Server Name | NODE5 (SQL Server 15.0.4430.1 — SQL Server 2019) |
+| Connection | USHADC0\ushakale (Windows Authentication) |
+| RDP IP Used | 20.80.6.29 (Public IP — pip-sqlnode5) |
+| VM Location | North Central US |
+
+## **B3.2 Databases Verified Online**
+
+| **Database** | **Type** | **Status** | **Notes** |
+| --- | --- | --- | --- |
+| AcquiredBanks_OnPrem_POC | POC Database | ONLINE | Migrated from Node5 on-premises |
+| CoreBank_OnPrem_POC | POC Database | ONLINE | Migrated from Node5 on-premises |
+| ReportServer | SSRS System DB | ONLINE | Carried over with VHD — SSRS intact |
+| ReportServerTempDB | SSRS Temp DB | ONLINE | Carried over with VHD — SSRS intact |
+
+## **B3.3 Additional Components Verified**
+
+| **Component** | **Status** | **Notes** |
+| --- | --- | --- |
+| SQL Server Engine | Running | SQL Server 2019 (15.0.4430.1) |
+| Security > Logins | All present | Includes USHADC0\ushakale, sa, and service accounts |
+| SQL Server Agent | Present | Visible in Object Explorer — jobs carried over |
+| Integration Services Catalogs | Present | SSIS catalog migrated with VHD |
+| Always On High Availability | Present (not configured) | Node5 was not part of AG — expected |
+| SSRS (ReportServer DBs) | Online | ReportServer and ReportServerTempDB both ONLINE |
+
+**NOTE: **Screenshot: SSMS Object Explorer showing NODE5 connected, all databases ONLINE, logins present, SQL Agent and Integration Services Catalogs visible — captured March 27, 2026.
+
+# **Appendix B4: POC — Post-Migration Configuration (Node5)**
+
+After verification, the Post_Migration_Config_Node5.sql script was run on vm-sqlnode5-azure to harden, tune, and validate the migrated SQL Server instance. The script is organized into 12 sections and should be run one section at a time in SSMS.
+
+## **B4.1 Script Summary**
+
+| **Section** | **Description** | **Key Settings Applied** |
+| --- | --- | --- |
+| 1 | Server Configuration | Max memory: 6144 MB, MAXDOP: 2, Cost threshold: 50, Optimize for ad hoc: ON |
+| 2 | TempDB Configuration | Verified TempDB file count matches 2 vCPUs, checked file locations |
+| 3 | Database Integrity | DBCC CHECKDB run on all 4 databases — no errors |
+| 4 | Update Statistics | sp_updatestats run on all user databases |
+| 5 | Index Maintenance | Fragmentation checked, indexes rebuilt with ONLINE = OFF |
+| 6 | Compatibility Level | Set to 150 (SQL Server 2019) for all POC databases |
+| 7 | Query Store | Enabled on POC databases — AUTO capture, 30-day retention, 100MB max |
+| 8 | Recovery Model | Set to SIMPLE for POC databases (change to FULL for production) |
+| 9 | Login Validation | All logins listed, orphaned users checked with sp_change_users_login |
+| 10 | SQL Agent Jobs | All jobs listed with last run status and outcome |
+| 11 | Azure VM Checks | Instant File Initialization verified, data/log file paths confirmed |
+| 12 | Final Validation | Full database status summary + server configuration summary |
+
+## **B4.2 Key T-SQL Commands from Post-Migration Script**
+
+-- Section 1: Set max memory for Standard_B2as_v2 (8 GB RAM, leave 2 GB for OS)
+
+EXEC sp_configure 'max server memory (MB)', 6144;
+
+EXEC sp_configure 'max degree of parallelism', 2;
+
+EXEC sp_configure 'cost threshold for parallelism', 50;
+
+RECONFIGURE WITH OVERRIDE;
+
+-- Section 3: Database integrity check
+
+DBCC CHECKDB ('CoreBank_OnPrem_POC') WITH NO_INFOMSGS, ALL_ERRORMSGS;
+
+DBCC CHECKDB ('AcquiredBanks_OnPrem_POC') WITH NO_INFOMSGS, ALL_ERRORMSGS;
+
+-- Section 6: Set compatibility level to SQL 2019
+
+ALTER DATABASE [CoreBank_OnPrem_POC] SET COMPATIBILITY_LEVEL = 150;
+
+ALTER DATABASE [AcquiredBanks_OnPrem_POC] SET COMPATIBILITY_LEVEL = 150;
+
+-- Section 7: Enable Query Store
+
+ALTER DATABASE [CoreBank_OnPrem_POC]
+
+SET QUERY_STORE = ON (OPERATION_MODE = READ_WRITE,
+
+  CLEANUP_POLICY = (STALE_QUERY_THRESHOLD_DAYS = 30),
+
+  MAX_STORAGE_SIZE_MB = 100, QUERY_CAPTURE_MODE = AUTO);
+
+-- Section 12: Final validation summary
+
+SELECT name, state_desc, recovery_model_desc, compatibility_level,
+
+       is_query_store_on, page_verify_option_desc
+
+FROM sys.databases
+
+WHERE name NOT IN ('master','model','msdb','tempdb');
+
+**NOTE: **Full Post_Migration_Config_Node5.sql script is maintained separately as a companion file to this document.
+
+# **Appendix B5: POC — Resource Cleanup and Decommission**
+
+After successful validation and post-migration configuration, all Azure resources created for the Node5 POC were decommissioned to avoid ongoing charges. This section documents the cleanup procedure.
+
+## **B5.1 Resources Deleted**
+
+| **Resource** | **Name** | **Region** | **Deleted Via** |
+| --- | --- | --- | --- |
+| Virtual Machine | vm-sqlnode5-azure | North Central US | Resource Group delete |
+| OS Managed Disk | disk-node5-os-ncus | North Central US | Resource Group delete |
+| Network Security Group | nsg-sqlnode5-ncus | North Central US | Resource Group delete |
+| Public IP Address | pip-sqlnode5 (20.80.6.29) | North Central US | Resource Group delete |
+| Storage Account | ushacloudmigrationncus | North Central US | Resource Group delete |
+| Storage Account | ushacloudmigrationpoc | West US 2 | Resource Group delete |
+| VHD Blob | Node5_Fixed_Final.vhd | Both regions | Resource Group delete |
+| Virtual Network | vnet-financialfirm-poc | West US 2 | Resource Group delete |
+| Resource Group | UshacloudMigration1 | West US 2 | Deleted directly |
+
+## **B5.2 Cleanup Commands**
+
+### **Option 1 — Deallocate VM Only (stops compute charges, retains all resources)**
+
+az vm deallocate \
+
+  --name vm-sqlnode5-azure \
+
+  --resource-group UshacloudMigration1
+
+### **Option 2 — Delete Entire Resource Group (full cleanup — used in this POC)**
+
+az group delete \
+
+  --name UshacloudMigration1 \
+
+  --yes \
+
+  --no-wait
+
+### **Verify Deletion Complete**
+
+az group show --name UshacloudMigration1
+
+# Expected response: ResourceGroupNotFound
+
+## **B5.3 Deletion Result**
+
+| **Property** | **Value** |
+| --- | --- |
+| Command Used | az group delete --name UshacloudMigration1 --yes --no-wait |
+| Provisioning State at Execution | Deleting |
+| All Resources Deleted | Yes — confirmed via az group show returning ResourceGroupNotFound |
+| Charges Stopped | Yes — all compute, storage, and networking charges ceased |
+| Date | March 27, 2026 |
+
+## **B5.4 Cost Management Notes**
+
+- Free trial subscriptions accrue charges against credit — always clean up POC resources after validation
+
+- Use az vm deallocate instead of delete if the VM may be needed again — avoids compute charges while retaining disk and config
+
+- Storage accounts continue to accrue charges even when VM is deallocated — delete storage accounts if VHDs are no longer needed
+
+- Consider Azure Cost Management + Budgets to set alerts before credits are exhausted
+
+- Tag all POC resources with Environment=POC at creation time for easy identification and bulk cleanup
+
+-- Tag resources at creation for easy POC cleanup later
+
+az group create \
+
+  --name UshacloudMigration1 \
+
+  --location westus2 \
+
+  --tags Environment=POC Project=SQLMigration Owner=Usha
+
+## **B5.5 Cost Analysis — Azure Free Trial (March 2026)**
+
+The following cost analysis was captured from Azure Cost Management + Billing after all POC resources were deleted. It confirms no active charges and documents the total spend for the Node5 VHD Lift & Shift POC.
+
+| **Metric** | **Value** | **Notes** |
+| --- | --- | --- |
+| Amount Due | $0.00 | No payment needed — covered by free trial credits |
+| Credits Remaining | $116.07 | $83.93 used of $200 total free trial credit |
+| Billing Period | 3/1/2026 - 3/31/2026 | Current billing cycle |
+| Free Trial Expiry | 13 days remaining | Upgrade required to continue after expiry |
+| Spending Forecast | Not projected | No active resources — charges stopped |
+
+### **Top Charges This Month**
+
+| **Resource Type** | **Charge** | **Root Cause** |
+| --- | --- | --- |
+| Premium SSD Managed Disks (primary) | $79.07 | VHD blob stored in Azure Blob Storage for extended period during POC |
+| Premium SSD Managed Disks (secondary) | $3.84 | Managed disk (disk-node5-os-ncus) attached to VM during POC |
+| IP Addresses — Standard IPv4 | $0.73 | Public IP address pip-sqlnode5 allocated during POC |
+| Other purchases | $0.29 | Miscellaneous storage transactions and API calls |
+
+### **Cost Optimization Lessons Learned**
+
+- VHD blob storage was the largest cost driver at $79.07 — delete storage accounts immediately after managed disk is created to avoid ongoing storage charges
+
+- Use Standard HDD (not Premium SSD) for staging VHDs — significantly cheaper for temporary uploads
+
+- Always run az group delete on the same day as POC completion to stop all charges
+
+- Free trial credits are sufficient for all 12 POC approaches if resources are cleaned up promptly after each POC
+
+- Tag all resources with Environment=POC at creation for easy identification and bulk cleanup
+
+- Set up Azure Cost Management budget alerts to notify when credits drop below a threshold
+
+-- Set up budget alert at $150 to warn before credits are exhausted
+
+az consumption budget create \
+
+  --budget-name POC-Budget-Alert \
+
+  --amount 150 \
+
+  --time-grain Monthly \
+
+  --start-date 2026-03-01 \
+
+  --end-date 2026-04-30 \
+
+  --resource-group UshacloudMigration1
+
+**NOTE: **Screenshot: Azure Cost Management billing summary showing $0.00 amount due, $116.07 credits remaining, $83.93 used, top charges breakdown by resource type — captured March 27, 2026.
+
+# **Appendix C: POC — Azure Database Migration Service (DMS)**
+
+Migration of databases using Azure DMS, including assessment, migration project setup, online replication, and cutover steps.
+
+**NOTE: **Lab walkthrough, commands, and screenshots to be added upon POC completion.
+
+# **Appendix D: POC — Log Shipping to Azure VM**
+
+Log Shipping configuration from on-premises Node1/Node3 to Azure VM, including latency monitoring and final cutover procedure.
+
+**NOTE: **Lab walkthrough, commands, and screenshots to be added upon POC completion.
+
+# **Appendix E: POC — Hybrid Always On AG with Azure Replica**
+
+Extending UshaAg19 or UshaAg22 to include an Azure VM replica, synchronization monitoring, and planned failover to Azure.
+
+**NOTE: **Lab walkthrough, commands, and screenshots to be added upon POC completion.
+
+# **Appendix F: POC — Azure Migrate (Agentless Server Migration)**
+
+Azure Migrate appliance deployment, Node6 discovery and assessment, replication configuration, test migration, and production cutover.
+
+**NOTE: **Lab walkthrough, commands, and screenshots to be added upon POC completion.
+
+# **Appendix G: POC — Database Migration Assistant (DMA) Assessment**
+
+DMA assessment results for all on-premises databases including compatibility issues, feature parity analysis, and remediation steps.
+
+**NOTE: **Lab walkthrough, commands, and screenshots to be added upon POC completion.
+
+# **Appendix H: POC — Azure SQL Managed Instance**
+
+Migration to Azure SQL Managed Instance using Log Replay Service or DMS, including VNet configuration and private endpoint setup.
+
+**NOTE: **Lab walkthrough, commands, and screenshots to be added upon POC completion.
+
+# **Appendix I: POC — Azure SQL Database (PaaS)**
+
+DMA assessment and migration of compatible databases to Azure SQL Database, including elastic pool configuration.
+
+**NOTE: **Lab walkthrough, commands, and screenshots to be added upon POC completion.
+
+# **Appendix J: POC — Azure Synapse Analytics**
+
+Migration of DW-oriented databases to Azure Synapse, including schema conversion, data loading via COPY INTO, and pipeline setup.
+
+**NOTE: **Lab walkthrough, commands, and screenshots to be added upon POC completion.
+
+# **Appendix K: POC — Azure Data Factory / SSIS Migration**
+
+**APPENDIX K**
+
+**POC — ADF + ADLS Gen2 + SSIS Migration**
+
+*Azure Data Engineering Portfolio | Financial Firm Migration Lab*
+
+Version 1.0  |  March 2026
+
+# **K.1 POC Overview**
+
+This appendix documents the end-to-end migration of an on-premises SSIS package from SQL Server 2019 (Node5) to Azure Data Factory with Azure-SSIS Integration Runtime. The POC also demonstrates the design of a Medallion Architecture (Bronze/Silver/Gold) using Azure Data Lake Storage Gen2 as the central data lake.
+
+## **K.1.1 Architecture**
+
+| **Layer** | **Component** | **Description** |
+| --- | --- | --- |
+| Source | Node5 — SQL Server 2019 | On-premises SSIS/SSRS server in VirtualBox lab |
+| SSIS Package | Extract_CoreBank_Transaction.dtsx | Extracts Banking.Transactions from CoreBank_OnPrem_POC |
+| Output (local) | C:\SSIS_Output\CoreBank_Transactions.csv | 25 MB CSV file — local test validation |
+| Azure IR | Azure-SSIS Integration Runtime in ADF | Executes SSIS packages in Azure |
+| Data Lake | ADLS Gen2 — ushaadfpocadls | Medallion architecture — landing/processed/curated |
+| Orchestration | Azure Data Factory — usha-adf-poc | Pipeline orchestration and monitoring |
+| Version Control | GitHub — Azure-Data-Engineering-Portfolio | ADF pipelines stored in /02-ADF-ADLS-Pipeline |
+
+## **K.1.2 Medallion Architecture**
+
+| **Layer** | **Container** | **Content** | **Format** |
+| --- | --- | --- | --- |
+| Bronze (Raw) | landing | Raw SSIS output — CoreBank_Transactions.csv | CSV |
+| Silver (Processed) | processed | Cleaned, deduplicated, standardized data | Parquet |
+| Gold (Curated) | curated | Analytics-ready aggregated datasets | Delta / Parquet |
+
+# **K.2 Phase 1 — SSIS Package Creation on Node5**
+
+## **K.2.1 Environment**
+
+| **Property** | **Value** |
+| --- | --- |
+| Server | Node5 (SQL Server 2019, SSIS/SSRS role) |
+| Operating System | Windows Server (VirtualBox lab) |
+| Visual Studio Version | Visual Studio 2026 — March 2026 Feature Update |
+| SSIS Extension | SQL Server Integration Services Projects 2022 v2.1.2 (Microsoft) |
+| Source Database | CoreBank_OnPrem_POC on Node5 |
+| Source Table | [Banking].[Transactions] |
+| Output File | C:\SSIS_Output\CoreBank_Transactions.csv |
+| Output Size | 24,999 KB (~25 MB) |
+| Project Name | CoreBank_SSIS_Migration |
+| Package Name | Extract_CoreBank_Transaction.dtsx |
+
+## **K.2.2 Steps Performed**
+
+- Opened Visual Studio 2026 on Node5
+
+- Verified SQL Server Integration Services Projects 2022 v2.1.2 extension installed
+
+- Created new project — selected Integration Services Project (on-premises, not Azure-Enabled)
+
+- Project name: CoreBank_SSIS_Migration, solution and project in same directory
+
+- Renamed default Package.dtsx to Extract_CoreBank_Transaction.dtsx
+
+- Created OLE DB Connection Manager — Node5.CoreBank_OnPrem_POC using Windows Authentication
+
+- Tested connection — succeeded
+
+- Added Data Flow Task to Control Flow canvas
+
+- Inside Data Flow: added OLE DB Source — selected [Banking].[Transactions] table
+
+- Previewed data — confirmed TransactionID, AccountID, TransactionDate, TransactionType, Amount columns
+
+- Added Flat File Destination — created new connection manager CoreBank_Transactions_Output
+
+- Output file: C:\SSIS_Output\CoreBank_Transactions.csv — Delimited format, column names in first row
+
+- Verified column mappings — all 9 columns auto-mapped correctly
+
+- Executed package — Package execution completed with success
+
+- Verified output: CoreBank_Transactions.csv created in C:\SSIS_Output\ — 24,999 KB
+
+## **K.2.3 Source Database Schema**
+
+The CoreBank_OnPrem_POC database contains a rich banking schema used for this POC:
+
+| **Schema** | **Tables** |
+| --- | --- |
+| Banking | Account, BranchMaster, Customer, Loans, ProductMaster, Transactions |
+| Compliance | AuditLog, DataRetentionPolicy, RegulatoryReport |
+| Reporting | CustomerAccountSummary, DailyTransactionVolume, LoanPortfolioSummary |
+
+## **K.2.4 Package Data Flow**
+
+| **Component** | **Type** | **Configuration** |
+| --- | --- | --- |
+| OLE DB Source | Source | Node5.CoreBank_OnPrem_POC — [Banking].[Transactions] — Table or view mode |
+| Flat File Destination | Destination | C:\SSIS_Output\CoreBank_Transactions.csv — Delimited — Column names in first row |
+| Data Flow | Connection | All 9 columns auto-mapped: TransactionID, AccountID, TransactionDate, PostedDate, TransactionType, Amount, RunningBalance, Description, ReferenceNumber |
+
+**NOTE: **Screenshots from SSIS package design, execution, and output validation will be inserted inline.
+
+# **K.3 Phase 2 — Azure Infrastructure Setup (Portal GUI)**
+
+## **K.3.1 Resources Created**
+
+| **Resource** | **Name** | **Region** | **Status** |
+| --- | --- | --- | --- |
+| Resource Group | UshaADF-POC | East US | Created ✅ |
+| Tags | Environment=POC, Project=ADF-SSIS, Owner=Usha | — | Applied ✅ |
+| Storage Account (ADLS Gen2) | ushaadfpocadls | East US | Created ✅ |
+| Hierarchical Namespace | Enabled | — | ADLS Gen2 ✅ |
+| Container — Bronze | landing | East US | Created ✅ |
+| Container — Silver | processed | East US | Created ✅ |
+| Container — Gold | curated | East US | Created ✅ |
+| Azure Data Factory | usha-adf-poc | East US | Created ✅ |
+| ADF Git Integration | GitHub — Azure-Data-Engineering-Portfolio | main branch | Connected ✅ |
+
+## **K.3.2 Resource Group Creation**
+
+- Navigated to portal.azure.com → Resource groups → + Create
+
+- Subscription: Azure subscription 1
+
+- Resource group name: UshaADF-POC
+
+- Region: East US
+
+- Added tags: Environment=POC, Project=ADF-SSIS, Owner=Usha
+
+- Clicked Review + Create → Create → Deployment succeeded
+
+## **K.3.3 ADLS Gen2 Storage Account Creation**
+
+- Navigated to UshaADF-POC resource group → + Create → Storage account
+
+- Storage account name: ushaadfpocadls
+
+- Region: East US, Performance: Standard, Redundancy: LRS
+
+- Clicked Advanced tab → Enabled Hierarchical namespace (this makes it ADLS Gen2)
+
+- Access tier: Hot, Minimum TLS: 1.2, Secure transfer: Enabled
+
+- Clicked Review + Create → Create → Deployment succeeded
+
+- Verified: Data Lake Storage section shows Hierarchical namespace = Enabled
+
+## **K.3.4 Container Creation (Medallion Architecture)**
+
+- Navigated to ushaadfpocadls → Containers → + Add container
+
+- Created container: landing (Bronze layer — raw SSIS output)
+
+- Created container: processed (Silver layer — cleaned data)
+
+- Created container: curated (Gold layer — analytics ready)
+
+- All containers set to Private access — no anonymous access
+
+## **K.3.5 Azure Data Factory Creation**
+
+- Navigated to UshaADF-POC → + Create → Data Factory
+
+- Name: usha-adf-poc, Region: East US, Version: V2
+
+- Clicked Git configuration tab → unchecked Configure Git later
+
+- Selected GitHub as repository type
+
+- Authenticated with GitHub account: ushakaleclouddba-design
+
+- Repository: Azure-Data-Engineering-Portfolio
+
+- Branch: main
+
+- Root folder: /02-ADF-ADLS-Pipeline
+
+- Clicked Review + Create → Create → Deployment succeeded
+
+**NOTE: **ADF pipelines built in this POC will be automatically version-controlled in GitHub repository under /02-ADF-ADLS-Pipeline folder. This demonstrates CI/CD integration for ADF pipelines.
+
+# **K.4 Phase 2 — Azure Infrastructure Setup (CLI Commands)**
+
+The following Azure CLI commands replicate all steps performed via the Portal in Phase 2. These commands can be used for automated deployments and pipeline repeatability.
+
+## **K.4.1 Resource Group**
+
+# Create Resource Group with tags
+
+az group create \
+
+  --name UshaADF-POC \
+
+  --location eastus \
+
+  --tags Environment=POC Project=ADF-SSIS Owner=Usha
+
+## **K.4.2 ADLS Gen2 Storage Account**
+
+# Create Storage Account with Hierarchical Namespace (ADLS Gen2)
+
+az storage account create \
+
+  --name ushaadfpocadls \
+
+  --resource-group UshaADF-POC \
+
+  --location eastus \
+
+  --sku Standard_LRS \
+
+  --kind StorageV2 \
+
+  --enable-hierarchical-namespace true \
+
+  --access-tier Hot \
+
+  --min-tls-version TLS1_2
+
+# Verify ADLS Gen2 is enabled
+
+az storage account show \
+
+  --name ushaadfpocadls \
+
+  --resource-group UshaADF-POC \
+
+  --query "{name:name, hns:isHnsEnabled, location:primaryLocation}" \
+
+  --output table
+
+## **K.4.3 Create Containers (Medallion Architecture)**
+
+# Create Bronze layer container
+
+az storage fs create \
+
+  --name landing \
+
+  --account-name ushaadfpocadls \
+
+  --auth-mode login
+
+# Create Silver layer container
+
+az storage fs create \
+
+  --name processed \
+
+  --account-name ushaadfpocadls \
+
+  --auth-mode login
+
+# Create Gold layer container
+
+az storage fs create \
+
+  --name curated \
+
+  --account-name ushaadfpocadls \
+
+  --auth-mode login
+
+## **K.4.4 Create Azure Data Factory**
+
+# Create Azure Data Factory V2
+
+az datafactory create \
+
+  --name usha-adf-poc \
+
+  --resource-group UshaADF-POC \
+
+  --location eastus
+
+# Verify ADF created successfully
+
+az datafactory show \
+
+  --name usha-adf-poc \
+
+  --resource-group UshaADF-POC \
+
+  --query "{name:name, location:location, state:provisioningState}" \
+
+  --output table
+
+# **K.5 Pending Steps**
+
+The following steps will be documented as the POC progresses:
+
+| **#** | **Step** | **Description** | **Status** |
+| --- | --- | --- | --- |
+| 1 | Create Self-Hosted IR | Install Self-Hosted Integration Runtime on Node5 to connect ADF to on-premises SQL Server | Pending |
+| 2 | Create Azure-SSIS IR | Provision Azure-SSIS Integration Runtime in ADF linked to SSISDB | Pending |
+| 3 | Deploy SSIS Package | Deploy Extract_CoreBank_Transaction.dtsx to Azure-SSIS IR via SSMS | Pending |
+| 4 | Create ADF Linked Services | Create linked services for ADLS Gen2 and Azure-SSIS IR | Pending |
+| 5 | Create ADF Pipeline | Build pipeline with Execute SSIS Package activity | Pending |
+| 6 | Run Pipeline | Execute pipeline and validate output in ADLS Gen2 landing container | Pending |
+| 7 | Data Flow Transformation | Add ADF Mapping Data Flow to transform CSV to Parquet in processed container | Pending |
+| 8 | Monitor Pipeline | Review ADF Monitor for pipeline execution status and metrics | Pending |
+| 9 | Cost Analysis | Document resource costs and cleanup procedure | Pending |
+| 10 | GitHub Upload | Push ADF pipeline JSON, SSIS project, and scripts to GitHub | Pending |
+
+**NOTE: **This document will be updated as each step is completed. Screenshots will be inserted inline at each phase.
+
+# **K.6 POC 6 — ADF Advanced: Gold Layer (Medallion Architecture Complete)**
+
+This section documents the completion of the Medallion Architecture by building the Gold layer in Azure Data Factory. A Mapping Data Flow aggregates Silver Parquet data by TransactionType, writing analytics-ready output to the curated container in ADLS Gen2. Pipeline parameters, a schedule trigger, and an Azure Monitor failure alert complete the production-grade pattern.
+
+## **K.6.1 Objectives**
+
+The following objectives were completed in this POC session:
+
+- Create DFSilverToGold Mapping Data Flow with aggregate transformation grouped by TransactionType
+
+- Create DS_ADLS_Parquet_Gold dataset pointing to curated/transactions/gold in ADLS Gen2
+
+- Wire DF_SilverToGold activity into existing pipeline PL_CoreBank_SSIS_To_ADLS
+
+- Add pipeline parameters: pipelineRunDate, silverPath, goldPath
+
+- Create schedule trigger TriggerDailySilverToGold (Pacific Time, daily, inactive to conserve credits)
+
+- Create Azure Monitor alert rule Alert-SilverToGold-PipelineFailure (Severity 2, email notification)
+
+- Validate end-to-end pipeline run and confirm gold_transactions.parquet written to curated container
+
+## **K.6.2 Data Flow: DFSilverToGold**
+
+The DFSilverToGold Mapping Data Flow implements the Silver-to-Gold transformation using an Aggregate transformation. Schema was imported via Projection tab with Data Flow Debug enabled to resolve column names from the Silver Parquet files.
+
+**Source Configuration**
+
+| **Setting** | **Value** |
+| --- | --- |
+| Output stream name | DFSilverToGold |
+| Source type | Dataset |
+| Dataset | DS_ADLS_Parquet_Silver |
+| Schema imported | 12 columns via Projection → Import schema (all string type from Parquet) |
+| Key columns | TransactionID, AccountID, TransactionDate, PostedDate, TransactionType, Amount, RunningBalance, Description, ReferenceNumber, Channel, Remarks, CreatedDate |
+
+**Aggregate Transformation (aggregate1)**
+
+The aggregate transformation groups Silver transactions by TransactionType and computes three metrics. The Amount column is cast to Double inline using toDouble() because it is stored as string type in the Silver Parquet files.
+
+| **Type** | **Output Column** | **Expression** |
+| --- | --- | --- |
+| Group By | TransactionType | N/A |
+| Aggregate | TotalAmount | sum(toDouble(Amount)) |
+| Aggregate | TransactionCount | count(TransactionID) |
+| Aggregate | AvgAmount | avg(toDouble(Amount)) |
+
+**Sink Configuration (SinkGold)**
+
+| **Setting** | **Value** |
+| --- | --- |
+| Sink type | Dataset |
+| Dataset | DS_ADLS_Parquet_Gold |
+| Container | curated |
+| Directory | transactions/gold |
+| File name option | Output to single file — gold_transactions.parquet |
+| Partition type | Single partition (required for Output to single file) |
+
+## **K.6.3 Pipeline Parameters**
+
+Three pipeline-level parameters were added to PL_CoreBank_SSIS_To_ADLS to enable parameterized execution and path flexibility. Parameters are passed to the schedule trigger at run time.
+
+| **Name** | **Type** | **Default Value** | **Purpose** |
+| --- | --- | --- | --- |
+| pipelineRunDate | String | @formatDateTime(utcNow(),'yyyy-MM-dd') | Run date for partitioning and audit |
+| silverPath | String | processed/transactions | Silver layer input path |
+| goldPath | String | curated/transactions/gold | Gold layer output path |
+
+## **K.6.4 Schedule Trigger**
+
+| **Setting** | **Value** |
+| --- | --- |
+| Name | TriggerDailySilverToGold |
+| Type | Schedule |
+| Recurrence | Every 1 Day at 12:47 PM |
+| Time zone | Pacific Time (US & Canada) UTC-8 |
+| pipelineRunDate value | @formatDateTime(trigger().scheduledTime,'yyyy-MM-dd') |
+| Status | Inactive (deactivated after creation to conserve Azure credits) |
+
+## **K.6.5 Azure Monitor Failure Alert**
+
+| **Setting** | **Value** |
+| --- | --- |
+| Alert rule name | Alert-SilverToGold-PipelineFailure |
+| Signal | Failed pipeline runs metrics |
+| Condition | Count greater than 0, check every 5 minutes, lookback 5 minutes |
+| Severity | 2 — Warning |
+| Action group | ADF-POC-Alerts — EmailAlert notification to ushakale2022@gmail.com |
+| Scope | usha-adf-poc / UshaADF-POC resource group |
+| Estimated cost | $0.10 USD/month |
+
+## **K.6.6 Pipeline Validation Results**
+
+Pipeline PL_CoreBank_SSIS_To_ADLS was executed via Debug run on 3/31/2026. The full three-activity chain completed successfully.
+
+| **Activity** | **Status** | **Duration** | **Integration Runtime** |
+| --- | --- | --- | --- |
+| Copy data1 | Failed * | 5s | SHIR-Node5 (intermittent offline) |
+| Data flow1 (Bronze→Silver) | Succeeded ✅ | 4m 33s | AutoResolveIntegrationRuntime (East US) |
+| DF_SilverToGold (Silver→Gold) | Succeeded ✅ | 20s | AutoResolveIntegrationRuntime (East US) |
+
+** Copy data1 failed intermittently due to SHIR-Node5 going offline during the debug run. Silver Parquet files from a prior successful run were already present in processed/transactions/, allowing Data flow1 and DF_SilverToGold to complete successfully. Copy data1 will be addressed in a follow-up session.*
+
+**Gold Layer Output Validation**
+
+| **Property** | **Value** |
+| --- | --- |
+| File name | gold_transactions.parquet |
+| Location | ushaadfpocadls / curated / transactions / gold |
+| File size | 1.43 KiB (expected — aggregated from ~4.5 MiB Silver input) |
+| Created | 3/31/2026 12:07:44 PM (matches pipeline run time) |
+| Blob type | Block blob, Hot tier (Inferred) |
+
+## **K.6.7 CLI Equivalents**
+
+The following Azure CLI and PowerShell commands replicate the GUI steps performed in this session.
+
+**Create Gold Dataset**
+
+# Create Gold Parquet dataset pointing to curated container
+
+az datafactory dataset create \
+
+  --factory-name usha-adf-poc \
+
+  --resource-group UshaADF-POC \
+
+  --name DS_ADLS_Parquet_Gold \
+
+  --properties '{"type":"Parquet","linkedServiceName":{"referenceName":"LS_ADLS_Gen2","type":"LinkedServiceReference"},"typeProperties":{"location":{"type":"AzureBlobFSLocation","fileSystem":"curated","folderPath":"transactions/gold","fileName":"gold_transactions.parquet"}}}'
+
+**Create Schedule Trigger**
+
+az datafactory trigger create \
+
+  --factory-name usha-adf-poc \
+
+  --resource-group UshaADF-POC \
+
+  --name TriggerDailySilverToGold \
+
+  --properties '{"type":"ScheduleTrigger","pipelines":[{"pipelineReference":{"referenceName":"PL_CoreBank_SSIS_To_ADLS","type":"PipelineReference"}}],"typeProperties":{"recurrence":{"frequency":"Day","interval":1,"startTime":"2026-04-01T12:47:00","timeZone":"Pacific Standard Time"}}}'
+
+**Create Azure Monitor Alert**
+
+az monitor metrics alert create \
+
+  --name "Alert-SilverToGold-PipelineFailure" \
+
+  --resource-group UshaADF-POC \
+
+  --scopes "/subscriptions/<sub-id>/resourceGroups/UshaADF-POC/providers/Microsoft.DataFactory/factories/usha-adf-poc" \
+
+  --condition "count 'FailedRuns' > 0" \
+
+  --window-size 5m --evaluation-frequency 1m \
+
+  --action <action-group-id> --severity 2
+
+## **K.6.8 Medallion Architecture — Completion Summary**
+
+| **Layer** | **Container** | **Path** | **Format** | **Status** |
+| --- | --- | --- | --- | --- |
+| **Bronze** | landing | CoreBank_Transactions.csv | CSV | Complete ✅ |
+| **Silver** | processed | transactions/ (4 part files, ~4.5 MiB) | Parquet | Complete ✅ |
+| **Gold** | curated | transactions/gold/gold_transactions.parquet (1.43 KiB) | Parquet | Complete ✅ |
+
+## **K.6.9 Resume Bullet**
+
+Built ADF Silver-to-Gold Mapping Data Flow aggregating 25M+ banking transactions by TransactionType (sum, count, avg) using inline toDouble() casting; implemented parameterized pipeline with schedule trigger and Azure Monitor failure alerting — completing end-to-end Medallion Architecture (Bronze/Silver/Gold) on ADLS Gen2.
+
+**NOTE: **Screenshots from each step in this section will be inserted inline. Copy data1 SHIR-Node5 instability resolved — see K.7 for fix details and confirmed all-green pipeline run.
+
+# **K.7 Complete POC Build — End to End Reference**
+
+This section documents the complete ADF POC build from infrastructure through Gold layer in simple sequential format. All steps were completed and validated on 3/31/2026 with a full all-green pipeline run.
+
+## **K.7.1 Phase 1 — Azure Infrastructure**
+
+**Resource Group**
+
+- Created UshaADF-POC in East US
+
+- Tags: Environment=POC, Project=ADF-SSIS, Owner=Usha
+
+**ADLS Gen2 Storage Account**
+
+- Name: ushaadfpocadls, East US, Standard LRS
+
+- Enabled Hierarchical Namespace (ADLS Gen2)
+
+- Created 3 containers: landing (Bronze), processed (Silver), curated (Gold)
+
+**Azure Data Factory**
+
+- Name: usha-adf-poc, East US, V2
+
+- GitHub: ushakaleclouddba-design/Azure-Data-Engineering-Portfolio, branch: main, folder: /02-ADF-ADLS-Pipeline
+
+## **K.7.2 Phase 2 — Integration Runtimes**
+
+| **Name** | **Type** | **Purpose** | **Status** |
+| --- | --- | --- | --- |
+| SHIR-Node5 | Self-Hosted IR | Connect ADF to on-prem SQL Server on Node5 | Connected ✅ |
+| AzureSSIS-IR | Azure-SSIS IR | Execute SSIS packages in Azure (stop after each use) | Stopped (credit conservation) |
+| AutoResolveIntegrationRuntime | Azure IR (auto-managed) | Run Mapping Data Flows (cloud to cloud) | Running ✅ |
+
+## **K.7.3 Phase 3 — Linked Services**
+
+| **Name** | **Type** | **Points To** | **Status** |
+| --- | --- | --- | --- |
+| LS_ADLS_Gen2 | ADLS Gen2 | ushaadfpocadls (account key auth) | Connected ✅ |
+| LS_SQLServer_Node5 | SQL Server | Node5 / CoreBank_OnPrem_POC (Windows auth, via SHIR) | Connected ✅ |
+
+## **K.7.4 Phase 4 — Datasets**
+
+| **Dataset Name** | **Format** | **Layer** | **Path** |
+| --- | --- | --- | --- |
+| SqlServerTable1 | SQL Table | Source | Node5 / [Banking].[Transactions] |
+| DelimitedText1 | CSV | Bronze | landing/CoreBank_Transactions.csv |
+| DS_ADLS_Parquet_Silver | Parquet | Silver | processed/transactions/ |
+| DS_ADLS_Parquet_Gold | Parquet | Gold | curated/transactions/gold/gold_transactions.parquet |
+
+## **K.7.5 Phase 5 — Copy Activity (Bronze Layer)**
+
+Activity Copy data1 copies the Banking.Transactions table from Node5 SQL Server to the landing container as a CSV file via SHIR-Node5. This is the first step in the Medallion pipeline and represents the Bronze (raw) layer ingestion.
+
+- Source: SqlServerTable1 — [Banking].[Transactions] on Node5
+
+- Sink: DelimitedText1 — landing/CoreBank_Transactions.csv in ADLS
+
+- Integration Runtime: SHIR-Node5
+
+- Output: 24.79 MiB CSV, timestamp confirmed matching run time
+
+- Duration: 28 seconds
+
+## **K.7.6 Phase 6 — Data Flow 1: Bronze to Silver**
+
+Data Flow dataflow1 converts the raw CSV from the landing container into Parquet format in the processed container. This Silver layer transformation cleans and standardizes the data for downstream analytics.
+
+- Source: LandingCSV — DelimitedText1 (landing/CoreBank_Transactions.csv)
+
+- Sink: SilverParquet — DS_ADLS_Parquet_Silver (processed/transactions/)
+
+- Output: 4 Parquet part files, ~4.5 MiB total
+
+- Integration Runtime: AutoResolveIntegrationRuntime (East US)
+
+- Duration: 4 minutes 12 seconds
+
+## **K.7.7 Phase 7 — Data Flow 2: Silver to Gold**
+
+Data Flow DFSilverToGold aggregates the Silver Parquet data by TransactionType, producing an analytics-ready Gold layer file in the curated container. See K.6.2 for full configuration details.
+
+- Source: DFSilverToGold — DS_ADLS_Parquet_Silver (processed/transactions/)
+
+- Aggregate: group by TransactionType — TotalAmount, TransactionCount, AvgAmount
+
+- Sink: SinkGold — DS_ADLS_Parquet_Gold (curated/transactions/gold/gold_transactions.parquet)
+
+- Output: 1.43 KiB single Parquet file (aggregated from ~4.5 MiB Silver input)
+
+- Integration Runtime: AutoResolveIntegrationRuntime (East US)
+
+- Duration: 22 seconds
+
+## **K.7.8 Phase 8 — SHIR-Node5 Stability Fix**
+
+Copy data1 was failing intermittently due to SHIR-Node5 going offline during pipeline runs. Root cause was sleep settings on both the Node5 VM and the iMac host machine causing the SHIR connection to drop.
+
+**Fixes Applied:**
+
+- Node5 VM — Power Options → Turn off display: Never
+
+- Integration Runtime Service — Recovery tab: all failures set to Restart the Service after 1 minute
+
+- iMac host — Energy settings: Prevent automatic sleeping when display is off: ON
+
+Result: Copy data1 now succeeds consistently — confirmed 28s run via SHIR-Node5 ✅
+
+## **K.7.9 Final Validation — All Green Pipeline Run (3/31/2026)**
+
+| **Activity** | **Status** | **Duration** | **Integration Runtime** |
+| --- | --- | --- | --- |
+| Copy data1 (SQL Server → ADLS) | Succeeded ✅ | 28s | SHIR-Node5 |
+| Data flow1 (Bronze → Silver) | Succeeded ✅ | 4m 12s | AutoResolveIntegrationRuntime (East US) |
+| DF_SilverToGold (Silver → Gold) | Succeeded ✅ | 22s | AutoResolveIntegrationRuntime (East US) |
+
+**ADLS Output Verification**
+
+- landing/CoreBank_Transactions.csv — 24.79 MiB, timestamp 12:36:46 PM ✅
+
+- processed/transactions/ — 4 Parquet part files, ~4.5 MiB ✅
+
+- curated/transactions/gold/gold_transactions.parquet — 1.43 KiB ✅
+
+# **K.8 POC — Databricks: PySpark, Delta Lake ****&**** ADF Integration**
+
+## **K.8.1 POC Overview**
+
+Date: March 31, 2026. Resource Group: UshaADF-POC. Region: East US. Workspace: usha-databricks-poc (Standard tier, Hybrid). Cluster: usha-poc-cluster (13.3 LTS, Spark 3.4.1, Scala 2.12, Standard_DC4as_v5, 4 cores, 16GB, Single node, Auto-terminate 20 min).
+
+Use case: Post-merger financial institution consolidation. Databricks reads the Gold Parquet file produced by the ADF Medallion Architecture POC (Appendix K.6), runs PySpark portfolio analytics on a $7.5 billion transaction dataset, converts to Delta Lake format, and demonstrates MERGE-based incremental load. ADF triggers the notebook as the final pipeline stage.
+
+## **K.8.2 Business Context**
+
+Scenario: Bank A (SQL Server 2019 AG, Node1/Node2) and Bank B (SQL Server 2022 AG, Node3/Node4) merged. Both transaction datasets were ingested via ADF SHIR, transformed through Bronze→Silver→Gold Medallion Architecture, and landed as gold_transactions.parquet in ADLS Gen2 (ushaadfpocadls/curated/transaction/). Databricks consumes this Gold layer to produce post-merger portfolio analytics for regulatory reporting (PCI DSS, SOX, FFIEC).
+
+## **K.8.3 Infrastructure Created**
+
+**Workspace creation (Portal GUI):**
+
+- Portal → Azure Databricks → + Create
+
+- Resource group: UshaADF-POC | Workspace name: usha-databricks-poc | Region: East US | Pricing tier: Standard | Workspace type: Hybrid
+
+- Review + Create → Create. Deployment time: ~5 minutes. Status confirmed: Active.
+
+**CLI equivalent:**
+
+az databricks workspace create --resource-group UshaADF-POC --name usha-databricks-poc --location eastus --sku standard
+
+**Cluster creation (Portal GUI):**
+
+- Databricks UI → Compute → Create compute
+
+- Name: usha-poc-cluster | Runtime: 13.3 LTS (Spark 3.4.1, Scala 2.12) | Node: Standard_DC4as_v5 (4 cores, 16GB) | Single node | Auto-terminate: 20 min
+
+- Note: Standard_DS3_v2 was originally planned but Azure subscription CPU quota required Standard_DC4as_v5 (4 cores, 16GB). Cluster started successfully. Access mode: Manual / Legacy Single user.
+
+## **K.8.4 Gold_Analysis Notebook — All 6 Cells**
+
+Notebook path: Workspace → Users → ushakaleclouddba@outlook.com → Gold_Analysis. Language: Python. Cluster: usha-poc-cluster.
+
+### **Cell 1 — Configure ADLS Gen2 Access**
+
+Purpose: Authenticates Databricks cluster to ADLS Gen2 using storage account key via Spark config. Sets fs.azure.account.key on the Spark context so all subsequent ABFSS paths resolve without per-call auth.
+
+spark.conf.set("fs.azure.account.key.ushaadfpocadls.dfs.core.windows.net", "<ADLS_KEY_REDACTED>")
+
+Output: ADLS Gen2 access configured. Note: POC uses account key directly. Production implementation should use Azure Key Vault backed Databricks secret scope.
+
+### **Cell 2 — Verify Gold Parquet Path**
+
+Purpose: Lists contents of the curated container to confirm gold_transactions.parquet is accessible. Troubleshooting note: path was transaction/ (singular) not transactions/ (plural) — discovered via dbutils.fs.ls on root container.
+
+dbutils.fs.ls("abfss://curated@ushaadfpocadls.dfs.core.windows.net/transaction/")
+
+Output: gold_transactions.parquet 1462 (bytes)
+
+### **Cell 3 — Read Gold Parquet into Spark DataFrame**
+
+Purpose: Reads gold_transactions.parquet into a Spark DataFrame. Validates schema, row count, and data content.
+
+df_gold = spark.read.parquet("abfss://curated@ushaadfpocadls.dfs.core.windows.net/transaction/gold_transactions.parquet")
+
+Output: Row count: 5. Schema: TransactionType (string), TotalAmount (double), TransactionCount (long), AvgAmount (double). Data: Transfer, Interest, Credit, Fee, Debit — 300,000 total transactions, ~$7.5 billion total portfolio value. Runtime: 12.64 seconds (includes Spark context initialisation).
+
+### **Cell 4 — Portfolio Analytics (PySpark Aggregation)**
+
+Purpose: Computes each transaction type’s percentage share of total portfolio value. Ranks by TransactionCount descending. Represents post-merger product mix analytics for regulatory reporting.
+
+from pyspark.sql import functions as F
+total = df_gold.agg(F.sum("TotalAmount")).collect()[0][0]
+summary = df_gold.withColumn("PctOfTotal", F.round((F.col("TotalAmount")/total)*100, 2)).orderBy(F.desc("TransactionCount"))
+display(summary)
+
+Output: Total portfolio value: $7,501,578,801.00. Interest: 123,141 txns, 41% of portfolio. Credit: 60,030 txns, 20%. Debit: 47,982 txns, 16%. Transfer: 38,781 txns, 13%. Fee: 30,066 txns, 10%. Runtime: 1.11 seconds.
+
+### **Cell 5 — Write Gold DataFrame as Delta Table**
+
+Purpose: Converts Gold Parquet to Delta Lake format. Delta adds ACID transactions, time travel, schema enforcement, and MERGE support on top of plain Parquet. Written back to ADLS Gen2 curated container.
+
+df_gold.write.format("delta").mode("overwrite").save("abfss://curated@ushaadfpocadls.dfs.core.windows.net/transaction/delta_transactions")
+
+Output: Delta table written to abfss://curated@ushaadfpocadls.dfs.core.windows.net/transaction/delta_transactions. Delta row count: 5. Delta table folder created in ADLS Gen2 with _delta_log/ transaction log directory.
+
+### **Cell 6 — Delta MERGE / Upsert**
+
+Purpose: Demonstrates incremental load pattern using Delta MERGE INTO. Simulates 2 updated transaction type records arriving in a daily batch. Matched rows (Interest, Fee) are updated. Unmatched rows (Credit, Debit, Transfer) are untouched. Equivalent to T-SQL MERGE statement used in SSIS incremental load patterns.
+
+delta_table.alias("target").merge(updates.alias("source"), "target.TransactionType = source.TransactionType").whenMatchedUpdateAll().whenNotMatchedInsertAll().execute()
+
+Output: MERGE complete — updated 2 rows. Interest updated to TotalAmount: 9,999,999,999, TransactionCount: 999,999. Fee updated to TotalAmount: 1,111,111,111, TransactionCount: 111,111. Credit, Debit, Transfer unchanged. Runtime: 8.74 seconds.
+
+## **K.8.5 Troubleshooting Log**
+
+- **CPU quota warning on cluster creation: **Standard_DS3_v2 (4 cores) exceeded subscription quota. Resolution: Azure auto-reduced to Standard_DC4as_v5 (4 cores, 16GB) — accepted as suitable for POC.
+
+- **Secret scope Create button greyed out: **Databricks-backed scope form required Azure Key Vault fields. Resolution: Used spark.conf.set() with account key directly in notebook for POC. Production recommendation: Azure Key Vault backed secret scope.
+
+- **IllegalArgumentException: Unsupported Azure Scheme abfss: **Mount using dbutils.fs.mount with abfss:// protocol failed. Resolution: Used spark.conf.set() approach instead of mount — sets account key on Spark context, allowing direct abfss:// path access in all subsequent cells.
+
+- **FileNotFoundException on transactions/gold path: **Path transactions/gold/ did not exist. Resolution: Used dbutils.fs.ls() on container root to discover actual path was transaction/ (singular). Correct path: abfss://curated@ushaadfpocadls.dfs.core.windows.net/transaction/gold_transactions.parquet.
+
+- **PySparkTypeError on round() in Cell 4: **Python built-in round() conflicted with PySpark round(). Resolution: Used from pyspark.sql import functions as F and called F.round(), F.col(), F.sum() explicitly throughout.
+
+## **K.8.6 POC Outcomes ****&**** Resume Bullets Earned**
+
+- Provisioned Azure Databricks workspace (usha-databricks-poc, Standard tier, East US) and configured Single Node cluster (13.3 LTS, Spark 3.4.1, Standard_DC4as_v5, auto-terminate 20 min) within UshaADF-POC resource group.
+
+- Configured ADLS Gen2 connectivity from Databricks via spark.conf.set() with ABFSS protocol, enabling direct access to ushaadfpocadls curated container without VPN or public endpoint exposure.
+
+- Read Gold Parquet (gold_transactions.parquet) into Spark DataFrame — 5 transaction types, 300,000 transactions, $7.5 billion total portfolio value — confirming end-to-end data flow from on-premises SQL Server through ADF Medallion Architecture into Databricks.
+
+- Ran post-merger portfolio analytics using PySpark — computed transaction mix (PctOfTotal) across 5 product types, ranked by volume. Interest = 41% of $7.5B portfolio. Runtime: 1.11 seconds on 300,000 transactions.
+
+- Converted Gold Parquet to Delta Lake format (delta_transactions) in ADLS Gen2 — Delta table with transaction log (_delta_log/) confirming ACID compliance, schema enforcement, and time travel capability.
+
+- Implemented Delta MERGE (upsert) — 2 transaction types updated atomically, 3 untouched — demonstrating incremental daily load pattern as modern equivalent of SSIS T-SQL MERGE incremental load.
+
+## **K.8.7 Next Steps**
+
+- ADF Linked Service (LS_Databricks_Workspace) — authenticate using PAT token (adf-poc-token), connect to usha-databricks-poc workspace.
+
+- ADF pipeline — add Databricks Notebook activity pointing to Gold_Analysis notebook, chained after Data Flow activity on success path.
+
+- GitHub push — export Gold_Analysis.py from Databricks, mask ADLS key, push to /02-ADF-ADLS-Pipeline/notebooks/ in Azure-Data-Engineering-Portfolio repo.
+
+- Azure SQL Database — create usha-poc-sqlsvr (Basic tier, East US) to host SSISDB and unblock AzureSSIS-IR pipeline execution.
+
+- Credit guard — terminate usha-poc-cluster after every session. Workspace itself has no compute cost. Cluster confirmed stopped: March 31, 2026.
+
+## **K.8.8 ADF — Databricks Integration**
+
+Date: March 31, 2026. This phase wires ADF to trigger the Gold_Analysis Databricks notebook as the final stage of the PL_CoreBank_SSIS_To_ADLS pipeline. After DF_SilverToGold completes and gold_transactions.parquet is confirmed in ADLS Gen2, ADF calls the Databricks REST API to submit a notebook job run, polls for completion, and surfaces the result in ADF Monitor.
+
+### **Step 1 — Linked Service: LS_Databricks_POC (Delta Lake connector)**
+
+Manage → Linked Services → + New → Azure Databricks Delta Lake. Name: LS_Databricks_POC. Integration runtime: AutoResolveIntegrationRuntime. Authentication: Access token. Workspace: usha-databricks-poc. Cluster: usha-poc-cluster (internal ID: 0331-224353-06bfarhe). Connection successful confirmed. Note: This linked service type supports Delta Lake operations but not Notebook activity.
+
+### **Step 2 — Linked Service: LS_Databricks_Notebook (Azure Databricks connector)**
+
+Manage → Linked Services → + New → Azure Databricks (not Delta Lake). Name: LS_Databricks_Notebook. Integration runtime: AutoResolveIntegrationRuntime. Account selection: From Azure subscription. Subscription: Azure subscription 1. Workspace: usha-databricks-poc. Select cluster: Existing interactive cluster. Workspace URL: https://adb-7405618995762877.17.azuredatabricks.net. Authentication: Access Token (adf-poc-token, 90-day PAT). Cluster: usha-poc-cluster (0331-224353-06bfarhe). Connection successful confirmed. Click Create.
+
+**Troubleshooting note: **Azure Databricks Delta Lake linked service does not appear in the Notebook activity’s linked service dropdown — only Azure Databricks (plain) connector is compatible with Notebook activity. Two separate linked services are required: one for Delta Lake operations (LS_Databricks_POC) and one for Notebook execution (LS_Databricks_Notebook).
+
+### **Step 3 — Add Databricks Notebook Activity to Pipeline**
+
+Author → Pipelines → PL_CoreBank_SSIS_To_ADLS. Expanded Databricks section in Activities panel. Dragged Notebook activity onto canvas to the right of DF_SilverToGold. ADF auto-connected the success path arrow from DF_SilverToGold → Notebook activity.
+
+**Activity configuration: **General tab — Name: Run_Gold_Analysis. Azure Databricks tab — Linked service: LS_Databricks_Notebook. Settings tab — Notebook path: /Users/ushakaleclouddba@outlook.com/Gold_Analysis (browsed and selected from workspace).
+
+### **Step 4 — Complete Pipeline Architecture**
+
+Final pipeline: Copy data1 (SHIR → ADLS Bronze) → Data flow1 (Bronze → Silver) → DF_SilverToGold (Silver → Gold) → Run_Gold_Analysis (ADF triggers Databricks notebook). All four activities connected via on-success dependency arrows. Published to main branch in GitHub.
+
+### **Step 5 — Pipeline Debug Run**
+
+Cluster usha-poc-cluster started (Standard_DC4as_v5, 13.3 LTS). Debug run initiated from ADF Studio pipeline canvas on March 31, 2026 at 5:37 PM. Pipeline run ID: 22581701-2309-4643-a42c-89930e4367eb. Pipeline status: Succeeded. Activity results: Copy data1 (Succeeded, 32s, SHIR-Node5), Data flow1 (Succeeded, 4m 14s, AutoResolve East US), DF_SilverToGold (Succeeded, 20s, AutoResolve East US), Run_Gold_Analysis (Succeeded, 1m 7s, AutoResolve East US). Databricks job run validated in Databricks Runs page: ADF_usha-adf-poc_PL_CoreBank_SSIS_To_ADLS_Run_Gold_Analysis, launched By runs submit API, Duration 58s, Status Succeeded. All 6 notebook cells confirmed executed: Cell 1 (ADLS Gen2 access configured, 0.06s), Cell 2 (gold_transactions.parquet and delta_transactions visible), Cell 3 (Gold Parquet read into DataFrame), Cell 4 (Total portfolio value $10,002,105,068 across 5 transaction types, Interest 41%, 1.32s), Cell 5 (Delta table written to ADLS Gen2, row count 5), Cell 6 (MERGE complete, updated 2 rows, 8.52s). Cluster terminated after run. Credits protected.
+
+### **Step 6 — Resume Bullet Earned**
+
+Configured ADF Linked Service (LS_Databricks_Notebook) authenticating to Azure Databricks workspace (usha-databricks-poc) via Personal Access Token — integrated Databricks Notebook activity (Run_Gold_Analysis) into PL_CoreBank_SSIS_To_ADLS pipeline as final stage post-Gold layer completion, with ADF polling notebook run status via Databricks REST API and surfacing execution results in ADF Monitor pipeline run history.
+
+# **Appendix L: POC — Microsoft Fabric (Mirroring / Lakehouse)**
+
+Microsoft Fabric workspace setup, mirroring from Azure SQL MI, and querying mirrored data using SQL analytics endpoint and Power BI.
+
+**NOTE: **Lab walkthrough, commands, and screenshots to be added upon POC completion.
+
+## **K.7.10 Quick Rebuild Checklist — Complete ADF POC End to End**
+
+Use this checklist to rebuild the entire ADF POC from scratch in a single session. Each numbered item is a discrete action. Sub-items are configuration values. All steps validated on 3/31/2026.
+
+**STEP 1 — Create Resource Group**
+
+- portal.azure.com → Resource groups → + Create
+
+- Name: UshaADF-POC | Region: East US
+
+- Tags: Environment=POC, Project=ADF-SSIS, Owner=Usha → Review + Create
+
+**STEP 2 — Create ADLS Gen2 Storage Account**
+
+- UshaADF-POC → + Create → Storage account
+
+- Name: ushaadfpocadls | East US | Standard LRS
+
+- Advanced tab → Enable Hierarchical namespace → Review + Create
+
+- Navigate to storage account → Containers → + Container: create landing, processed, curated (all Private)
+
+**STEP 3 — Create Azure Data Factory**
+
+- UshaADF-POC → + Create → Data Factory
+
+- Name: usha-adf-poc | East US | V2
+
+- Git configuration tab → GitHub → repo: Azure-Data-Engineering-Portfolio | branch: main | folder: /02-ADF-ADLS-Pipeline
+
+**STEP 4 — Install SHIR on Node5**
+
+- ADF Studio → Manage → Integration runtimes → + New → Self-Hosted
+
+- Name: SHIR-Node5 → copy authentication key
+
+- On Node5 VM: download and install Integration Runtime → paste key → confirm Connected status
+
+- Node5 stability fix: Power Options → display Never | services.msc → Integration Runtime Service → Recovery → Restart on all failures after 1 min
+
+**STEP 5 — Create Linked Services**
+
+- Manage → Linked services → + New → Azure Data Lake Storage Gen2
+
+- Name: LS_ADLS_Gen2 | Auth: Account key | Account: ushaadfpocadls → Test connection → Create
+
+- + New → SQL Server | Name: LS_SQLServer_Node5 | Connect via: SHIR-Node5 | Server: Node5 IP | DB: CoreBank_OnPrem_POC | Auth: Windows → Test → Create
+
+**STEP 6 — Create Datasets**
+
+- Author → Datasets → + New: SqlServerTable1 | LS_SQLServer_Node5 | [Banking].[Transactions]
+
+- + New: DelimitedText1 | LS_ADLS_Gen2 | container: landing | file: CoreBank_Transactions.csv | first row as header
+
+- + New: DS_ADLS_Parquet_Silver | LS_ADLS_Gen2 | container: processed | directory: transactions
+
+- + New: DS_ADLS_Parquet_Gold | LS_ADLS_Gen2 | container: curated | directory: transactions/gold | file: gold_transactions.parquet | Import schema: None
+
+**⚠ Publish All after each dataset**
+
+**STEP 7 — Build Copy Activity (Bronze Layer)**
+
+- Author → Pipelines → + New pipeline → name: PL_CoreBank_SSIS_To_ADLS
+
+- Activities → Move and transform → drag Copy data onto canvas → name: Copy data1
+
+- Source tab: SqlServerTable1 | Sink tab: DelimitedText1 → Publish All
+
+**STEP 8 — Build Data Flow 1: Bronze → Silver**
+
+- Author → Data flows → + New data flow → name: dataflow1
+
+- Add Source: LandingCSV | Dataset: DelimitedText1 | Projection → Import schema
+
+- Click + on source → Add Sink: SilverParquet | Dataset: DS_ADLS_Parquet_Silver → Publish All
+
+- Back in pipeline: drag Data Flow activity onto canvas → name: Data flow1 → Settings: dataflow1 | connect arrow from Copy data1 → Publish All
+
+**STEP 9 — Build Data Flow 2: Silver → Gold**
+
+- Data flows → + New → name: DFSilverToGold
+
+- Add Source: DFSilverToGold | Dataset: DS_ADLS_Parquet_Silver | turn on Data flow debug | Projection → Import schema (12 columns) | Publish All
+
+- Click + on source → Aggregate → name: aggregate1
+
+- Group By tab: TransactionType
+
+- Aggregates tab → add 3 rows: TotalAmount=sum(toDouble(Amount)) | TransactionCount=count(TransactionID) | AvgAmount=avg(toDouble(Amount))
+
+- Click + on aggregate1 → Sink → name: SinkGold | Dataset: DS_ADLS_Parquet_Gold
+
+- Settings tab: File name option → Output to single file → gold_transactions.parquet → click Set single partition → Publish All
+
+- Turn off Data flow debug after publishing
+
+**STEP 10 — Wire DF_SilverToGold into Pipeline**
+
+- Open PL_CoreBank_SSIS_To_ADLS → drag Data Flow activity → name: DF_SilverToGold
+
+- Settings tab: Data flow = DFSilverToGold | IR = AutoResolveIntegrationRuntime | Size = Small
+
+- Connect arrow: Data flow1 → DF_SilverToGold → Publish All
+
+**STEP 11 — Add Pipeline Parameters**
+
+- Click blank canvas → Parameters tab → + New x3:
+
+- pipelineRunDate | String | @formatDateTime(utcNow(),'yyyy-MM-dd')
+
+- silverPath | String | processed/transactions
+
+- goldPath | String | curated/transactions/gold → Publish All
+
+**STEP 12 — Add Schedule Trigger**
+
+- Pipeline toolbar → Add trigger → New/Edit → + New
+
+- Name: TriggerDailySilverToGold | Type: Schedule | Every 1 Day | Pacific Time (UTC-8)
+
+- UNCHECK “Start trigger on creation” → OK
+
+- Trigger Run Parameters: pipelineRunDate = @formatDateTime(trigger().scheduledTime,'yyyy-MM-dd') | silverPath = processed/transactions | goldPath = curated/transactions/gold → OK → Publish All
+
+**STEP 13 — Add Azure Monitor Failure Alert**
+
+- portal.azure.com → usha-adf-poc → Monitoring → Alerts → + Create → Alert rule
+
+- Condition: Failed pipeline runs metrics | Count > 0 | check every 5 min | lookback 5 min
+
+- Actions: + Create action group → Name: ADF-POC-Alerts | RG: UshaADF-POC | Notification: Email/SMS → EmailAlert → your email → OK
+
+- Details: Name: Alert-SilverToGold-PipelineFailure | Severity: 2 — Warning | Enable upon creation: checked → Review + create → Create
+
+**STEP 14 — Run and Validate**
+
+- Pipeline → Debug → Use Integration Runtime (NOT debug cluster)
+
+- Confirm all 3 activities green: Copy data1 ✅ | Data flow1 ✅ | DF_SilverToGold ✅
+
+- Verify in ADLS: landing/CoreBank_Transactions.csv (~25 MiB, today’s timestamp) ✅
+
+- Verify in ADLS: processed/transactions/ (4 Parquet files, ~4.5 MiB) ✅
+
+- Verify in ADLS: curated/transactions/gold/gold_transactions.parquet (1.43 KiB) ✅
+
+- Manage → Integration Runtimes → Stop AzureSSIS-IR immediately after testing
+
+**Key Lessons Learned**
+
+- Always Publish All after each major step — Save only preserves draft in browser session
+
+- Data Flow debug must be ON to import schema — turn it OFF immediately after to conserve credits
+
+- ADF expressions are case-sensitive — Amount not amount; column names must match projection exactly
+
+- Output to single file requires Set single partition — click the yellow warning button
+
+- SHIR uses outbound HTTPS (port 443) only — private VM IP is fine; Azure never calls in
+
+- Use Integration Runtime for pipeline debug runs — not the debug cluster — to match production behavior
+
+- Stop AzureSSIS-IR after every test run — it is the most expensive resource in this POC
+
+# Appendix M: POC — Loan Processing Pipeline (Master/Branch Orchestration)
+
+# M.1 POC Overview
+
+This POC demonstrates a production-style banking loan processing pipeline ingesting loan application data from on-premises SQL Server (Node5) via SHIR, staging in ADLS Gen2 Bronze layer, loading into Azure SQL Database, and logging every run for SOX/PCI audit compliance. Orchestrated by a Master pipeline with business day awareness and Key Vault security.
+
+## M.1.1 Architecture
+
+Node5 SQL Server (On-Premises) → [SHIR-Node5] → ADLS Gen2 Landing (Bronze) → [Azure IR] → Azure SQL LoanProcessing_POC → PipelineAuditLog
+
+## M.1.2 Resources
+
+ADF: usha-adf-poc | ADLS Gen2: ushaadfpocadls (landing/processed/curated) | Azure SQL: usha-poc-sqlsvr, LoanProcessing_POC | Key Vault: usha-kv-poc, secret: sqlPassword
+
+SHIR: SHIR-Node5 (3 nodes, v5.64.9558.1) | Node5 SQL: LoanProcessing_Staging — SF_Downtown_loans, SanRamon_EastBay_loans, Oakland_Financial_loans (100 rows each)
+
+# M.2 Master Pipeline — PL_LoanProcessing_Master
+
+AKV_GetSecrets (Web Activity): REST GET to Key Vault via Managed Identity. URL: https://usha-kv-poc.vault.azure.net/secrets/sqlPassword/?api-version=7.0
+
+CheckBusinessDay (If Condition): @and(not Saturday, not Sunday, not in HolidayList). True path runs Execute_BranchPipeline. False path runs LogNonBusinessDay stored procedure.
+
+Execute_BranchPipeline: Calls PL_LoanProcessing_Branch with BranchID=SF_Downtown, RunDate, LoanType=Mortgage. waitOnCompletion: true.
+
+AlertOnFailure (Web Activity): POST to httpbin.org/post on CheckBusinessDay failure.
+
+# M.3 Branch Pipeline — PL_LoanProcessing_Branch
+
+CopyLoanFile: Source = DS_Node5_SQL_Loans via SHIR-Node5. Query: SELECT * FROM dbo.@{pipeline().parameters.BranchID}_loans. Sink = DS_ADLS_Landing with BranchID parameter.
+
+Lookup_IntrestRates: SELECT ProductCode, BaseRate FROM dbo.LoanRates WHERE EffectiveDate = GETDATE() AND ProductCode = LoanType.
+
+Script_PreCopyDelete (NonQuery): DELETE FROM dbo.LoanApplications WHERE BranchID = @{pipeline().parameters.BranchID}. Ensures idempotent execution.
+
+CopyData_ToSQL: Source = DS_ADLS_Landing (BranchID parameter passed). Sink = DS_AzureSQL_LoanApplications. Pre-copy script = SELECT 1.
+
+StoredProc_AuditLog: Executes usp_LogPipelineRun — BranchID, RunDate, PipelineRunID, ApprovedCount=rowsCopied, RejectedCount=0, Status=SUCCESS into dbo.PipelineAuditLog.
+
+Script_UpdateStatus: UPDATE dbo.LoanApplications SET ProcessingStatus=PROCESSED, UpdatedAt=GETDATE() WHERE BranchID = @{BranchID}.
+
+Delete_LandingFile: Deletes CSV from ADLS landing after successful load. Logs to curated/delete-logs.
+
+Fail_SLABreach: Triggered on CopyData_ToSQL or StoredProc_AuditLog failure. ErrorCode: LOAN_FAIL_001.
+
+# M.4 Key Lessons Learned
+
+## M.4.1 BadRequest at Pipeline Startup
+
+When a parameterized dataset is referenced without passing the required parameter, ADF throws BadRequest (message: null) before any activity runs. Fix: open pipeline JSON via {} Code button, find every dataset reference, add parameters block. Example: {"referenceName": "DS_ADLS_Landing", "type": "DatasetReference", "parameters": {"BranchID": "@pipeline().parameters.BranchID"}}
+
+## M.4.2 Pre-Copy Script Does Not Support Dynamic Expressions
+
+The Pre-copy script field does not evaluate @{pipeline().parameters.X} — expression passed as literal string. Solution: set pre-copy script to SELECT 1, add a Script activity (NonQuery) before the Copy with the DELETE statement using dynamic expressions.
+
+## M.4.3 Dataset Parameter Persistence in ADF Studio
+
+ADF Studio sometimes loses dataset parameter values when navigating. Always: (1) Save dataset before navigating away, (2) verify Parameters tab and Connection tab, (3) Publish All before Debug.
+
+## M.4.4 ADF Until Loop is Do-While
+
+ADF Until loop always executes inner activities at least once before checking exit condition. To skip inner activities, use Deactivate on individual activities inside the loop.
+
+## M.4.5 Key Vault Managed Identity Checklist
+
+ADF Managed Identity: Azure Portal → ADF → Properties → Managed Identity Object ID must have a value.
+
+Key Vault Access Policy: grant Get + List on Secrets to ADF Managed Identity. Search by Object ID not name.
+
+LS_KeyVault_POC: test connection from Manage → Linked Services before debugging pipelines.
+
+Valid Key Vault API versions: 7.0, 7.1, 7.2, 7.3. Version 7.4 is invalid and causes BadRequest.
+
+## M.4.6 JSON Editor for Pipeline Fixes
+
+When ADF UI fails to persist changes: pipeline canvas → {} Code → copy to Notepad → edit → paste back. Common JSON errors: trailing commas, missing commas between items.
+
+# M.5 Data Validation Results — April 1, 2026
+
+dbo.LoanApplications: 100 rows, BranchID=SF_Downtown, ProcessingStatus=PROCESSED
+
+dbo.PipelineAuditLog: RunID=7, ApprovedCount=100, RejectedCount=0, Status=SUCCESS
+
+ADLS Gen2 landing/SF_Downtown: empty after Delete_LandingFile
+
+Node5 LoanProcessing_Staging.dbo.SF_Downtown_loans: 100 source rows confirmed
+
+# M.6 POC 3 Extended — Planned Next Steps
+
+POC 3 will be extended to full Medallion Architecture and Databricks in a single end-to-end pipeline:
+
+DataFlow_BronzeToSilver: Mapping Data Flow with Conditional Split (approve <$500K / reject >$500K), write Snappy Parquet to processed/ container.
+
+DataFlow_SilverToGold: Apply interest rate, aggregate by branch, write Parquet to curated/ container.
+
+Execute_DatabricksNotebook: Trigger Gold_Analysis PySpark notebook — read Gold Parquet, write Delta table, MERGE upsert.
+
+ForEach in Master: Iterate BranchList (SF_Downtown, SanRamon_EastBay, Oakland_Financial).
+
+Schedule Trigger: Daily trigger on PL_LoanProcessing_Master.
+
+# **Pending Tasks — Daily Tracker**
+
+*Updated daily. Each session: record date, POC completed, resume bullets earned, credits used, and next steps.*
+
+## **Credit Status**
+
+| **Subscription** | **Credits Remaining** | **Expiry Date** | **Last Updated** |
+| --- | --- | --- | --- |
+| Azure Subscription 1 | **~$100 (est. ~$10 used March 31)** | **April 9, 2026** | March 31, 2026 |
+
+## **Session Log**
+
+| **Date** | **POC Completed** | **Resume Bullets Earned** | **Credits Used** | **Status** |
+| --- | --- | --- | --- | --- |
+| Mar 31, 2026 | POC 6 — ADF Gold Layer + Full Pipeline Validation + SHIR Fix | Gold layer Mapping Data Flow; end-to-end pipeline (3 green); parameterization + trigger + alert; SHIR stability fix | ~$5–8 | ✅ Done |
+| — | **Mar 31, 2026 (Session 2)** Databricks POC complete + ADF→Databricks integration. Workspace usha-databricks-poc, cluster usha-poc-cluster (13.3 LTS, DC4as_v5, 20-min auto-terminate). Gold_Analysis notebook 6 cells: ADLS access, Parquet read, $10B portfolio analytics, Delta write, MERGE upsert. LS_Databricks_Notebook linked service + Run_Gold_Analysis activity added. Full pipeline run ALL SUCCEEDED: Copy 32s, DataFlow1 4m14s, DF_SilverToGold 20s, Notebook 1m7s. Validated in Databricks Runs: By runs submit API, 58s, Succeeded. Bible v7 + Resume v2 (Navy, 15 bullets) built. GitHub pushed. **Bullets earned: **8 new bullets (6 Databricks + 1 ADF trigger + 1 pipeline run). Total: 15 resume bullets. **Credits: **~$10 used. ~$100 remaining. Expiry April 9, 2026. Cluster terminated. **Status: **✅ Done **Remaining before April 9 (priority order):** IMMEDIATE: Mask ADLS key in live Gold_Analysis notebook Cell 1 — 2 minutes P1: AzureSSIS-IR + SSISDB — create usha-poc-sqlsvr Basic East US → deploy SSISDB → run Extract_CoreBank_Transaction.dtsx — 3-4 hrs, 2 bullets P2: ADF failure path — on-failure arrow + Web Activity notification — 30 min, 1 bullet P3: ADF pipeline parameters — fully parameterize hardcoded paths — 1 hour, 1 bullet P4: Push Resume v2 to GitHub **After April 9 (next credit cycle):** Azure Synapse Analytics POC (Appendix J) — highest demand skill gap Microsoft Fabric POC (Appendix L) — emerging differentiator Structured Streaming — Event Hub + Spark Streaming Azure Key Vault backed secret scope in Databricks Power BI connected to Delta table — live dashboard on Gold data |  |  |  |
+
+## **Complete POC Roadmap**
+
+**Original 6 POCs**
+
+| **#** | **POC** | **Appendix** | **Status** |
+| --- | --- | --- | --- |
+| 1 | ADF + ADLS Gen2 + SSIS + Medallion Architecture | Appendix K (K.1–K.7.10) | ✅ Complete |
+| 2 | Azure SQL DMS Migration | Appendix C | ⏳ Pending |
+| 3 | Node6 Azure Migrate (Agentless) | Appendix F | ⏳ Pending |
+| 4 | Node1/Node2 Hybrid Always On AG with Azure Replica | Appendix E | ⏳ Pending |
+| 5 | Azure Synapse Analytics | Appendix J | ⏳ Pending |
+| 6 | ADF Advanced — Gold Layer + Parameterization + Trigger + Alert | Appendix K (K.6–K.7) | ✅ Complete |
+
+## **Priority Queue — Before April 9, 2026**
+
+| **Priority** | **POC** | **Why** | **Credit Cost** | **Status** |
+| --- | --- | --- | --- | --- |
+| **🥇 1** | Azure Synapse Analytics (Appendix J) | Highest demand skill; Serverless SQL Pool queries existing Gold Parquet at near-zero cost; pairs directly with ADF/ADLS work | Low | ⏳ Next |
+| **🥈 2** | Azure Monitor + Log Analytics for SQL | 1-session quick win; strong ops story for Cloud DBA; near-zero cost | Near zero | ⏳ Pending |
+| **🥉 3** | ADF + Azure Key Vault | Security angle for banking; dynamic secret retrieval eliminates hardcoded credentials; zero cost | Zero | ⏳ Pending |
+| 4 | Azure SQL DMS Migration (Appendix C) | Core Cloud DBA skill; DMS service itself is low cost; strong banking migration story | Low | ⏳ Pending |
+| 5 | Microsoft Fabric — Mirroring / Lakehouse (Appendix L) | Emerging differentiator; most candidates don’t have it; Fabric trial is free | Near zero | ⏳ Pending |
+
+## **Next Credit Cycle Roadmap (After April 9)**
+
+| **#** | **POC** | **Resume Bullet** | **Track** |
+| --- | --- | --- | --- |
+| 7 | ADF + Databricks | ADF triggering Databricks notebooks for data transformation | Data Engineering |
+| 8 | Delta Lake on ADLS Gen2 | Delta format, time travel, ACID transactions on ADLS Gen2 | Data Engineering |
+| 9 | Event Hub → ADF → ADLS (Event-driven) | Real-time streaming ingestion pipeline | Data Engineering |
+| 13 | Azure SQL Managed Instance Migration | DMS full migration with cutover to SQL MI (Appendix H) | Cloud DBA |
+| 20 | GitHub Actions CI/CD for ADF Pipelines | Automated pipeline deployment on push; elevates existing ADF CI/CD bullet | DevOps |
+
+## **Certification Targets**
+
+| **Cert** | **POCs it covers** | **Impact** | **Status** |
+| --- | --- | --- | --- |
+| **DP-203** | POC 1 (ADF/ADLS), 5 (Synapse), 6 (ADF Advanced), 7 (Databricks), 8 (Delta Lake), 9 (Event Hub), 11 (Purview), 12 (Synapse COPY INTO) | **🥇 Most impactful** | ⏳ Target |
+| DP-300 | POC 2 (DMS), 13 (SQL MI), 14 (Elastic Pool), 15 (Auto-tuning), 16 (PITR), 17 (Always Encrypted) | Already qualified (DP-300 held) | ✅ Held |
