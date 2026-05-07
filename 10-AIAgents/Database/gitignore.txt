@@ -1,0 +1,18 @@
+# Generated reports - contain real estate metadata, do not commit
+Migration_Assessment_Report_*.xlsx
+
+# Mac metadata
+.DS_Store
+._*
+
+# Windows metadata
+Thumbs.db
+Desktop.ini
+
+# PowerShell module install logs
+*.log
+
+# Editor files
+*.swp
+*.swo
+.vscode/
