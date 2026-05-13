@@ -1,0 +1,34 @@
+# Terraform state and provider plugins
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan
+
+# Terraform secrets — admin_password in plaintext
+Terraform/terraform.tfvars
+
+# Generated outputs (decision logs accumulate)
+generated/
+
+# Phase 1 output (large Excel/JSON, regenerated)
+Migration_Assessment_Report_*.xlsx
+Migration_Assessment_Report_*.json
+
+# Backups / archives
+*.zip
+*.bak
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
+# PowerShell transcript / log noise
+*.log
+sqlpilot_assess_*.log*
+
+# Old / historical docs (keep current ones tracked)
+docs/historical/

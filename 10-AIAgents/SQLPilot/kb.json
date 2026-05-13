@@ -1,0 +1,239 @@
+{
+  "_meta": {
+    "description": "SQLPilot knowledge base. Curated Microsoft Learn guidance on SQL Server -> Azure SQL Managed Instance migration compatibility. Each entry mirrors a rule from Microsoft's official assessment-rules page so the agent's reasoning is defensible against the same playbook Microsoft uses.",
+    "primary_source": "https://learn.microsoft.com/en-us/data-migration/sql-server/managed-instance/assessment-rules",
+    "primary_source_last_updated": "2025-01-08",
+    "verified_by": "Kale",
+    "verified_date": "2026-05-10",
+    "version": "1.0",
+    "verdict_legend": {
+      "blocker": "Source feature is not supported on this target. Migration to this target requires removing or rearchitecting the feature.",
+      "warning_remediable": "Source feature has restrictions on this target. Migration is possible after specific remediation steps.",
+      "supported": "Feature works on this target with no changes needed."
+    },
+    "target_legend": {
+      "sql_vm": "Azure SQL on Azure Virtual Machines (IaaS)",
+      "sql_mi": "Azure SQL Managed Instance (PaaS)",
+      "sql_db": "Azure SQL Database (PaaS, single DB or elastic pool)"
+    }
+  },
+  "topics": {
+    "xp_cmdshell": {
+      "phase1_match": ["sp_configure: xp_cmdshell"],
+      "ms_rule_name": "XpCmdshell",
+      "ms_rule_category": "Issue",
+      "verdicts": {
+        "sql_vm": "supported",
+        "sql_mi": "blocker",
+        "sql_db": "blocker"
+      },
+      "viable_targets": ["sql_vm"],
+      "rationale": "xp_cmdshell spawns a Windows command shell to execute strings. It is not supported on Azure SQL Managed Instance or Azure SQL Database. Workloads that rely on xp_cmdshell must either (a) remove the dependency, (b) move the shell-execution logic to Azure Automation, or (c) remain on SQL Server (Azure VM).",
+      "remediation_options": [
+        "Remove xp_cmdshell calls and rewrite the affected stored procedures",
+        "Replace xp_cmdshell-based automation with Azure Automation runbooks",
+        "Use Azure VM target where xp_cmdshell remains available"
+      ],
+      "citation": {
+        "title": "xp_cmdshell - Assessment rules for SQL Server to Azure SQL Managed Instance migration",
+        "url": "https://learn.microsoft.com/en-us/data-migration/sql-server/managed-instance/assessment-rules#xp_cmdshell",
+        "category": "Issue",
+        "verified_date": "2026-05-10"
+      }
+    },
+
+    "clr_strict_security": {
+      "phase1_match": [
+        "sp_configure: clr enabled",
+        "CLR Assembly: PERMISSION_SET in (UNSAFE, EXTERNAL_ACCESS)"
+      ],
+      "ms_rule_name": "ClrStrictSecurity",
+      "ms_rule_category": "Warning",
+      "verdicts": {
+        "sql_vm": "supported",
+        "sql_mi": "warning_remediable",
+        "sql_db": "blocker"
+      },
+      "viable_targets": ["sql_vm", "sql_mi"],
+      "rationale": "Azure SQL Managed Instance enforces 'CLR Strict Security' mode by default. Under strict security, SAFE and EXTERNAL_ACCESS assemblies are treated as if they were UNSAFE. CLR is supported on MI, but unsigned or self-signed UNSAFE/EXTERNAL_ACCESS assemblies will fail to load until they are signed by a certificate or asymmetric key whose corresponding login has been granted UNSAFE ASSEMBLY permission in master. Azure SQL Database does not support CLR at all.",
+      "remediation_options": [
+        "Sign each assembly with a certificate or asymmetric key, then create a login from that certificate in master with UNSAFE ASSEMBLY permission",
+        "Add the assembly to the trusted-assembly list using sys.sp_add_trusted_assembly",
+        "Migrate to SQL VM where strict-security signing is not required"
+      ],
+      "citation": {
+        "title": "CLR security - Assessment rules for SQL Server to Azure SQL Managed Instance migration",
+        "url": "https://learn.microsoft.com/en-us/data-migration/sql-server/managed-instance/assessment-rules#clr-security",
+        "category": "Warning",
+        "verified_date": "2026-05-10"
+      },
+      "additional_references": [
+        {
+          "title": "clr strict security - SQL Server",
+          "url": "https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/clr-strict-security"
+        },
+        {
+          "title": "sys.sp_add_trusted_assembly",
+          "url": "https://learn.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sys-sp-add-trusted-assembly-transact-sql"
+        }
+      ]
+    },
+
+    "linked_server_non_sql_provider": {
+      "phase1_match": ["Linked Server with non-SQL provider"],
+      "ms_rule_name": "LinkedServerWithNonSQLProvider",
+      "ms_rule_category": "Issue",
+      "verdicts": {
+        "sql_vm": "supported",
+        "sql_mi": "blocker",
+        "sql_db": "blocker"
+      },
+      "viable_targets": ["sql_vm"],
+      "rationale": "Azure SQL Managed Instance supports linked servers only when the remote provider is SQL Server. Linked servers to non-SQL sources (Oracle, Sybase, DB2, ODBC, etc.) are not supported on MI. SQL Database does not support linked servers at all.",
+      "remediation_options": [
+        "Move the dependent non-SQL data into a SQL-compatible target",
+        "Two-hop pattern: linked server from MI to a SQL VM, and from the SQL VM to the non-SQL source",
+        "Migrate to SQL VM where any provider is supported"
+      ],
+      "citation": {
+        "title": "Linked server (non-SQL provider) - Assessment rules for SQL Server to Azure SQL Managed Instance migration",
+        "url": "https://learn.microsoft.com/en-us/data-migration/sql-server/managed-instance/assessment-rules#linked-server-non-sql-provider",
+        "category": "Issue",
+        "verified_date": "2026-05-10"
+      }
+    },
+
+    "linked_server_legacy_provider": {
+      "phase1_match": ["Linked Server with provider in (SQLNCLI, SQLNCLI11)"],
+      "ms_rule_name": null,
+      "ms_rule_category": "Warning (provider deprecation)",
+      "verdicts": {
+        "sql_vm": "warning_remediable",
+        "sql_mi": "warning_remediable",
+        "sql_db": "blocker"
+      },
+      "viable_targets": ["sql_vm", "sql_mi"],
+      "rationale": "Linked servers using SQLNCLI or SQLNCLI11 (the SQL Server Native Client OLE DB providers) work today but those providers are deprecated. Microsoft's recommended replacement is MSOLEDBSQL (the Microsoft OLE DB Driver for SQL Server). MI's OPENROWSET and linked-server features list MSOLEDBSQL as the recommended provider; SQLNCLI/SQLNCLI11 are listed as 'supported' but should be replaced for new development.",
+      "remediation_options": [
+        "Drop and recreate each linked server using @provider='MSOLEDBSQL'",
+        "Test connectivity end-to-end after recreation, especially for any application code that explicitly references the linked server"
+      ],
+      "citation": {
+        "title": "OPENROWSET (non-SQL provider) - Assessment rules (notes recommended provider list)",
+        "url": "https://learn.microsoft.com/en-us/data-migration/sql-server/managed-instance/assessment-rules#openrowset-non-sql-provider",
+        "category": "Issue (parent rule); Warning for provider replacement",
+        "verified_date": "2026-05-10"
+      },
+      "additional_references": [
+        {
+          "title": "Microsoft OLE DB Driver for SQL Server",
+          "url": "https://learn.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server"
+        }
+      ]
+    },
+
+    "agent_job_powershell_subsystem": {
+      "phase1_match": ["SQL Agent Job with PowerShell subsystem step"],
+      "ms_rule_name": "PowerShellJob",
+      "ms_rule_category": "Warning",
+      "verdicts": {
+        "sql_vm": "supported",
+        "sql_mi": "blocker",
+        "sql_db": "blocker"
+      },
+      "viable_targets": ["sql_vm"],
+      "rationale": "Azure SQL Managed Instance supports SQL Agent jobs but only with T-SQL and SSIS subsystems. PowerShell, CmdExec, ActiveX, AnalysisCommand, AnalysisQuery, Merge, and Queue Reader subsystems are not supported. A job with any unsupported step type will not migrate cleanly to MI. SQL Database has no SQL Agent at all.",
+      "remediation_options": [
+        "Convert PowerShell job logic to Azure Automation runbooks scheduled by Logic Apps or Azure Function timer triggers",
+        "Convert simple PowerShell steps to T-SQL where possible",
+        "Migrate to SQL VM where the full SQL Agent subsystem set is available"
+      ],
+      "citation": {
+        "title": "PowerShell job - Assessment rules for SQL Server to Azure SQL Managed Instance migration",
+        "url": "https://learn.microsoft.com/en-us/data-migration/sql-server/managed-instance/assessment-rules#powershell-job",
+        "category": "Warning",
+        "verified_date": "2026-05-10"
+      },
+      "additional_references": [
+        {
+          "title": "SQL Server Agent differences in Azure SQL Managed Instance",
+          "url": "https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/transact-sql-tsql-differences-sql-server#sql-server-agent"
+        }
+      ]
+    },
+
+    "ssrs_workload": {
+      "phase1_match": [
+        "Database: ReportServer present",
+        "Database: ReportServerTempDB present"
+      ],
+      "ms_rule_name": null,
+      "ms_rule_category": "Architectural constraint",
+      "verdicts": {
+        "sql_vm": "supported",
+        "sql_mi": "warning_remediable",
+        "sql_db": "blocker"
+      },
+      "viable_targets": ["sql_vm", "sql_mi"],
+      "rationale": "Azure SQL Managed Instance can host the SSRS catalog databases (ReportServer and ReportServerTempDB), but it cannot run the Reporting Services service itself. Two viable patterns exist: (1) Power BI paginated reports, or (2) host SSRS on an Azure VM and point its catalog at MI using SQL authentication. Azure SQL Database does not support SSRS catalog databases.",
+      "remediation_options": [
+        "Replace SSRS with Power BI paginated reports",
+        "Host SSRS service on an Azure VM, point its catalog DBs at MI",
+        "Migrate the entire workload to SQL VM (simplest if SSRS reports must remain unchanged)"
+      ],
+      "citation": {
+        "title": "What is Azure SQL Managed Instance? (SSRS section)",
+        "url": "https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/sql-managed-instance-paas-overview",
+        "category": "Service-level architectural constraint",
+        "verified_date": "2026-05-10"
+      }
+    },
+
+    "ssis_workload": {
+      "phase1_match": ["Database: SSISDB present"],
+      "ms_rule_name": null,
+      "ms_rule_category": "Architectural note",
+      "verdicts": {
+        "sql_vm": "supported",
+        "sql_mi": "supported",
+        "sql_db": "blocker"
+      },
+      "viable_targets": ["sql_vm", "sql_mi"],
+      "rationale": "Azure SQL Managed Instance supports SSIS: it can host the SSIS catalog (SSISDB) directly. However, SSIS packages don't execute on the MI itself; they execute on a managed Azure-SSIS Integration Runtime in Azure Data Factory. Azure SQL Database does not support SSISDB.",
+      "remediation_options": [
+        "On MI: keep SSISDB hosted on MI, deploy an Azure-SSIS IR in Data Factory, redeploy packages to that IR",
+        "On SQL VM: continue running SSIS in-process the same way as on-prem"
+      ],
+      "citation": {
+        "title": "SQL Server Integration Services (SSIS) on SQL Managed Instance",
+        "url": "https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/sql-managed-instance-paas-overview",
+        "category": "Service-level architectural note",
+        "verified_date": "2026-05-10"
+      }
+    },
+
+    "filestream_filetable": {
+      "phase1_match": ["Database with FileStream/FileTable filegroup"],
+      "ms_rule_name": "FileStream",
+      "ms_rule_category": "Issue",
+      "verdicts": {
+        "sql_vm": "supported",
+        "sql_mi": "blocker",
+        "sql_db": "blocker"
+      },
+      "viable_targets": ["sql_vm"],
+      "rationale": "FILESTREAM and FileTable are not supported on Azure SQL Managed Instance. The backup itself cannot be restored on MI - this is a hard migration block, not a runtime warning. SQL Database also does not support FILESTREAM.",
+      "remediation_options": [
+        "Move unstructured files out of FILESTREAM into Azure Blob Storage; store metadata (URL, size, name) in MI",
+        "Re-engineer the application to stream blobs to/from Blob Storage",
+        "Migrate to SQL VM where FILESTREAM continues to work"
+      ],
+      "citation": {
+        "title": "FILESTREAM - Assessment rules for SQL Server to Azure SQL Managed Instance migration",
+        "url": "https://learn.microsoft.com/en-us/data-migration/sql-server/managed-instance/assessment-rules#filestream",
+        "category": "Issue",
+        "verified_date": "2026-05-10"
+      }
+    }
+  }
+}

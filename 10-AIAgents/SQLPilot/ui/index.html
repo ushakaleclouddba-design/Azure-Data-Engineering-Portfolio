@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQLPilot</title>
+<style>
+  /* =========================================================
+     Design tokens — light + dark via [data-theme]
+     ========================================================= */
+  :root[data-theme="light"] {
+    --fg-1: #0F172A;
+    --fg-2: #475569;
+    --fg-3: #94A3B8;
+    --bg-page: #E2E8F0;       /* slate-200 - DEEPER not bland */
+    --bg-card: #FFFFFF;
+    --bg-subtle: #CBD5E1;     /* slate-300 - more contrast */
+    --border: rgba(15,23,42,0.15);
+    --border-strong: rgba(15,23,42,0.28);
+    --good: #059669;
+    --good-bg: #A7F3D0;
+    --good-fg: #065F46;
+    --warn: #D97706;
+    --warn-bg: #FDE68A;
+    --warn-fg: #92400E;
+    --bad: #DC2626;
+    --bad-bg: #FECACA;
+    --bad-fg: #991B1B;
+    --info: #2563EB;
+    --info-bg: #BFDBFE;
+    --info-fg: #1E40AF;
+    --azure: #0078D4;
+    --code-bg: #0F172A;
+    --code-fg: #E2E8F0;
+    --stage1: #4F46E5;
+    --stage1-bg: #C7D2FE;
+    --stage2: #9333EA;
+    --stage2-bg: #E9D5FF;
+    --stage3: #EA580C;
+    --stage3-bg: #FED7AA;
+    --stage4: #0D9488;
+    --stage4-bg: #99F6E4;
+    --stage5: #475569;
+    --stage5-bg: #CBD5E1;
+    --hero-gradient: linear-gradient(135deg, #4F46E5 0%, #9333EA 30%, #EA580C 65%, #0D9488 100%);
+    --hero-fg: #FFFFFF;
+    --hero-fg-2: rgba(255,255,255,0.92);
+  }
+  :root[data-theme="dark"] {
+    --fg-1: #F1F5F9;          /* slate-100 */
+    --fg-2: #94A3B8;          /* slate-400 */
+    --fg-3: #64748B;          /* slate-500 */
+    --bg-page: #0F172A;       /* slate-900 — true modern dark */
+    --bg-card: #1E293B;       /* slate-800 */
+    --bg-subtle: #334155;     /* slate-700 */
+    --border: rgba(241,245,249,0.08);
+    --border-strong: rgba(241,245,249,0.18);
+    --good: #34D399;
+    --good-bg: rgba(16,185,129,0.18);
+    --good-fg: #6EE7B7;
+    --warn: #FBBF24;
+    --warn-bg: rgba(245,158,11,0.18);
+    --warn-fg: #FCD34D;
+    --bad: #F87171;
+    --bad-bg: rgba(239,68,68,0.18);
+    --bad-fg: #FCA5A5;
+    --info: #60A5FA;
+    --info-bg: rgba(59,130,246,0.18);
+    --info-fg: #93C5FD;
+    --azure: #29A2F0;
+    --code-bg: #1E293B;
+    --stage1: #818CF8;
+    --stage1-bg: rgba(99,102,241,0.22);
+    --stage2: #C084FC;
+    --stage2-bg: rgba(168,85,247,0.22);
+    --stage3: #FB923C;
+    --stage3-bg: rgba(249,115,22,0.20);
+    --stage4: #2DD4BF;
+    --stage4-bg: rgba(20,184,166,0.20);
+    --stage5: #94A3B8;
+    --stage5-bg: rgba(100,116,139,0.20);
+    --hero-gradient: linear-gradient(135deg, #3730A3 0%, #6B21A8 30%, #9A3412 65%, #115E59 100%);
+    --hero-fg: #FFFFFF;
+    --hero-fg-2: rgba(255,255,255,0.85);
+  }
+  :root {
+    --r-md: 8px;
+    --r-lg: 12px;
+    --mono: ui-monospace, "Cascadia Code", Consolas, monospace;
+    color-scheme: light dark;
+  }
+
+  /* =========================================================
+     Reset + base
+     ========================================================= */
+  * { box-sizing: border-box; }
+  html { background: var(--bg-page); }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(ellipse 800px 600px at 5% 5%,   rgba(79,70,229,0.20),  transparent 60%),
+      radial-gradient(ellipse 700px 500px at 95% 0%,  rgba(147,51,234,0.18), transparent 60%),
+      radial-gradient(ellipse 900px 700px at 100% 95%, rgba(234,88,12,0.18),  transparent 60%),
+      radial-gradient(ellipse 700px 600px at 0% 100%, rgba(13,148,136,0.20), transparent 60%),
+      var(--bg-page);
+    background-attachment: fixed;
+    color: var(--fg-1);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.5;
+    font-size: 14px;
+    transition: color 150ms ease;
+    min-height: 100vh;
+  }
+  /* Dark theme tones the blooms down so they don't overwhelm */
+  [data-theme="dark"] body {
+    background:
+      radial-gradient(ellipse 800px 600px at 5% 5%,   rgba(99,102,241,0.18), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 95% 0%,  rgba(168,85,247,0.15), transparent 60%),
+      radial-gradient(ellipse 900px 700px at 100% 95%, rgba(249,115,22,0.13), transparent 60%),
+      radial-gradient(ellipse 700px 600px at 0% 100%, rgba(20,184,166,0.16), transparent 60%),
+      var(--bg-page);
+    background-attachment: fixed;
+  }
+  /* Toolbar background needs to be opaque now so the blooms don't bleed through */
+  .toolbar { backdrop-filter: blur(20px); }
+  a { color: var(--info); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  button { font-family: inherit; cursor: pointer; }
+
+  /* =========================================================
+     Layout
+     ========================================================= */
+  .page { max-width: 1080px; margin: 0 auto; padding: 16px 32px 64px; }
+
+  .toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 24px;
+    border: 0.5px solid var(--border);
+    border-radius: var(--r-lg);
+    margin: 0 0 20px;
+    position: sticky; top: 12px; z-index: 10;
+    background: var(--bg-card);
+    box-shadow: 0 2px 12px rgba(15,23,42,0.06);
+  }
+  .toolbar-left { display: flex; align-items: center; gap: 14px; }
+  .toolbar-right { display: flex; align-items: center; gap: 16px; }
+  .wordmark {
+    font-size: 17px; font-weight: 800; cursor: pointer;
+    background: linear-gradient(135deg, #4F46E5 0%, #9333EA 50%, #EA580C 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; color: transparent;
+    letter-spacing: -0.02em;
+  }
+  .version {
+    font-size: 11px; color: var(--info-fg); font-weight: 600;
+    padding: 3px 8px; background: var(--info-bg); border-radius: 4px;
+  }
+  .vm-status { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+  .vm-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--fg-3);
+  }
+  .vm-dot.running  { background: var(--good); box-shadow: 0 0 0 3px var(--good-bg); }
+  .vm-dot.destroyed { background: var(--fg-3); }
+  .vm-dot.unknown  { background: var(--warn); box-shadow: 0 0 0 3px var(--warn-bg); }
+  .vm-status .label { color: var(--fg-2); font-weight: 500; }
+  .vm-status .ip { font-family: var(--mono); color: var(--fg-1); font-size: 11px; font-weight: 600; }
+  .theme-toggle {
+    background: transparent; border: 0.5px solid var(--border-strong);
+    width: 28px; height: 28px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--fg-2);
+    font-size: 14px;
+  }
+  .theme-toggle:hover { color: var(--fg-1); }
+
+  .btn {
+    font-size: 12px; padding: 7px 14px; border-radius: var(--r-md);
+    border: 0.5px solid var(--border-strong); background: var(--bg-card);
+    color: var(--fg-1); font-weight: 500;
+    transition: all 120ms ease;
+  }
+  .btn:hover { background: var(--bg-subtle); border-color: var(--fg-2); }
+  .btn:disabled {
+    opacity: 0.45; cursor: not-allowed;
+    background: transparent; border-color: var(--border);
+    color: var(--fg-3);
+  }
+  .btn:disabled:hover { background: transparent; border-color: var(--border); }
+  /* Danger button — Destroy VM. Bold red outline; hover fills danger background. */
+  .btn-danger {
+    border: 1.5px solid var(--bad);
+    color: var(--bad);
+    font-weight: 600;
+  }
+  .btn-danger:hover {
+    background: var(--bad);
+    color: white;
+    border-color: var(--bad);
+  }
+  .btn-danger:disabled {
+    border: 0.5px solid var(--border);
+    color: var(--fg-3);
+    background: transparent;
+  }
+  /* Action button — Create VM. Bold emerald gradient fill, the primary action. */
+  .btn-action {
+    border: none;
+    background: linear-gradient(135deg, #10B981 0%, #0D9488 100%);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(13,148,136,0.30);
+  }
+  .btn-action:hover {
+    background: linear-gradient(135deg, #059669 0%, #0F766E 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(13,148,136,0.40);
+  }
+  .btn-action:disabled {
+    background: var(--bg-subtle);
+    color: var(--fg-3);
+    box-shadow: none;
+    transform: none;
+  }
+  /* Primary button — used on Continue / Start migration. Same dark style. */
+  .btn-primary { border: none; background: var(--fg-1); color: var(--bg-card); font-weight: 600; padding: 8px 16px; }
+  .btn-primary:hover { opacity: 0.88; background: var(--fg-1); }
+  .btn-success { border: none; background: var(--good); color: white; font-weight: 600; }
+
+  .back-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--fg-2);
+    text-decoration: none; margin-bottom: 20px;
+    cursor: pointer;
+  }
+  .back-link:hover { color: var(--fg-1); text-decoration: none; }
+
+  /* =========================================================
+     Front page workspace
+     ========================================================= */
+  .workspace-title {
+    margin: 0 0 32px;
+    padding: 44px 36px 36px;
+    background: var(--hero-gradient);
+    border-radius: var(--r-lg);
+    border: 0.5px solid var(--border);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  }
+  .workspace-title h1 {
+    font-size: 32px; font-weight: 700; margin: 0 0 8px;
+    letter-spacing: -0.02em;
+    color: var(--hero-fg);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  }
+  .workspace-title p {
+    margin: 0;
+    color: var(--hero-fg-2);
+    font-size: 15px;
+  }
+
+  .stage-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px;
+    margin-bottom: 40px;
+  }
+  .stage-card {
+    position: relative;
+    border: 0.5px solid var(--border); border-radius: var(--r-lg);
+    padding: 18px 16px; background: var(--bg-card);
+    cursor: pointer;
+    transition: border-color 120ms ease, transform 120ms ease, box-shadow 150ms ease, background 150ms ease;
+    overflow: hidden;
+  }
+  .stage-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--accent, var(--border));
+    opacity: 0.85;
+  }
+  .stage-card:hover {
+    border-color: var(--border-strong);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    transform: translateY(-1px);
+  }
+  .stage-card.active {
+    border: 1.5px solid var(--accent, var(--info));
+    background: var(--accent-bg, var(--info-bg));
+    padding: 17.5px 15.5px;
+  }
+  .stage-card.done {
+    background: var(--accent-bg, var(--good-bg));
+  }
+  /* Per-stage color accents — driven by data-stage attribute */
+  .stage-card[data-stage="1"] { --accent: var(--stage1); --accent-bg: var(--stage1-bg); }
+  .stage-card[data-stage="2"] { --accent: var(--stage2); --accent-bg: var(--stage2-bg); }
+  .stage-card[data-stage="3"] { --accent: var(--stage3); --accent-bg: var(--stage3-bg); }
+  .stage-card[data-stage="4"] { --accent: var(--stage4); --accent-bg: var(--stage4-bg); }
+  .stage-card[data-stage="5"] { --accent: var(--stage5); --accent-bg: var(--stage5-bg); }
+
+  .stage-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .stage-num {
+    font-size: 10px; color: var(--accent, var(--fg-3));
+    letter-spacing: 0.08em; font-weight: 600;
+    opacity: 0.85;
+  }
+  .stage-num.active { color: var(--accent, var(--info)); font-weight: 700; opacity: 1; }
+  .stage-dot {
+    width: 18px; height: 18px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px;
+  }
+  .stage-dot.done {
+    background: var(--accent, var(--good));
+    color: white;
+    box-shadow: 0 0 0 3px var(--accent-bg, var(--good-bg));
+  }
+  .stage-dot.active {
+    border: 2px solid var(--accent, var(--info));
+    background: var(--bg-card);
+    animation: pulseDot 2s ease-in-out infinite;
+  }
+  .stage-dot.pending { border: 1px solid var(--border-strong); }
+  @keyframes pulseDot {
+    0%, 100% { box-shadow: 0 0 0 0 var(--accent-bg, transparent); }
+    50%      { box-shadow: 0 0 0 6px var(--accent-bg, transparent); }
+  }
+  .stage-name { font-size: 14.5px; font-weight: 600; margin-bottom: 4px; }
+  .stage-tag { font-size: 11px; color: var(--fg-2); margin-bottom: 12px; line-height: 1.5; }
+  .stage-value { font-size: 22px; font-weight: 500; line-height: 1; }
+  .stage-value.text { font-size: 14px; }
+  .stage-value.muted { color: var(--fg-3); }
+  .stage-value.info { color: var(--info); }
+  .stage-meta { font-size: 10px; color: var(--fg-3); margin-top: 2px; }
+
+  .activity-label {
+    font-size: 11px; color: var(--fg-3); letter-spacing: 0.08em;
+    margin-bottom: 14px; font-weight: 600;
+  }
+  .activity-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 16px; background: var(--bg-card);
+    border: 0.5px solid var(--border);
+    border-left: 3px solid var(--good);
+    border-radius: var(--r-md); font-size: 12px;
+    margin-bottom: 8px;
+    transition: border-color 120ms ease;
+  }
+  .activity-row:hover { border-color: var(--good); }
+  .activity-row .time { font-family: var(--mono); color: var(--fg-3); font-size: 11px; min-width: 60px; }
+  .activity-row .desc { flex: 1; }
+  .activity-row .desc .tool { color: var(--fg-1); font-weight: 500; }
+  .activity-row .status {
+    font-size: 10px; padding: 4px 10px; font-weight: 700;
+    background: linear-gradient(135deg, var(--good) 0%, #14B8A6 100%);
+    color: white;
+    border-radius: 4px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .activity-empty {
+    font-size: 12px; color: var(--fg-3); padding: 18px;
+    background: var(--bg-subtle); border-radius: var(--r-md);
+    text-align: center;
+  }
+
+  /* =========================================================
+     Detail page common
+     ========================================================= */
+  .section-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px; }
+  .section-head h2 { font-size: 22px; font-weight: 500; margin: 0; }
+  .stage-tag-line { font-size: 11px; color: var(--fg-3); }
+  .section-sub { margin: 0 0 24px; color: var(--fg-2); font-size: 13px; }
+
+  .actions { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .empty {
+    padding: 24px; background: var(--bg-subtle);
+    border-radius: var(--r-md); color: var(--fg-2);
+    font-size: 13px; text-align: center;
+  }
+  .empty button { margin-top: 12px; }
+
+  /* =========================================================
+     Assess
+     ========================================================= */
+  .metric-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px;
+    margin-bottom: 32px;
+  }
+  .metric .label { font-size: 11px; color: var(--fg-3); margin-bottom: 4px; }
+  .metric .value { font-size: 32px; font-weight: 500; line-height: 1; }
+  .metric .value.bad { color: var(--bad); }
+  .metric .value.warn { color: var(--warn); }
+  .metric .value.good { color: var(--good); }
+
+  .table-label {
+    font-size: 11px; color: var(--fg-3); letter-spacing: 0.04em;
+    margin-bottom: 10px;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { border-bottom: 0.5px solid var(--border); }
+  tbody tr { border-bottom: 0.5px solid var(--border); }
+  tbody tr:hover { background: var(--bg-subtle); }
+  th {
+    text-align: left; padding: 10px 0;
+    font-weight: 500; color: var(--fg-2); font-size: 12px;
+  }
+  th.num { text-align: right; }
+  td { padding: 11px 0; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.verdict-bad { color: var(--bad); text-align: right; }
+  td.verdict-warn { color: var(--warn); text-align: right; }
+  td.verdict-good { color: var(--good); text-align: right; }
+  td.muted { color: var(--fg-3); }
+
+  /* =========================================================
+     Decide
+     ========================================================= */
+  .decide-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+    margin-bottom: 20px;
+  }
+  .decide-card {
+    border: 0.5px solid var(--border); border-radius: var(--r-lg);
+    padding: 18px 20px; background: var(--bg-card);
+  }
+  .decide-card.recommended { border: 2px solid var(--info); padding: 17px 19px; }
+  .decide-card .head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .decide-card .head .title-wrap { display: flex; align-items: center; gap: 8px; }
+  .decide-card .azure-dot { width: 8px; height: 8px; background: var(--azure); border-radius: 50%; }
+  .decide-card .title { font-size: 13px; font-weight: 500; }
+  .decide-card .recommend-badge {
+    font-size: 10px; padding: 3px 8px;
+    background: var(--info-bg); color: var(--info-fg); border-radius: 4px;
+  }
+  .decide-card .label-row {
+    margin-bottom: 14px; font-size: 13px; font-weight: 500;
+  }
+  .decide-card .label-row.good { color: var(--good); }
+  .decide-card .label-row.warn { color: var(--warn); }
+  .decide-card .label-row.bad { color: var(--bad); }
+  .decide-card .findings { font-size: 12px; line-height: 1.9; }
+  .decide-card .findings .row { display: flex; gap: 6px; align-items: flex-start; }
+  .decide-card .findings .check { color: var(--good); flex-shrink: 0; }
+  .decide-card .findings .cross { color: var(--bad); flex-shrink: 0; }
+  .decide-card .findings .warn  { color: var(--warn); flex-shrink: 0; }
+  .decide-card .findings .text { flex: 1; }
+  .decide-card .more { margin-top: 14px; font-size: 11px; }
+
+  /* =========================================================
+     Migrate
+     ========================================================= */
+  .migrate-list { display: flex; flex-direction: column; }
+  .migrate-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 0; border-bottom: 0.5px solid var(--border);
+  }
+  .migrate-row:last-child { border-bottom: none; }
+  .migrate-status {
+    width: 20px; height: 20px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .migrate-status.done { background: var(--good); color: white; font-size: 11px; }
+  .migrate-status.running { border: 1.5px solid var(--info); animation: pulse 1.5s infinite; }
+  .migrate-status.pending { border: 0.5px solid var(--border-strong); }
+  .migrate-status.failed { background: var(--bad); color: white; font-size: 11px; }
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.35; }
+    100% { opacity: 1; }
+  }
+  .migrate-body { flex: 1; min-width: 0; }
+  .migrate-title { font-size: 13px; font-weight: 500; }
+  .migrate-title.dim { color: var(--fg-2); }
+  .migrate-sub { font-size: 11px; color: var(--fg-2); margin-top: 2px; }
+  .migrate-sub.dim { color: var(--fg-3); }
+  .badge-real, .badge-phase3 {
+    font-size: 10px; padding: 3px 8px; border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .badge-real { background: var(--good-bg); color: var(--good-fg); }
+  .badge-phase3 { background: var(--bg-subtle); color: var(--fg-2); }
+
+  .stream-log {
+    margin-top: 16px; max-height: 220px; overflow-y: auto;
+    background: var(--code-bg); border-radius: var(--r-md);
+    padding: 12px 14px; font-family: var(--mono); font-size: 11px;
+    color: var(--fg-2); line-height: 1.5;
+    display: none;
+  }
+  .stream-log.show { display: block; }
+  .stream-log .line { word-break: break-all; }
+
+  /* =========================================================
+     Handoff
+     ========================================================= */
+  .handoff-doc {
+    background: var(--bg-subtle); border-radius: var(--r-lg);
+    padding: 24px 28px;
+  }
+  .doc-label {
+    font-size: 10px; color: var(--fg-3); letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+  .doc-value { font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
+  .doc-value.mono { font-family: var(--mono); }
+  .doc-value.mono-box {
+    font-family: var(--mono); font-size: 12px;
+    background: var(--bg-card); padding: 12px 14px;
+    border-radius: var(--r-md); border: 0.5px solid var(--border);
+    word-break: break-all;
+  }
+  .doc-value.struck {
+    font-family: var(--mono); font-size: 12px;
+    color: var(--fg-3); text-decoration: line-through;
+  }
+  .doc-value.passed { color: var(--good); }
+  .doc-value.failed { color: var(--bad); }
+
+  /* =========================================================
+     Day-to-day
+     ========================================================= */
+  .day2-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  .day2-col h3 {
+    font-size: 10px; color: var(--fg-3); letter-spacing: 0.06em;
+    margin: 0 0 12px; font-weight: 500;
+  }
+  .day2-card {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px; background: var(--bg-subtle);
+    border-radius: var(--r-md); margin-bottom: 8px;
+  }
+  .day2-card-title { font-size: 13px; font-weight: 500; }
+  .day2-card-sub { font-size: 11px; color: var(--fg-2); margin-top: 2px; }
+  .badge-phase3-on-subtle {
+    font-size: 10px; padding: 3px 8px;
+    background: var(--bg-card); color: var(--fg-2); border-radius: 4px;
+  }
+  .day2-note {
+    margin-top: 24px; font-size: 12px; color: var(--fg-3);
+    padding: 14px 18px; background: var(--bg-subtle);
+    border-radius: var(--r-md);
+    border-left: 2px solid var(--border-strong);
+    line-height: 1.6;
+  }
+
+  /* =========================================================
+     Toasts
+     ========================================================= */
+  #toasts {
+    position: fixed; bottom: 24px; right: 24px;
+    display: flex; flex-direction: column; gap: 8px;
+    z-index: 100;
+  }
+  .toast {
+    background: var(--bg-card); border: 0.5px solid var(--border-strong);
+    border-radius: var(--r-md); padding: 12px 16px;
+    font-size: 12px; min-width: 280px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+  .toast.error { border-color: var(--bad); color: var(--bad-fg); }
+
+  /* =========================================================
+     Views
+     ========================================================= */
+  .view { display: none; }
+  .view.active { display: block; }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ================================
+       TOOLBAR
+       ================================ -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <span class="wordmark" onclick="goView('home')">SQLPilot</span>
+      <span class="version">v0.9</span>
+    </div>
+    <div class="toolbar-right">
+      <div class="vm-status" id="vm-status">
+        <span class="vm-dot unknown" id="vm-dot"></span>
+        <span class="label" id="vm-label">…</span>
+        <span class="ip" id="vm-ip"></span>
+      </div>
+      <button class="btn btn-action" id="create-vm-btn" onclick="createVm()">Create VM</button>
+      <button class="btn btn-danger" id="destroy-vm-btn" onclick="destroyVm()">Destroy VM</button>
+      <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle theme">◐</button>
+    </div>
+  </div>
+
+  <!-- ================================
+       HOME (workspace)
+       ================================ -->
+  <div id="view-home" class="view active">
+    <div class="workspace-title">
+      <h1>Database migration workspace</h1>
+      <p>SQL Server estate from on-prem to Azure. Each stage opens its own workspace.</p>
+      <p id="home-assess-line" style="font-size:13px;color:var(--hero-fg-2);margin-top:14px">Loading assessment status…</p>
+    </div>
+
+    <div class="stage-grid" id="stage-grid">
+      <!-- 5 stage cards rendered by JS -->
+    </div>
+
+    <div class="activity-label">RECENT ACTIVITY</div>
+    <div id="activity-list">
+      <div class="activity-empty">No tool calls yet this session. Trigger an action to start the audit trail.</div>
+    </div>
+  </div>
+
+  <!-- ================================
+       ASSESS
+       ================================ -->
+  <div id="view-assess" class="view">
+    <a class="back-link" onclick="goView('home')">← Back to workspace</a>
+    <div class="section-head">
+      <h2>Estate assessment</h2>
+      <span class="stage-tag-line">stage 1 of 5</span>
+    </div>
+    <p class="section-sub" id="assess-source">Loading…</p>
+
+    <!-- Empty state — shown when no Phase 1 JSON exists yet -->
+    <div id="assess-empty" class="empty" style="display:none">
+      <div style="font-size:14px;font-weight:500;color:var(--fg-1);margin-bottom:8px">No assessment yet</div>
+      <div>Phase 1 scans your SQL Server estate, finds blockers and warnings, and writes the JSON this stage reads.<br/>Click to run it now — takes 3-5 minutes per server.</div>
+      <button class="btn btn-action" style="margin-top:14px" onclick="runAssessment()">Run Phase 1 assessment</button>
+    </div>
+
+    <!-- Running state — shown while a job is in flight -->
+    <div id="assess-running" class="empty" style="display:none">
+      <div style="font-size:14px;font-weight:500;color:var(--fg-1);margin-bottom:8px">Running Phase 1 assessment…</div>
+      <div id="assess-running-detail">Starting up. This typically takes 3-5 minutes per server.</div>
+      <div style="margin-top:14px;font-family:var(--mono);font-size:11px;color:var(--fg-3);background:var(--bg-subtle);padding:10px 14px;border-radius:6px;text-align:left;max-height:140px;overflow-y:auto" id="assess-running-log"></div>
+    </div>
+
+    <!-- Data state — shown when JSON exists -->
+    <div id="assess-data" style="display:none">
+      <div class="metric-grid">
+        <div class="metric"><div class="label">Servers</div><div class="value" id="m-servers">—</div></div>
+        <div class="metric"><div class="label">High findings</div><div class="value bad" id="m-high">—</div></div>
+        <div class="metric"><div class="label">Medium</div><div class="value warn" id="m-medium">—</div></div>
+        <div class="metric"><div class="label">Source file</div><div class="value" style="font-size:12px;color:var(--fg-2);word-break:break-all" id="m-file">—</div></div>
+      </div>
+
+      <div class="table-label">PER SERVER</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Server</th>
+            <th class="num">High</th>
+            <th class="num">Medium</th>
+            <th class="num">Verdict</th>
+          </tr>
+        </thead>
+        <tbody id="assess-rows"></tbody>
+      </table>
+
+      <div class="actions">
+        <button class="btn btn-primary" onclick="approveAndGo('assess', 'decide')">Continue to Decide →</button>
+        <button class="btn" onclick="runAssessment()">Refresh assessment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================
+       DECIDE
+       ================================ -->
+  <div id="view-decide" class="view">
+    <a class="back-link" onclick="goView('home')">← Back to workspace</a>
+    <div class="section-head">
+      <h2>Target decision</h2>
+      <span class="stage-tag-line" id="decide-tag-line">stage 2 of 5</span>
+    </div>
+    <p class="section-sub">KB-driven verdicts. Each verdict maps to a Microsoft Learn citation.</p>
+
+    <div class="decide-grid" id="decide-grid">
+      <!-- 3 cards rendered by JS -->
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" onclick="approveAndGo('decide', 'migrate')">Continue to Migrate →</button>
+    </div>
+  </div>
+
+  <!-- ================================
+       MIGRATE
+       ================================ -->
+  <div id="view-migrate" class="view">
+    <a class="back-link" onclick="goView('home')">← Back to workspace</a>
+    <div class="section-head">
+      <h2>Stand up equivalent server</h2>
+      <span class="stage-tag-line">stage 3 of 5</span>
+    </div>
+    <p class="section-sub" id="migrate-sub">Node5 on-prem → new Azure SQL VM · 8 sub-steps</p>
+
+    <div class="migrate-list" id="migrate-list">
+      <!-- 8 sub-steps rendered by JS -->
+    </div>
+
+    <div class="stream-log" id="stream-log"></div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="start-migrate-btn" onclick="startMigration()">Start migration</button>
+      <button class="btn" onclick="goView('handoff')">Skip to Handoff →</button>
+    </div>
+  </div>
+
+  <!-- ================================
+       HANDOFF
+       ================================ -->
+  <div id="view-handoff" class="view">
+    <a class="back-link" onclick="goView('home')">← Back to workspace</a>
+    <div class="section-head">
+      <h2>Handoff to app team</h2>
+      <span class="stage-tag-line">stage 4 of 5</span>
+    </div>
+    <p class="section-sub">Generated package · ready to email or paste into a ticket.</p>
+
+    <div id="handoff-empty" class="empty">
+      <div>No handoff generated yet. Complete the migration first, or generate from the current state.</div>
+      <button class="btn" onclick="generateHandoff()">Generate handoff</button>
+    </div>
+
+    <div id="handoff-content" style="display:none">
+      <div class="handoff-doc" id="handoff-doc"></div>
+      <div class="actions">
+        <button class="btn" onclick="copyHandoffEmail()">Copy as email</button>
+        <button class="btn btn-success" onclick="signoffHandoff()">Sign off · handoff complete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================
+       DAY-TO-DAY OPERATIONS
+       ================================ -->
+  <div id="view-day2" class="view">
+    <a class="back-link" onclick="goView('home')">← Back to workspace</a>
+    <div class="section-head">
+      <h2>Day-to-day operations</h2>
+      <span class="stage-tag-line">stage 5 of 5</span>
+    </div>
+    <p class="section-sub">Steady-state DBA tooling · roadmap for Phase 3.</p>
+
+    <div class="day2-grid">
+      <div class="day2-col">
+        <h3>TOOLING</h3>
+        <div class="day2-card">
+          <div>
+            <div class="day2-card-title">dbatools</div>
+            <div class="day2-card-sub">PowerShell community module</div>
+          </div>
+          <span class="badge-phase3-on-subtle">Phase 3</span>
+        </div>
+        <div class="day2-card">
+          <div>
+            <div class="day2-card-title">Ola Hallengren maintenance</div>
+            <div class="day2-card-sub">Backup, integrity, index jobs</div>
+          </div>
+          <span class="badge-phase3-on-subtle">Phase 3</span>
+        </div>
+        <div class="day2-card">
+          <div>
+            <div class="day2-card-title">First Responder Kit</div>
+            <div class="day2-card-sub">sp_BlitzFirst, sp_Blitz, sp_BlitzIndex</div>
+          </div>
+          <span class="badge-phase3-on-subtle">Phase 3</span>
+        </div>
+      </div>
+      <div class="day2-col">
+        <h3>DAILY / WEEKLY REPORTS</h3>
+        <div class="day2-card">
+          <div>
+            <div class="day2-card-title">Backup status</div>
+            <div class="day2-card-sub">Daily · RPO &lt; 15 min</div>
+          </div>
+          <span class="badge-phase3-on-subtle">Phase 3</span>
+        </div>
+        <div class="day2-card">
+          <div>
+            <div class="day2-card-title">Integrity check</div>
+            <div class="day2-card-sub">Weekly · all DBs</div>
+          </div>
+          <span class="badge-phase3-on-subtle">Phase 3</span>
+        </div>
+        <div class="day2-card">
+          <div>
+            <div class="day2-card-title">Failed jobs</div>
+            <div class="day2-card-sub">Daily · email digest</div>
+          </div>
+          <span class="badge-phase3-on-subtle">Phase 3</span>
+        </div>
+        <div class="day2-card">
+          <div>
+            <div class="day2-card-title">Patch / CU compliance</div>
+            <div class="day2-card-sub">Monthly · Azure Update Manager</div>
+          </div>
+          <span class="badge-phase3-on-subtle">Phase 3</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="day2-note">
+      Day-to-day operations is the Phase 3 roadmap. The Friday demo shows the design and structure;
+      implementation begins after sign-off on this prototype.
+    </div>
+  </div>
+
+</div>
+
+<div id="toasts"></div>
+
+<script>
+/* =========================================================
+   State
+   ========================================================= */
+const state = {
+  vm: { state: 'unknown', ip: null, deployment: null },
+  assess: null,
+  decide: null,
+  approved: {
+    // Stage approvals — flipped to true when user clicks "Continue" on each stage page.
+    // Stage 3 (Migrate) is derived from sub-step status, not approved here.
+    assess:  false,
+    decide:  false,
+    handoff: false,
+  },
+  migrate: {
+    // 8 sub-steps, indexed 0..7
+    steps: [
+      { id: 'provision',   title: 'Provision target VM',                    sub: 'Terraform apply', real: true,  status: 'pending' },
+      { id: 'restore',     title: 'Restore user databases',                 sub: 'BACKUP TO URL / RESTORE FROM URL', real: true, status: 'pending' },
+      { id: 'logins',      title: 'Migrate SQL logins (SID-preserving)',    sub: 'Windows + SQL auth', real: false, status: 'pending' },
+      { id: 'jobs',        title: 'Migrate SQL Agent jobs',                 sub: 'Schedules + alerts + operators', real: false, status: 'pending' },
+      { id: 'ssis',        title: 'Migrate SSIS packages',                  sub: 'SSISDB catalog · package store', real: false, status: 'pending' },
+      { id: 'linked',      title: 'Migrate linked servers + configs',       sub: 'sp_configure · credentials · certs', real: false, status: 'pending' },
+      { id: 'backup',      title: 'Configure Azure Backup',                 sub: 'Recovery Services vault · daily + 15-min log', real: false, status: 'pending' },
+      { id: 'validate',    title: 'Validate (DBCC CHECKDB)',                sub: 'Page-level integrity check', real: true,  status: 'pending' },
+    ],
+    restore_result: null,
+    validate_result: null,
+  },
+  handoff: null,
+  activity: [], // recent tool calls
+};
+
+const TARGET_SERVER = 'NODE5';
+const TARGET_DB = 'SQLPilotDemo';
+
+/* =========================================================
+   Theme
+   ========================================================= */
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('sqlpilot-theme', t);
+  document.getElementById('theme-toggle').textContent = (t === 'light' ? '◐' : '◑');
+}
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme') || 'light';
+  applyTheme(cur === 'light' ? 'dark' : 'light');
+}
+applyTheme(localStorage.getItem('sqlpilot-theme') || 'light');
+
+/* =========================================================
+   Routing
+   ========================================================= */
+function goView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const el = document.getElementById('view-' + name);
+  if (el) el.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (name === 'home')    renderHome();
+  if (name === 'assess')  loadAssess();
+  if (name === 'decide')  loadDecide();
+  if (name === 'migrate') renderMigrate();
+  if (name === 'handoff') renderHandoff();
+}
+
+// Mark a stage as approved (DBA gate) and navigate to the next.
+function approveAndGo(stageKey, nextView) {
+  if (state.approved && stageKey in state.approved) {
+    state.approved[stageKey] = true;
+  }
+  toast(stageKey + ' stage approved');
+  addActivity('approve_stage', stageKey + ' · DBA gate cleared');
+  goView(nextView);
+}
+
+/* =========================================================
+   Toasts
+   ========================================================= */
+function toast(msg, kind) {
+  const el = document.createElement('div');
+  el.className = 'toast' + (kind === 'error' ? ' error' : '');
+  el.textContent = msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+/* =========================================================
+   Fetch helpers
+   ========================================================= */
+async function api(path, options) {
+  const opts = options || {};
+  if (opts.body && typeof opts.body !== 'string') {
+    opts.body = JSON.stringify(opts.body);
+    opts.headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
+  }
+  const r = await fetch(path, opts);
+  let data;
+  try { data = await r.json(); } catch { data = null; }
+  if (!r.ok) {
+    const msg = (data && data.error) || ('HTTP ' + r.status);
+    throw new Error(msg);
+  }
+  return data;
+}
+
+/* =========================================================
+   VM status polling
+   ========================================================= */
+async function pollStatus() {
+  try {
+    const s = await api('/api/status');
+    state.vm.state = s.vm_state || 'unknown';
+    state.vm.ip = s.public_ip;
+    state.vm.deployment = s.deployment;
+    renderVmStatus();
+  } catch (e) { /* server might be restarting */ }
+}
+function renderVmStatus() {
+  const dot = document.getElementById('vm-dot');
+  const lbl = document.getElementById('vm-label');
+  const ip  = document.getElementById('vm-ip');
+  dot.className = 'vm-dot ' + state.vm.state;
+  const labels = { running: 'VM running', destroyed: 'VM destroyed', uninitialized: 'Terraform not init', unknown: '…' };
+  lbl.textContent = labels[state.vm.state] || state.vm.state;
+  ip.textContent = state.vm.ip || '';
+  const createBtn = document.getElementById('create-vm-btn');
+  const destroyBtn = document.getElementById('destroy-vm-btn');
+  createBtn.disabled  = state.vm.state === 'running';
+  destroyBtn.disabled = state.vm.state !== 'running';
+}
+
+async function createVm() {
+  if (!confirm('Apply Terraform — provisions an Azure VM. ~6 minutes. Continue?')) return;
+  toast('Terraform apply starting…');
+  try {
+    const r = await api('/api/terraform', { method: 'POST', body: { action: 'apply' } });
+    if (r.status === 'ok') {
+      toast('VM created at ' + r.public_ip);
+      state.migrate.steps[0].status = 'done';
+      addActivity('apply_terraform', 'action=apply · ' + (r.resources_added||'?') + ' resources · ' + (r.duration_seconds||'?') + 's');
+    } else {
+      toast('Terraform error: ' + (r.error || 'unknown'), 'error');
+    }
+  } catch (e) {
+    toast('Terraform failed: ' + e.message, 'error');
+  }
+  pollStatus();
+}
+
+async function destroyVm() {
+  if (!confirm('Destroy the Azure VM. This deletes all resources. Continue?')) return;
+  toast('Terraform destroy starting…');
+  try {
+    const r = await api('/api/terraform', { method: 'POST', body: { action: 'destroy' } });
+    if (r.status === 'ok') {
+      toast(r.resources_destroyed + ' resources destroyed');
+      addActivity('apply_terraform', 'action=destroy · ' + r.resources_destroyed + ' resources · ' + r.duration_seconds + 's');
+    } else {
+      toast('Destroy error: ' + (r.error || 'unknown'), 'error');
+    }
+  } catch (e) {
+    toast('Destroy failed: ' + e.message, 'error');
+  }
+  pollStatus();
+}
+
+/* =========================================================
+   Home / workspace
+   ========================================================= */
+function renderHome() {
+  // Update the assessment status line in the hero
+  const homeAssessLine = document.getElementById('home-assess-line');
+  if (homeAssessLine) {
+    if (state._assessJob) {
+      homeAssessLine.innerHTML = `Phase 1 assessment running… <a onclick="goView('assess')" style="cursor:pointer;text-decoration:underline;color:var(--hero-fg)">View progress →</a>`;
+    } else if (state.assess && state.assess.has_data) {
+      const when = state.assess.file_mtime ? new Date(state.assess.file_mtime).toLocaleString() : 'recent';
+      homeAssessLine.innerHTML = `Last assessment: ${when} · ${state.assess.server_count} server${state.assess.server_count===1?'':'s'} · ${state.assess.high_findings} high, ${state.assess.medium_findings} medium findings`;
+    } else {
+      homeAssessLine.innerHTML = `No assessment data yet. <a onclick="goView('assess')" style="cursor:pointer;text-decoration:underline;color:var(--hero-fg)">Run Phase 1 →</a>`;
+    }
+  }
+  const grid = document.getElementById('stage-grid');
+  const cards = [
+    { n: 1, key: 'assess',  name: 'Assess',                tag: 'Estate findings',  value: (state.assess && state.assess.has_data) ? state.assess.server_count : '—', meta: 'servers',         status: state.approved.assess ? 'done' : 'pending' },
+    { n: 2, key: 'decide',  name: 'Decide',                tag: 'Target picker',    value: state.decide ? (state.decide.recommended_target.display.split('(')[0].trim()) : '—', meta: state.decide ? state.decide.recommended_target.label.toLowerCase() : '', status: state.approved.decide ? 'done' : 'pending' },
+    { n: 3, key: 'migrate', name: 'Migrate',               tag: 'Stand up server',  value: doneStepsText(), meta: 'sub-steps done',                                  status: migrateStatus() },
+    { n: 4, key: 'handoff', name: 'Handoff',               tag: 'App team package', value: state.handoff ? 'Generated' : 'Pending', meta: state.handoff ? 'ready to send' : 'awaiting migrate', status: state.approved.handoff ? 'done' : (state.handoff ? 'active' : 'pending') },
+    { n: 5, key: 'day2',    name: 'Day-to-day ops',        tag: 'Steady state',     value: 'Roadmap', meta: 'Phase 3',                                                status: 'pending' },
+  ];
+  grid.innerHTML = cards.map(c => stageCardHtml(c)).join('');
+}
+function doneStepsText() {
+  const done = state.migrate.steps.filter(s => s.status === 'done').length;
+  const real = state.migrate.steps.filter(s => s.real).length;
+  return done + '/' + real;
+}
+function migrateStatus() {
+  const realDone = state.migrate.steps.filter(s => s.real && s.status === 'done').length;
+  const realTot  = state.migrate.steps.filter(s => s.real).length;
+  if (realDone === 0) return 'pending';
+  if (realDone === realTot) return 'done';
+  return 'active';
+}
+function stageCardHtml(c) {
+  const isActive = c.status === 'active';
+  const isDone = c.status === 'done';
+  const dotHtml = isDone   ? '<span class="stage-dot done">✓</span>'
+                : isActive ? '<span class="stage-dot active"></span>'
+                :            '<span class="stage-dot pending"></span>';
+  const valueClass = (typeof c.value === 'string' && (c.value === 'Pending' || c.value === 'Roadmap' || c.value === '—')) ? 'text muted' : (isDone ? 'text info' : '');
+  const classes = ['stage-card'];
+  if (isActive) classes.push('active');
+  if (isDone)   classes.push('done');
+  return `<div class="${classes.join(' ')}" data-stage="${c.n}" onclick="goView('${c.key}')">
+    <div class="stage-head">
+      <div class="stage-num ${isActive ? 'active' : ''}">STAGE ${c.n}${isActive ? ' · ACTIVE' : ''}</div>
+      ${dotHtml}
+    </div>
+    <div class="stage-name">${c.name}</div>
+    <div class="stage-tag">${c.tag}</div>
+    <div class="stage-value ${valueClass}">${c.value}</div>
+    <div class="stage-meta">${c.meta || ''}</div>
+  </div>`;
+}
+
+/* =========================================================
+   Activity feed
+   ========================================================= */
+function addActivity(tool, desc) {
+  const t = new Date().toLocaleTimeString('en-US', { hour12: false }).substring(0, 5);
+  state.activity.unshift({ time: t, tool, desc });
+  if (state.activity.length > 8) state.activity.length = 8;
+  renderActivity();
+}
+function renderActivity() {
+  const el = document.getElementById('activity-list');
+  if (!state.activity.length) {
+    el.innerHTML = '<div class="activity-empty">No tool calls yet this session. Trigger an action to start the audit trail.</div>';
+    return;
+  }
+  el.innerHTML = state.activity.map(a =>
+    `<div class="activity-row">
+      <span class="time">${a.time}</span>
+      <span class="desc"><span class="tool">${a.tool}</span> · ${a.desc}</span>
+      <span class="status">ok</span>
+    </div>`
+  ).join('');
+}
+
+/* =========================================================
+   Assess
+   ========================================================= */
+async function loadAssess() {
+  // If a job is already running, just show the running pane and let the poller drive
+  if (state._assessJob) {
+    showAssessPane('running');
+    return;
+  }
+  document.getElementById('assess-source').textContent = 'Loading…';
+  try {
+    const d = await api('/api/assess');
+    if (!d.has_data) {
+      // No JSON yet — empty state
+      showAssessPane('empty');
+      document.getElementById('assess-source').textContent =
+        'No assessment data on disk yet.';
+      return;
+    }
+    state.assess = d;
+    showAssessPane('data');
+    document.getElementById('assess-source').textContent =
+      d.server_count + ' servers · ' + (d.source_file || '');
+    document.getElementById('m-servers').textContent = d.server_count;
+    document.getElementById('m-high').textContent    = d.high_findings;
+    document.getElementById('m-medium').textContent  = d.medium_findings;
+    document.getElementById('m-file').textContent    = d.source_file || '—';
+
+    const rows = (d.per_server || []).map(s => {
+      const verdict = s.high > 0 ? 'Blocked' : (s.medium > 0 ? 'Conditional' : 'Ready');
+      const cls = s.high > 0 ? 'verdict-bad' : (s.medium > 0 ? 'verdict-warn' : 'verdict-good');
+      return `<tr onclick="loadDecideFor('${s.name}')" style="cursor:pointer">
+        <td>${s.name}</td>
+        <td class="num">${s.high}</td>
+        <td class="num">${s.medium}</td>
+        <td class="${cls}">${verdict}</td>
+      </tr>`;
+    }).join('');
+    document.getElementById('assess-rows').innerHTML = rows || '<tr><td colspan="4" class="muted">No servers in assessment.</td></tr>';
+    addActivity('run_phase1_assessment', d.server_count + ' servers · ' + d.high_findings + 'H ' + d.medium_findings + 'M');
+    // Re-render the workspace cards now that Assess data is loaded
+    renderHome();
+  } catch (e) {
+    document.getElementById('assess-source').textContent = 'Error: ' + e.message;
+    toast('Assess failed: ' + e.message, 'error');
+  }
+}
+function showAssessPane(which) {
+  document.getElementById('assess-empty').style.display   = (which === 'empty')   ? 'block' : 'none';
+  document.getElementById('assess-running').style.display = (which === 'running') ? 'block' : 'none';
+  document.getElementById('assess-data').style.display    = (which === 'data')    ? 'block' : 'none';
+}
+
+async function runAssessment() {
+  if (state._assessJob) {
+    toast('Assessment already running');
+    return;
+  }
+  if (!confirm('Run Phase 1 assessment? Takes 3-5 minutes per server. Continue?')) return;
+  showAssessPane('running');
+  document.getElementById('assess-source').textContent = 'Starting Phase 1…';
+  try {
+    const r = await api('/api/assess/run', { method: 'POST', body: {} });
+    if (r.status !== 'started') {
+      toast('Assessment failed to start: ' + (r.error || 'unknown'), 'error');
+      showAssessPane(state.assess ? 'data' : 'empty');
+      return;
+    }
+    state._assessJob = r.job_id;
+    addActivity('run_phase1_assessment', 'started · job ' + r.job_id);
+    toast('Phase 1 started · job ' + r.job_id);
+    pollAssessment();
+  } catch (e) {
+    toast('Assessment failed: ' + e.message, 'error');
+    showAssessPane(state.assess ? 'data' : 'empty');
+  }
+}
+
+async function pollAssessment() {
+  if (!state._assessJob) return;
+  try {
+    const s = await api('/api/assess/status?job_id=' + encodeURIComponent(state._assessJob));
+    const detailEl = document.getElementById('assess-running-detail');
+    const logEl = document.getElementById('assess-running-log');
+    if (detailEl) {
+      detailEl.textContent = `Elapsed ${s.elapsed_seconds}s · status: ${s.status}` + (s.process_running ? ' · running' : ' · process exited');
+    }
+    if (logEl && s.log_tail && s.log_tail.length) {
+      logEl.innerHTML = s.log_tail.map(line => `<div>${(line||'').replace(/[<>&]/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</div>`).join('');
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+    if (s.status === 'done') {
+      const finishedJob = state._assessJob;
+      state._assessJob = null;
+      toast('Phase 1 complete · new JSON: ' + (s.new_json_file || ''));
+      addActivity('run_phase1_assessment', 'completed · job ' + finishedJob);
+      await loadAssess();
+      return;
+    }
+    if (s.status === 'failed') {
+      state._assessJob = null;
+      toast('Phase 1 failed — see error_tail in server log', 'error');
+      showAssessPane(state.assess ? 'data' : 'empty');
+      return;
+    }
+    // Still running — poll again
+    setTimeout(pollAssessment, 3000);
+  } catch (e) {
+    setTimeout(pollAssessment, 5000);
+  }
+}
+function loadDecideFor(server) {
+  state._decideServer = server;
+  goView('decide');
+}
+
+/* =========================================================
+   Decide
+   ========================================================= */
+async function loadDecide() {
+  const server = state._decideServer || (state.assess && state.assess.per_server && state.assess.per_server[0] && state.assess.per_server[0].name) || TARGET_SERVER;
+  document.getElementById('decide-tag-line').textContent = 'stage 2 of 5 · ' + server;
+  document.getElementById('decide-grid').innerHTML = '<div class="empty">Loading verdicts for ' + server + '…</div>';
+  try {
+    const d = await api('/api/decide?server=' + encodeURIComponent(server));
+    state.decide = d;
+    renderDecide(d);
+    addActivity('consult_kb', server + ' · ' + (d.contributing_topics ? d.contributing_topics.length : 0) + ' topics matched');
+    // Re-render the workspace cards now that Decide data is loaded
+    renderHome();
+  } catch (e) {
+    document.getElementById('decide-grid').innerHTML = '<div class="empty">Error: ' + e.message + '</div>';
+    toast('Decide failed: ' + e.message, 'error');
+  }
+}
+function renderDecide(d) {
+  const rec = d.recommended_target.key;
+  const cards = d.cards.map(c => {
+    const isRec = c.target_key === rec;
+    const labelClass = c.label === 'Ready' ? 'good' : (c.label === 'Conditional' ? 'warn' : 'bad');
+    const blockerRows = (c.blockers || []).map(b => `
+      <div class="row"><span class="cross">✗</span><span class="text">${b.rationale_short}</span></div>`).join('');
+    const warningRows = (c.warnings || []).map(w => `
+      <div class="row"><span class="warn">!</span><span class="text">${w.rationale_short}</span></div>`).join('');
+    let allFindings = blockerRows + warningRows;
+    if (!allFindings && c.label === 'Ready') {
+      allFindings = '<div class="row"><span class="check">✓</span><span class="text">No blocking findings for this target.</span></div>';
+    }
+    return `<div class="decide-card ${isRec ? 'recommended' : ''}">
+      <div class="head">
+        <div class="title-wrap"><span class="azure-dot"></span><span class="title">${c.display}</span></div>
+        ${isRec ? '<span class="recommend-badge">Recommended</span>' : ''}
+      </div>
+      <div class="label-row ${labelClass}">${c.label} · ${c.blocker_count} blockers · ${c.warning_count} warnings</div>
+      <div class="findings">${allFindings}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('decide-grid').innerHTML = cards;
+}
+
+/* =========================================================
+   Migrate
+   ========================================================= */
+function renderMigrate() {
+  if (state.assess && state.assess.per_server && state.assess.per_server[0]) {
+    document.getElementById('migrate-sub').textContent =
+      state.assess.per_server[0].name + ' on-prem → new Azure SQL VM · 8 sub-steps';
+  }
+  // Sync provision status from VM state
+  if (state.vm.state === 'running' && state.migrate.steps[0].status === 'pending') {
+    state.migrate.steps[0].status = 'done';
+  }
+  const html = state.migrate.steps.map(step => migrateRowHtml(step)).join('');
+  document.getElementById('migrate-list').innerHTML = html;
+}
+function migrateRowHtml(step) {
+  const status = step.status;
+  const dotHtml = status === 'done'    ? '<span class="migrate-status done">✓</span>'
+                : status === 'running' ? '<span class="migrate-status running"></span>'
+                : status === 'failed'  ? '<span class="migrate-status failed">✗</span>'
+                :                        '<span class="migrate-status pending"></span>';
+  const titleClass = step.real ? '' : 'dim';
+  const subClass = step.real ? '' : 'dim';
+  const badge = step.real
+    ? '<span class="badge-real">Real</span>'
+    : '<span class="badge-phase3">Phase 3</span>';
+  return `<div class="migrate-row">
+    ${dotHtml}
+    <div class="migrate-body">
+      <div class="migrate-title ${titleClass}">${step.title}</div>
+      <div class="migrate-sub ${subClass}">${step.sub}</div>
+    </div>
+    ${badge}
+  </div>`;
+}
+
+async function startMigration() {
+  const log = document.getElementById('stream-log');
+  log.classList.add('show');
+  log.innerHTML = '';
+
+  // Step 1: Provision (only if VM not already running)
+  if (state.vm.state !== 'running') {
+    setStep('provision', 'running');
+    log.innerHTML += '<div class="line">[terraform] apply starting...</div>';
+    try {
+      const r = await api('/api/terraform', { method: 'POST', body: { action: 'apply' } });
+      if (r.status === 'ok') {
+        setStep('provision', 'done', '9 resources · ' + r.duration_seconds + 's');
+        log.innerHTML += '<div class="line">[terraform] ' + (r.resources_added||'?') + ' resources created at ' + r.public_ip + '</div>';
+        addActivity('apply_terraform', 'action=apply · ' + r.duration_seconds + 's');
+      } else {
+        setStep('provision', 'failed');
+        log.innerHTML += '<div class="line">[terraform] ERROR: ' + (r.error||'unknown') + '</div>';
+        toast('Provisioning failed', 'error');
+        return;
+      }
+    } catch (e) {
+      setStep('provision', 'failed');
+      log.innerHTML += '<div class="line">[terraform] EXCEPTION: ' + e.message + '</div>';
+      toast('Provisioning failed: ' + e.message, 'error');
+      return;
+    }
+    await pollStatus();
+  } else {
+    setStep('provision', 'done', 'already running');
+  }
+
+  // Step 2: Restore
+  setStep('restore', 'running');
+  log.innerHTML += '<div class="line">[restore] BACKUP TO URL / RESTORE FROM URL...</div>';
+  try {
+    const r = await api('/api/restore', { method: 'POST', body: {
+      database: TARGET_DB, source: TARGET_SERVER, target: state.vm.ip || 'auto'
+    }});
+    if (r.status === 'ok') {
+      state.migrate.restore_result = r;
+      setStep('restore', 'done', r.rows_restored + ' rows · ' + r.elapsed_seconds + 's');
+      log.innerHTML += '<div class="line">[restore] ' + r.rows_restored + ' rows restored to ' + r.target + '</div>';
+      addActivity('restore_database', r.database + ' · ' + r.rows_restored + ' rows · ' + r.elapsed_seconds + 's');
+    } else {
+      setStep('restore', 'failed');
+      log.innerHTML += '<div class="line">[restore] ERROR: ' + (r.error||'unknown') + '</div>';
+      toast('Restore failed', 'error');
+      return;
+    }
+  } catch (e) {
+    setStep('restore', 'failed');
+    log.innerHTML += '<div class="line">[restore] EXCEPTION: ' + e.message + '</div>';
+    toast('Restore failed: ' + e.message, 'error');
+    return;
+  }
+
+  // Step 8: Validate (skip 3-7, they're Phase 3 placeholders)
+  setStep('validate', 'running');
+  log.innerHTML += '<div class="line">[validate] DBCC CHECKDB on all user databases...</div>';
+  try {
+    const r = await api('/api/validate', { method: 'POST', body: {} });
+    if (r.status === 'ok') {
+      state.migrate.validate_result = r;
+      const pass = r.all_passed ? 'passed' : (r.total_errors + ' errors');
+      setStep('validate', r.all_passed ? 'done' : 'failed', r.databases_checked + ' DBs · ' + pass);
+      log.innerHTML += '<div class="line">[validate] ' + r.databases_checked + ' DBs checked · ' + pass + '</div>';
+      addActivity('validate_database', r.databases_checked + ' DBs · ' + pass);
+    } else {
+      setStep('validate', 'failed');
+      log.innerHTML += '<div class="line">[validate] ERROR: ' + (r.error||'unknown') + '</div>';
+    }
+  } catch (e) {
+    setStep('validate', 'failed');
+    log.innerHTML += '<div class="line">[validate] EXCEPTION: ' + e.message + '</div>';
+  }
+
+  log.innerHTML += '<div class="line">[migrate] Real sub-steps complete. Phase 3 sub-steps remain.</div>';
+  toast('Migration sub-steps complete. Continue to Handoff.');
+}
+
+function setStep(id, status, sub) {
+  const step = state.migrate.steps.find(s => s.id === id);
+  if (step) {
+    step.status = status;
+    if (sub) step.sub = sub;
+  }
+  renderMigrate();
+}
+
+/* =========================================================
+   Handoff
+   ========================================================= */
+function renderHandoff() {
+  if (!state.handoff) {
+    document.getElementById('handoff-empty').style.display = 'block';
+    document.getElementById('handoff-content').style.display = 'none';
+    return;
+  }
+  document.getElementById('handoff-empty').style.display = 'none';
+  document.getElementById('handoff-content').style.display = 'block';
+  const h = state.handoff;
+  const v = h.validation || {};
+  const validationHtml = v.ran
+    ? `<div class="doc-label">DBCC CHECKDB</div>
+       <div class="doc-value ${v.all_passed ? 'passed' : 'failed'}">${v.all_passed ? '✓ Passed' : '✗ Failed'} · ${v.databases_checked||0} databases · ${v.total_errors||0} errors</div>`
+    : '<div class="doc-label">DBCC CHECKDB</div><div class="doc-value" style="color:var(--fg-3)">Not run yet</div>';
+  document.getElementById('handoff-doc').innerHTML = `
+    <div class="doc-label">SERVER</div>
+    <div class="doc-value mono">${h.target.fqdn}<br/>${h.target.public_ip} · port ${h.target.port}</div>
+
+    <div class="doc-label">CONNECTION STRING (new)</div>
+    <div class="doc-value mono-box">${h.target.connection_string_new}</div>
+
+    <div class="doc-label">CONNECTION STRING (old)</div>
+    <div class="doc-value struck">${h.source.connection_string_old}</div>
+
+    <div class="doc-label">DATABASES MIGRATED</div>
+    <div class="doc-value">${(h.databases || []).map(d => `${d.name} · ${d.user_table_count||'?'} tables · ${d.rows_restored||'?'} rows · ${d.state||'?'}`).join('<br/>')}</div>
+
+    ${validationHtml}
+
+    <div class="doc-label">REQUIRED CHANGES ON APP SIDE</div>
+    <div class="doc-value">${(h.app_side_changes || []).filter(c => c.severity === 'required').map(c => `<strong>${c.change}:</strong> ${c.detail}`).join('<br/><br/>')}</div>
+  `;
+}
+
+async function generateHandoff() {
+  toast('Generating handoff…');
+  try {
+    const r = await api('/api/handoff', { method: 'POST', body: {
+      database: TARGET_DB,
+      source: TARGET_SERVER,
+      restore_result: state.migrate.restore_result,
+      validate_result: state.migrate.validate_result,
+    }});
+    state.handoff = r;
+    renderHandoff();
+    addActivity('generate_handoff', TARGET_DB + ' · ready to send');
+  } catch (e) {
+    toast('Handoff failed: ' + e.message, 'error');
+  }
+}
+
+function copyHandoffEmail() {
+  if (!state.handoff) return;
+  // Approximate the email format on the client side
+  const h = state.handoff;
+  const lines = [];
+  lines.push(`Subject: ${TARGET_DB} migration complete - please update connection strings`);
+  lines.push('');
+  lines.push(`Database ${TARGET_DB} has been migrated from ${h.source.server} to a new Azure SQL VM.`);
+  lines.push('Please update your connection strings and verify functionality.');
+  lines.push('');
+  lines.push('NEW CONNECTION:');
+  lines.push('  ' + h.target.connection_string_new);
+  lines.push('');
+  lines.push('PREVIOUS (deprecated):');
+  lines.push('  ' + h.source.connection_string_old);
+  navigator.clipboard.writeText(lines.join('\n'));
+  toast('Email copied to clipboard');
+}
+
+function signoffHandoff() {
+  state.approved.handoff = true;
+  toast('Handoff signed off · audit trail updated');
+  addActivity('signoff_handoff', TARGET_DB);
+  renderHome();
+}
+
+/* =========================================================
+   SSE event stream (DISABLED in v0.9 — see server.ps1 note)
+   ========================================================= */
+function connectEvents() {
+  // SSE disabled. UI uses status polling instead. Re-enable when server.ps1
+  // has proper async HttpListener support.
+  return;
+}
+
+/* =========================================================
+   Startup
+   ========================================================= */
+function start() {
+  renderHome();
+  pollStatus();
+  setInterval(pollStatus, 5000);
+  connectEvents();
+  // Pre-warm Assess data so the front page card shows real numbers
+  loadAssess().catch(() => {});
+}
+start();
+</script>
+
+</body>
+</html>
