@@ -1,34 +1,62 @@
-# Terraform state and provider plugins
-**/.terraform/
-*.tfstate
-*.tfstate.*
-*.tfplan
-tfplan
+# SQLPilot .gitignore
+# Drop this in the repo root before your first commit so secrets and
+# regenerable state never land in git history.
 
-# Terraform secrets — admin_password in plaintext
+# ---- Terraform secrets / state ----
+# tfvars contains admin_password, subscription IDs, tenant IDs.
 Terraform/terraform.tfvars
+# The .example template SHOULD be tracked — it documents what fields to fill.
+!Terraform/terraform.tfvars.example
 
-# Generated outputs (decision logs accumulate)
+# State files contain provider output (public IPs, resource IDs, sometimes secrets).
+Terraform/terraform.tfstate
+Terraform/terraform.tfstate.backup
+Terraform/*.tfstate
+Terraform/*.tfstate.backup
+
+# Binary plan files can contain sensitive variable values.
+Terraform/tfplan
+Terraform/*.tfplan
+
+# Provider plugins cache — ~200 MB, regenerable, never useful in git.
+Terraform/.terraform/
+# Lock file IS fine to track — pins provider versions, no secrets.
+!Terraform/.terraform.lock.hcl
+
+# ---- Deployment artifacts ----
+# Captures the last public IP and run metadata after each apply.
+last_deployment.json
+**/last_deployment.json
+
+# ---- Assessment runtime data ----
+# Recipient and dev machines each generate their own. Don't share via git.
+Assessment/Inputs/
+Assessment/Reports/
+
+# ---- Generated logs ----
+# decision_log.json captures every tool call the agent made — local-only.
+decision_log.json
 generated/
 
-# Phase 1 output (large Excel/JSON, regenerated)
-Migration_Assessment_Report_*.xlsx
-Migration_Assessment_Report_*.json
-
-# Backups / archives
-*.zip
-*.bak
-
-# OS / editor noise
-.DS_Store
-Thumbs.db
-*.swp
+# ---- Editor / OS noise ----
 .vscode/
 .idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
 
-# PowerShell transcript / log noise
-*.log
-sqlpilot_assess_*.log*
+# ---- PowerShell backups ----
+# When patching files in place, we often leave .bak copies. Not for git.
+*.bak
+*.bak.*
+*.bak-*
 
-# Old / historical docs (keep current ones tracked)
-docs/historical/
+# ---- Python virtualenv (if anyone adds python tooling later) ----
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# ---- Node modules (if anyone adds node tooling later) ----
+node_modules/

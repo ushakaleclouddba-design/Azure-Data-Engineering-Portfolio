@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SQLPilot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   /* =========================================================
      Design tokens — light + dark via [data-theme]
@@ -86,7 +89,7 @@
   :root {
     --r-md: 8px;
     --r-lg: 12px;
-    --mono: ui-monospace, "Cascadia Code", Consolas, monospace;
+    --mono: "JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
     color-scheme: light dark;
   }
 
@@ -105,9 +108,9 @@
       var(--bg-page);
     background-attachment: fixed;
     color: var(--fg-1);
-    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-    line-height: 1.5;
-    font-size: 14px;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.55;
+    font-size: 15px;
     transition: color 150ms ease;
     min-height: 100vh;
   }
@@ -227,6 +230,15 @@
   .btn-primary:hover { opacity: 0.88; background: var(--fg-1); }
   .btn-success { border: none; background: var(--good); color: white; font-weight: 600; }
 
+  /* Hero action buttons — subtle white-on-gradient pills inside the hero card */
+  .btn-hero {
+    font-size: 12px; padding: 6px 14px; border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.1);
+    color: white; cursor: pointer; font-weight: 500;
+    transition: all 150ms ease;
+  }
+  .btn-hero:hover { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.7); }
+
   .back-link {
     display: inline-flex; align-items: center; gap: 6px;
     font-size: 12px; color: var(--fg-2);
@@ -342,14 +354,14 @@
     padding: 12px 16px; background: var(--bg-card);
     border: 0.5px solid var(--border);
     border-left: 3px solid var(--good);
-    border-radius: var(--r-md); font-size: 12px;
+    border-radius: var(--r-md); font-size: 13px;
     margin-bottom: 8px;
     transition: border-color 120ms ease;
   }
   .activity-row:hover { border-color: var(--good); }
-  .activity-row .time { font-family: var(--mono); color: var(--fg-3); font-size: 11px; min-width: 60px; }
+  .activity-row .time { font-family: var(--mono); color: var(--fg-3); font-size: 12px; min-width: 70px; font-feature-settings: "tnum"; }
   .activity-row .desc { flex: 1; }
-  .activity-row .desc .tool { color: var(--fg-1); font-weight: 500; }
+  .activity-row .desc .tool { color: var(--fg-1); font-weight: 600; }
   .activity-row .status {
     font-size: 10px; padding: 4px 10px; font-weight: 700;
     background: linear-gradient(135deg, var(--good) 0%, #14B8A6 100%);
@@ -451,6 +463,116 @@
   .decide-card .findings .text { flex: 1; }
   .decide-card .more { margin-top: 14px; font-size: 11px; }
 
+  /* Server index grid — multi-node Decide overview */
+  .server-tile-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+    margin-bottom: 20px;
+  }
+  .server-tile {
+    background: var(--bg-card);
+    border: 0.5px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: border-color 120ms ease, transform 120ms ease, box-shadow 150ms ease;
+  }
+  .server-tile:hover {
+    border-color: var(--border-strong);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .server-tile .row1 {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .server-tile .name { font-size: 14px; font-weight: 600; color: var(--fg-1); }
+  .server-tile .rec-pill {
+    font-size: 10px; padding: 3px 8px;
+    background: var(--info-bg); color: var(--info-fg); border-radius: 4px;
+    font-weight: 500;
+  }
+  .server-tile .rec-pill.muted {
+    background: var(--bg-subtle); color: var(--fg-3);
+  }
+  .server-tile .verdicts {
+    display: flex; gap: 14px; font-size: 12px; flex-wrap: wrap;
+  }
+  .server-tile .verdict { display: flex; align-items: center; gap: 5px; }
+  .server-tile .verdict .dot {
+    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+  }
+  .server-tile .verdict .dot.good { background: var(--good); }
+  .server-tile .verdict .dot.warn { background: var(--warn); }
+  .server-tile .verdict .dot.bad  { background: var(--bad);  }
+  .server-tile .verdict .dot.pending { background: var(--fg-3); }
+  .server-tile .verdict .tgt { color: var(--fg-2); }
+  .server-tile .verdict .lbl { color: var(--fg-1); font-weight: 500; }
+  .server-tile .findings-line {
+    margin-top: 10px; font-size: 11px; color: var(--fg-3);
+  }
+
+  .crumb-row {
+    font-size: 12px; color: var(--fg-2);
+    margin-bottom: 10px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .crumb-row:hover { color: var(--fg-1); }
+
+  /* Database picker — used in the Decide detail view */
+  .db-picker {
+    margin-top: 24px; padding: 18px 20px;
+    background: var(--bg-card); border: 0.5px solid var(--border);
+    border-radius: var(--r-lg);
+  }
+  .db-picker .head {
+    font-size: 11px; color: var(--fg-3); letter-spacing: 0.06em;
+    margin-bottom: 10px; font-weight: 600;
+  }
+  .db-picker .list {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .db-picker .db-option {
+    font-size: 12px; padding: 7px 12px;
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--r-md);
+    background: var(--bg-card);
+    color: var(--fg-1);
+    cursor: pointer;
+    transition: all 120ms ease;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .db-picker .db-option:hover {
+    border-color: var(--info); background: var(--info-bg);
+  }
+  .db-picker .db-option.selected {
+    border: 1.5px solid var(--info);
+    background: var(--info-bg);
+    color: var(--info-fg);
+    padding: 6.5px 11.5px;
+    font-weight: 500;
+  }
+  .db-picker .db-option.disabled {
+    opacity: 0.5; cursor: not-allowed;
+    background: var(--bg-subtle); color: var(--fg-3);
+  }
+  .db-picker .db-option.disabled:hover {
+    border-color: var(--border-strong); background: var(--bg-subtle);
+  }
+  .db-picker .db-state {
+    font-size: 10px; color: var(--fg-3);
+    padding: 1px 5px; background: var(--bg-page);
+    border-radius: 3px; font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .db-picker .db-option.selected .db-state {
+    color: var(--info-fg); background: var(--bg-card);
+  }
+  .db-picker .empty {
+    font-size: 12px; color: var(--fg-3); padding: 12px;
+    background: var(--bg-subtle); border-radius: var(--r-md);
+    text-align: center;
+  }
+
   /* =========================================================
      Migrate
      ========================================================= */
@@ -487,14 +609,18 @@
   .badge-phase3 { background: var(--bg-subtle); color: var(--fg-2); }
 
   .stream-log {
-    margin-top: 16px; max-height: 220px; overflow-y: auto;
-    background: var(--code-bg); border-radius: var(--r-md);
-    padding: 12px 14px; font-family: var(--mono); font-size: 11px;
-    color: var(--fg-2); line-height: 1.5;
+    margin-top: 16px; max-height: 280px; overflow-y: auto;
+    background: #0F172A; border-radius: var(--r-md);
+    padding: 14px 16px; font-family: var(--mono); font-size: 12px;
+    color: #E2E8F0; line-height: 1.55;
     display: none;
+    border: 1px solid #1E293B;
   }
   .stream-log.show { display: block; }
-  .stream-log .line { word-break: break-all; }
+  .stream-log .line { word-break: break-all; margin-bottom: 2px; }
+  .stream-log .line.error { color: #FCA5A5; }
+  .stream-log .line.warn { color: #FCD34D; }
+  .stream-log .line.ok { color: #86EFAC; }
 
   /* =========================================================
      Handoff
@@ -553,17 +679,39 @@
      Toasts
      ========================================================= */
   #toasts {
-    position: fixed; bottom: 24px; right: 24px;
-    display: flex; flex-direction: column; gap: 8px;
-    z-index: 100;
+    position: fixed; top: 24px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; gap: 10px;
+    z-index: 1000; max-width: 720px; width: calc(100% - 48px);
   }
   .toast {
-    background: var(--bg-card); border: 0.5px solid var(--border-strong);
-    border-radius: var(--r-md); padding: 12px 16px;
-    font-size: 12px; min-width: 280px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    background: var(--bg-card); border: 1px solid var(--border-strong);
+    border-radius: var(--r-md); padding: 14px 44px 14px 18px;
+    font-size: 13px; line-height: 1.5;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    position: relative;
+    animation: toastSlide 200ms ease-out;
   }
-  .toast.error { border-color: var(--bad); color: var(--bad-fg); }
+  @keyframes toastSlide { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+  .toast.error { border-color: var(--bad); color: var(--bad-fg); background: #FEF2F2; }
+  .toast .toast-close {
+    position: absolute; top: 8px; right: 10px;
+    background: none; border: none; color: var(--fg-3);
+    font-size: 18px; line-height: 1; cursor: pointer; padding: 4px;
+  }
+  .toast .toast-close:hover { color: var(--fg-1); }
+
+  /* In-flight spinner for long-running terraform jobs (apply/destroy).
+     Small rotating ring in info-blue; sits next to status text in the
+     #tf-running-banner. */
+  .tf-spinner {
+    width: 18px; height: 18px;
+    border: 2px solid var(--info-bg, rgba(37,99,235,0.20));
+    border-top-color: var(--info);
+    border-radius: 50%;
+    animation: tf-spin 0.9s linear infinite;
+    flex: 0 0 18px;
+  }
+  @keyframes tf-spin { to { transform: rotate(360deg); } }
 
   /* =========================================================
      Views
@@ -596,14 +744,27 @@
     </div>
   </div>
 
+  <!-- Persistent banner for long-running terraform jobs (apply/destroy).
+       Shows under the top bar on every view so the user can navigate
+       around without losing visibility of the running job. -->
+  <div id="tf-running-banner" style="display:none;align-items:center;gap:12px;margin:12px auto 0;max-width:1280px;padding:10px 16px;background:var(--info-bg, rgba(37,99,235,0.10));border:1px solid var(--info);border-radius:var(--r-md);"></div>
+
   <!-- ================================
        HOME (workspace)
        ================================ -->
   <div id="view-home" class="view active">
     <div class="workspace-title">
-      <h1>Database migration workspace</h1>
+      <h1>Database Migration Workspace</h1>
       <p>SQL Server estate from on-prem to Azure. Each stage opens its own workspace.</p>
       <p id="home-assess-line" style="font-size:13px;color:var(--hero-fg-2);margin-top:14px">Loading assessment status…</p>
+      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn-hero" onclick="openRunAssessmentModal()">Run New Assessment</button>
+        <button class="btn-hero" onclick="document.getElementById('hero-upload-file').click()">Upload Existing Report</button>
+        <input type="file" id="hero-upload-file" accept=".json,.rpt" style="display:none" onchange="uploadFromHero(this.files[0])"/>
+      </div>
+      <div id="hero-drop-hint" style="display:none;margin-top:14px;padding:14px 18px;border:2px dashed rgba(255,255,255,0.7);border-radius:var(--r-md);background:rgba(255,255,255,0.12);font-size:13px;color:var(--hero-fg);text-align:center;font-weight:500">
+        Drop .rpt or .json to upload
+      </div>
     </div>
 
     <div class="stage-grid" id="stage-grid">
@@ -616,13 +777,54 @@
     </div>
   </div>
 
+  <!-- Run-assessment modal — global, accessible from hero buttons -->
+  <div id="run-assess-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:1000;align-items:center;justify-content:center">
+    <div style="background:var(--bg-card);border-radius:12px;padding:24px;max-width:440px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.2)">
+      <h3 style="margin:0 0 6px;font-size:16px;color:var(--fg-1)">Run New Assessment</h3>
+      <p style="margin:0 0 16px;font-size:12px;color:var(--fg-3)">Phase 1 scans your SQL Server(s) for migration findings. Takes 3-5 minutes per server.</p>
+
+      <!-- Tabs: Single Server (default) | CMS Group -->
+      <div style="display:flex;border-bottom:1px solid var(--border);margin-bottom:14px">
+        <button id="run-tab-single" class="run-tab run-tab-active" onclick="setRunTab('single')" type="button"
+                style="flex:1;padding:8px 0;background:none;border:none;border-bottom:2px solid var(--accent);font:inherit;font-size:13px;font-weight:600;color:var(--fg-1);cursor:pointer">
+          Single Server
+        </button>
+        <button id="run-tab-cms" class="run-tab" onclick="setRunTab('cms')" type="button"
+                style="flex:1;padding:8px 0;background:none;border:none;border-bottom:2px solid transparent;font:inherit;font-size:13px;font-weight:500;color:var(--fg-3);cursor:pointer">
+          CMS Group (Estate)
+        </button>
+      </div>
+
+      <!-- Single Server tab -->
+      <div id="run-pane-single">
+        <label style="display:block;font-size:11px;font-weight:600;color:var(--fg-2);margin-bottom:6px;letter-spacing:0.04em">SERVER NAME</label>
+        <input type="text" id="run-server-name" placeholder="your-sql-server" style="width:100%;padding:10px;font-size:13px;border:1px solid var(--border);border-radius:6px;font-family:inherit;background:var(--bg-page);color:var(--fg-1)"/>
+        <p style="margin:8px 0 0;font-size:11px;color:var(--fg-3)">The hostname or instance to assess (e.g. <code style="font-size:11px">SQL01</code> or <code style="font-size:11px">SQL01\INST2</code>).</p>
+      </div>
+
+      <!-- CMS Group tab -->
+      <div id="run-pane-cms" style="display:none">
+        <label style="display:block;font-size:11px;font-weight:600;color:var(--fg-2);margin-bottom:6px;letter-spacing:0.04em">CMS HOST</label>
+        <input type="text" id="run-cms-host" placeholder="your-cms-server" style="width:100%;padding:10px;font-size:13px;border:1px solid var(--border);border-radius:6px;font-family:inherit;background:var(--bg-page);color:var(--fg-1);margin-bottom:12px"/>
+        <label style="display:block;font-size:11px;font-weight:600;color:var(--fg-2);margin-bottom:6px;letter-spacing:0.04em">GROUP NAME</label>
+        <input type="text" id="run-cms-group" placeholder="your-group" style="width:100%;padding:10px;font-size:13px;border:1px solid var(--border);border-radius:6px;font-family:inherit;background:var(--bg-page);color:var(--fg-1)"/>
+        <p style="margin:8px 0 0;font-size:11px;color:var(--fg-3)">Fans out to every server registered in the named CMS group. One report covers the whole estate.</p>
+      </div>
+
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:18px">
+        <button class="btn" onclick="closeRunAssessmentModal()">Cancel</button>
+        <button class="btn btn-action" onclick="submitRunAssessment()">Run Phase 1</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ================================
        ASSESS
        ================================ -->
   <div id="view-assess" class="view">
-    <a class="back-link" onclick="goView('home')">← Back to workspace</a>
+    <a class="back-link" onclick="goView('home')">← Back to Workspace</a>
     <div class="section-head">
-      <h2>Estate assessment</h2>
+      <h2>Estate Assessment</h2>
       <span class="stage-tag-line">stage 1 of 5</span>
     </div>
     <p class="section-sub" id="assess-source">Loading…</p>
@@ -630,15 +832,63 @@
     <!-- Empty state — shown when no Phase 1 JSON exists yet -->
     <div id="assess-empty" class="empty" style="display:none">
       <div style="font-size:14px;font-weight:500;color:var(--fg-1);margin-bottom:8px">No assessment yet</div>
-      <div>Phase 1 scans your SQL Server estate, finds blockers and warnings, and writes the JSON this stage reads.<br/>Click to run it now — takes 3-5 minutes per server.</div>
-      <button class="btn btn-action" style="margin-top:14px" onclick="runAssessment()">Run Phase 1 assessment</button>
+      <div>Phase 1 scans your SQL Server estate, finds blockers and warnings, and writes the JSON this stage reads.</div>
+      <div style="display:flex;gap:12px;justify-content:center;align-items:stretch;flex-wrap:wrap;margin-top:18px">
+        <div style="flex:0 1 260px;padding:14px 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-md);text-align:left">
+          <div style="font-size:12px;font-weight:600;color:var(--fg-1);margin-bottom:4px">Run New Assessment</div>
+          <div style="font-size:12px;color:var(--fg-3);margin-bottom:10px">Fires Phase 1 against the estate. Takes 3-5 minutes per server.</div>
+          <button class="btn btn-action" onclick="runAssessment()">Run Phase 1</button>
+        </div>
+        <div style="align-self:center;font-size:11px;color:var(--fg-3);letter-spacing:0.06em">OR</div>
+        <div style="flex:0 1 320px;padding:14px 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-md);text-align:left">
+          <div style="font-size:12px;font-weight:600;color:var(--fg-1);margin-bottom:4px">Upload existing report</div>
+          <div style="font-size:12px;color:var(--fg-3);margin-bottom:10px">Drop a .rpt from <code>01_Assessment_Script.sql</code>, or a Migration_Assessment_Report_*.json from a previous run.</div>
+          <div id="assess-drop-zone" tabindex="0" role="button" aria-label="Upload .rpt or .json"
+               onclick="document.getElementById('assess-upload-file').click()"
+               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('assess-upload-file').click();}"
+               style="padding:18px 14px;border:2px dashed var(--border);border-radius:var(--r-md);background:var(--bg-subtle);text-align:center;cursor:pointer;transition:border-color 120ms,background 120ms,color 120ms;color:var(--fg-2)">
+            <div style="font-size:13px;font-weight:500;color:var(--fg-1);margin-bottom:4px">Drop file here</div>
+            <div style="font-size:11px;color:var(--fg-3)">or click to browse · .rpt or .json</div>
+          </div>
+          <div style="margin-top:8px;font-size:11px;color:var(--fg-3);line-height:1.45">
+            <strong style="color:var(--fg-2);font-weight:600">Tip:</strong> keep client files under <code>C:\Clients\&lt;name&gt;\</code>; the browser remembers your last location and the picker will default there next time.
+          </div>
+          <input type="file" id="assess-upload-file" accept=".json,.rpt,application/json" style="display:none" onchange="uploadAssessmentFile(this.files[0])" />
+        </div>
+      </div>
     </div>
 
     <!-- Running state — shown while a job is in flight -->
     <div id="assess-running" class="empty" style="display:none">
       <div style="font-size:14px;font-weight:500;color:var(--fg-1);margin-bottom:8px">Running Phase 1 assessment…</div>
       <div id="assess-running-detail">Starting up. This typically takes 3-5 minutes per server.</div>
-      <div style="margin-top:14px;font-family:var(--mono);font-size:11px;color:var(--fg-3);background:var(--bg-subtle);padding:10px 14px;border-radius:6px;text-align:left;max-height:140px;overflow-y:auto" id="assess-running-log"></div>
+      <div style="margin-top:14px;font-family:var(--mono);font-size:11px;color:var(--fg-1);font-weight:500;background:var(--bg-subtle);padding:10px 14px;border-radius:6px;text-align:left;max-height:140px;overflow-y:auto" id="assess-running-log"></div>
+    </div>
+
+    <!-- RPT-uploaded state — shown after one or more .rpts are saved, before the user clicks Parse -->
+    <div id="assess-rpt-uploaded" class="empty" style="display:none;text-align:left;max-width:600px;margin:0 auto">
+      <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px">
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--good-bg);color:var(--good-fg);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;flex-shrink:0">✓</div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:500;color:var(--fg-1);margin-bottom:2px">
+            <span id="rpt-up-title">SSMS .rpt uploaded</span>
+          </div>
+          <div style="font-size:12px;color:var(--fg-3)" id="rpt-up-subtitle">Ready to convert into the full Phase 1 deliverable (xlsx + JSON).</div>
+        </div>
+      </div>
+
+      <!-- List of uploaded files. Rendered by renderRptUploadList(). -->
+      <div id="rpt-up-list" style="margin-bottom:14px"></div>
+
+      <div style="background:var(--info-bg);border:1px solid var(--info);color:var(--info-fg);border-radius:var(--r-md);padding:10px 14px;margin-bottom:16px;font-size:12px;line-height:1.6">
+        Upload one or more .rpt files. When you click Parse, every staged file is merged into a single Phase 1 report (xlsx + JSON). Use additional files if your estate's SSMS output came in pieces — for example, a CMS multi-server run plus a separate single-server run against the CMS host.
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-action" id="rpt-parse-btn" onclick="parseUploadedRpt()">Parse to JSON</button>
+        <button class="btn" onclick="document.getElementById('assess-upload-file').click()">＋ Add another file</button>
+        <button class="btn" onclick="resetRptUploads()" style="margin-left:auto;color:var(--fg-3)">Clear</button>
+      </div>
     </div>
 
     <!-- Data state — shown when JSON exists -->
@@ -674,19 +924,42 @@
        DECIDE
        ================================ -->
   <div id="view-decide" class="view">
-    <a class="back-link" onclick="goView('home')">← Back to workspace</a>
-    <div class="section-head">
-      <h2>Target decision</h2>
-      <span class="stage-tag-line" id="decide-tag-line">stage 2 of 5</span>
-    </div>
-    <p class="section-sub">KB-driven verdicts. Each verdict maps to a Microsoft Learn citation.</p>
+    <a class="back-link" onclick="goView('home')">← Back to Workspace</a>
 
-    <div class="decide-grid" id="decide-grid">
-      <!-- 3 cards rendered by JS -->
+    <!-- Index pane — multi-server grid. Only shown when assessment has >1 server. -->
+    <div id="decide-index" style="display:none">
+      <div class="section-head">
+        <h2>Target Decision</h2>
+        <span class="stage-tag-line" id="decide-index-tag">stage 2 of 5</span>
+      </div>
+      <p class="section-sub">Pick a server to see its three target verdicts and select a database to migrate.</p>
+      <div class="server-tile-grid" id="server-tile-grid">
+        <!-- tiles rendered by JS -->
+      </div>
     </div>
 
-    <div class="actions">
-      <button class="btn btn-primary" onclick="approveAndGo('decide', 'migrate')">Continue to Migrate →</button>
+    <!-- Detail pane — three target cards + database picker for one server. -->
+    <div id="decide-detail" style="display:none">
+      <a class="crumb-row" id="back-to-servers" onclick="backToServerIndex()" style="display:none">← Back to all servers</a>
+      <div class="section-head">
+        <h2 id="decide-detail-heading">Target Decision</h2>
+        <span class="stage-tag-line" id="decide-tag-line">stage 2 of 5</span>
+      </div>
+      <p class="section-sub">KB-driven verdicts. Each verdict maps to a Microsoft Learn citation.</p>
+
+      <div class="decide-grid" id="decide-grid">
+        <!-- 3 target cards rendered by JS -->
+      </div>
+
+      <!-- Database picker — appears below the three target cards -->
+      <div class="db-picker" id="db-picker" style="display:none">
+        <div class="head">SELECT DATABASE TO MIGRATE</div>
+        <div class="list" id="db-list"></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="decide-continue-btn" onclick="continueFromDecide()">Continue to Migrate →</button>
+      </div>
     </div>
   </div>
 
@@ -694,12 +967,12 @@
        MIGRATE
        ================================ -->
   <div id="view-migrate" class="view">
-    <a class="back-link" onclick="goView('home')">← Back to workspace</a>
+    <a class="back-link" onclick="goView('home')">← Back to Workspace</a>
     <div class="section-head">
-      <h2>Stand up equivalent server</h2>
+      <h2>Stand Up Equivalent Server</h2>
       <span class="stage-tag-line">stage 3 of 5</span>
     </div>
-    <p class="section-sub" id="migrate-sub">Node5 on-prem → new Azure SQL VM · 8 sub-steps</p>
+    <p class="section-sub" id="migrate-sub">Loading…</p>
 
     <div class="migrate-list" id="migrate-list">
       <!-- 8 sub-steps rendered by JS -->
@@ -717,9 +990,9 @@
        HANDOFF
        ================================ -->
   <div id="view-handoff" class="view">
-    <a class="back-link" onclick="goView('home')">← Back to workspace</a>
+    <a class="back-link" onclick="goView('home')">← Back to Workspace</a>
     <div class="section-head">
-      <h2>Handoff to app team</h2>
+      <h2>Handoff to App Team</h2>
       <span class="stage-tag-line">stage 4 of 5</span>
     </div>
     <p class="section-sub">Generated package · ready to email or paste into a ticket.</p>
@@ -742,9 +1015,9 @@
        DAY-TO-DAY OPERATIONS
        ================================ -->
   <div id="view-day2" class="view">
-    <a class="back-link" onclick="goView('home')">← Back to workspace</a>
+    <a class="back-link" onclick="goView('home')">← Back to Workspace</a>
     <div class="section-head">
-      <h2>Day-to-day operations</h2>
+      <h2>Day-to-Day Operations</h2>
       <span class="stage-tag-line">stage 5 of 5</span>
     </div>
     <p class="section-sub">Steady-state DBA tooling · roadmap for Phase 3.</p>
@@ -808,7 +1081,7 @@
     </div>
 
     <div class="day2-note">
-      Day-to-day operations is the Phase 3 roadmap. The Friday demo shows the design and structure;
+      Day-to-Day Operations is the Phase 3 roadmap. The Friday demo shows the design and structure;
       implementation begins after sign-off on this prototype.
     </div>
   </div>
@@ -825,6 +1098,9 @@ const state = {
   vm: { state: 'unknown', ip: null, deployment: null },
   assess: null,
   decide: null,
+  decideCache: {},        // server-name -> /api/decide result, populated by the index view
+  currentServer: null,    // the server picked in Decide; threads through Migrate + Handoff
+  currentDb: null,        // the database picked in Decide
   approved: {
     // Stage approvals — flipped to true when user clicks "Continue" on each stage page.
     // Stage 3 (Migrate) is derived from sub-step status, not approved here.
@@ -851,6 +1127,7 @@ const state = {
   activity: [], // recent tool calls
 };
 
+// Fallback defaults for the legacy single-server flow (no assessment present).
 const TARGET_SERVER = 'NODE5';
 const TARGET_DB = 'SQLPilotDemo';
 
@@ -899,9 +1176,20 @@ function approveAndGo(stageKey, nextView) {
 function toast(msg, kind) {
   const el = document.createElement('div');
   el.className = 'toast' + (kind === 'error' ? ' error' : '');
-  el.textContent = msg;
+  // Message text
+  const txt = document.createElement('span');
+  txt.textContent = msg;
+  el.appendChild(txt);
+  // Close button — always present, errors are dismissed manually
+  const close = document.createElement('button');
+  close.className = 'toast-close';
+  close.setAttribute('aria-label', 'Dismiss');
+  close.textContent = '×';
+  close.onclick = () => el.remove();
+  el.appendChild(close);
   document.getElementById('toasts').appendChild(el);
-  setTimeout(() => el.remove(), 4000);
+  // Errors stay until dismissed; success messages auto-fade after 4s
+  if (kind !== 'error') setTimeout(() => el.remove(), 4000);
 }
 
 /* =========================================================
@@ -921,6 +1209,24 @@ async function api(path, options) {
     throw new Error(msg);
   }
   return data;
+}
+
+// True when the failure looks like "there's no SQLPilot server behind /api"
+// rather than "the server is up but the request itself failed." Used to
+// suppress page-load error toasts when index.html is rendered without
+// server.ps1 (preview / offline review). A genuine application error from
+// a live server has data.error set and won't match.
+function isServerUnreachable(e) {
+  if (!e) return false;
+  const msg = (e.message || '') + '';
+  // fetch() network failure: TypeError 'Failed to fetch' (Chromium) or
+  // 'NetworkError' (Firefox) or similar.
+  if (/Failed to fetch|NetworkError|Network request failed/i.test(msg)) return true;
+  // Bare 'HTTP 4xx/5xx' from api() means r.json() returned no .error field,
+  // which is what a non-SQLPilot host (preview shell, static file viewer)
+  // looks like. A real server's 4xx response always has data.error populated.
+  if (/^HTTP \d{3}$/.test(msg)) return true;
+  return false;
 }
 
 /* =========================================================
@@ -945,13 +1251,91 @@ function renderVmStatus() {
   ip.textContent = state.vm.ip || '';
   const createBtn = document.getElementById('create-vm-btn');
   const destroyBtn = document.getElementById('destroy-vm-btn');
+  // If a terraform job is in flight, leave the disabled state to the
+  // in-flight renderer so we don't fight over the button.
+  if (state._tfJob) {
+    renderTerraformInFlight();
+    return;
+  }
   createBtn.disabled  = state.vm.state === 'running';
   destroyBtn.disabled = state.vm.state !== 'running';
+}
+
+/* In-flight state for terraform apply/destroy. Stored on `state` so
+   navigating between views (Home / Migrate / Decide) doesn't lose track
+   of a running job. The ticker updates the button label every second.
+   Only one terraform job can be in flight at a time. */
+function setTerraformInFlight(action) {
+  state._tfJob = { action, startedAt: Date.now() };
+  if (state._tfTicker) clearInterval(state._tfTicker);
+  renderTerraformInFlight();
+  state._tfTicker = setInterval(renderTerraformInFlight, 1000);
+}
+
+function clearTerraformInFlight() {
+  state._tfJob = null;
+  if (state._tfTicker) {
+    clearInterval(state._tfTicker);
+    state._tfTicker = null;
+  }
+  renderTerraformInFlight();
+}
+
+function fmtElapsed(ms) {
+  const s = Math.floor(ms / 1000);
+  const mm = Math.floor(s / 60);
+  const ss = (s % 60).toString().padStart(2, '0');
+  return mm + ':' + ss;
+}
+
+function renderTerraformInFlight() {
+  const job        = state._tfJob;
+  const createBtn  = document.getElementById('create-vm-btn');
+  const destroyBtn = document.getElementById('destroy-vm-btn');
+  const banner     = document.getElementById('tf-running-banner');
+
+  if (job) {
+    const elapsed = fmtElapsed(Date.now() - job.startedAt);
+    const verb    = job.action === 'apply' ? 'Creating VM' : 'Destroying VM';
+    if (createBtn) {
+      createBtn.disabled = true;
+      createBtn.dataset.origText = createBtn.dataset.origText || createBtn.textContent;
+      createBtn.textContent = job.action === 'apply' ? `${verb}… ${elapsed}` : createBtn.dataset.origText;
+    }
+    if (destroyBtn) {
+      destroyBtn.disabled = true;
+      destroyBtn.dataset.origText = destroyBtn.dataset.origText || destroyBtn.textContent;
+      destroyBtn.textContent = job.action === 'destroy' ? `${verb}… ${elapsed}` : destroyBtn.dataset.origText;
+    }
+    if (banner) {
+      banner.style.display = 'flex';
+      banner.innerHTML =
+        '<div style="display:flex;align-items:center;gap:10px;flex:1">' +
+          '<div class="tf-spinner" aria-hidden="true"></div>' +
+          '<div>' +
+            '<div style="font-weight:600;color:var(--fg-1);font-size:13px">' + verb + ' in Azure…</div>' +
+            '<div style="font-size:11px;color:var(--fg-3);margin-top:2px">Elapsed ' + elapsed + ' · typical run ~6 minutes · stay on this page</div>' +
+          '</div>' +
+        '</div>';
+    }
+  } else {
+    if (createBtn && createBtn.dataset.origText) {
+      createBtn.textContent = createBtn.dataset.origText;
+    }
+    if (destroyBtn && destroyBtn.dataset.origText) {
+      destroyBtn.textContent = destroyBtn.dataset.origText;
+    }
+    // Re-enable buttons based on actual VM state (not the in-flight flag).
+    if (createBtn)  createBtn.disabled  = state.vm.state === 'running';
+    if (destroyBtn) destroyBtn.disabled = state.vm.state !== 'running';
+    if (banner) banner.style.display = 'none';
+  }
 }
 
 async function createVm() {
   if (!confirm('Apply Terraform — provisions an Azure VM. ~6 minutes. Continue?')) return;
   toast('Terraform apply starting…');
+  setTerraformInFlight('apply');
   try {
     const r = await api('/api/terraform', { method: 'POST', body: { action: 'apply' } });
     if (r.status === 'ok') {
@@ -963,13 +1347,16 @@ async function createVm() {
     }
   } catch (e) {
     toast('Terraform failed: ' + e.message, 'error');
+  } finally {
+    clearTerraformInFlight();
+    pollStatus();
   }
-  pollStatus();
 }
 
 async function destroyVm() {
   if (!confirm('Destroy the Azure VM. This deletes all resources. Continue?')) return;
   toast('Terraform destroy starting…');
+  setTerraformInFlight('destroy');
   try {
     const r = await api('/api/terraform', { method: 'POST', body: { action: 'destroy' } });
     if (r.status === 'ok') {
@@ -980,8 +1367,10 @@ async function destroyVm() {
     }
   } catch (e) {
     toast('Destroy failed: ' + e.message, 'error');
+  } finally {
+    clearTerraformInFlight();
+    pollStatus();
   }
-  pollStatus();
 }
 
 /* =========================================================
@@ -1001,12 +1390,41 @@ function renderHome() {
     }
   }
   const grid = document.getElementById('stage-grid');
+  const serverCount = (state.assess && state.assess.has_data) ? state.assess.server_count : 0;
+  const multi = serverCount > 1;
+
+  // Stage 2 (Decide) display
+  let decideValue, decideMeta;
+  if (state.currentServer && state.currentDb) {
+    decideValue = state.currentServer;
+    decideMeta  = state.currentDb;
+  } else if (multi) {
+    decideValue = serverCount + ' servers';
+    decideMeta  = 'pick one to migrate';
+  } else if (state.decide) {
+    decideValue = state.decide.recommended_target.display.split('(')[0].trim();
+    decideMeta  = state.decide.recommended_target.label.toLowerCase();
+  } else {
+    decideValue = '—';
+    decideMeta  = '';
+  }
+
+  // Stage 3 (Migrate) meta — show which server/db is being targeted
+  const migrateMeta = (state.currentServer && state.currentDb)
+    ? state.currentServer + ' / ' + state.currentDb
+    : 'sub-steps done';
+
+  // Stage 4 (Handoff) meta
+  const handoffMeta = state.handoff
+    ? 'ready to send'
+    : (state.currentServer ? 'awaiting migrate of ' + state.currentServer : 'awaiting migrate');
+
   const cards = [
-    { n: 1, key: 'assess',  name: 'Assess',                tag: 'Estate findings',  value: (state.assess && state.assess.has_data) ? state.assess.server_count : '—', meta: 'servers',         status: state.approved.assess ? 'done' : 'pending' },
-    { n: 2, key: 'decide',  name: 'Decide',                tag: 'Target picker',    value: state.decide ? (state.decide.recommended_target.display.split('(')[0].trim()) : '—', meta: state.decide ? state.decide.recommended_target.label.toLowerCase() : '', status: state.approved.decide ? 'done' : 'pending' },
-    { n: 3, key: 'migrate', name: 'Migrate',               tag: 'Stand up server',  value: doneStepsText(), meta: 'sub-steps done',                                  status: migrateStatus() },
-    { n: 4, key: 'handoff', name: 'Handoff',               tag: 'App team package', value: state.handoff ? 'Generated' : 'Pending', meta: state.handoff ? 'ready to send' : 'awaiting migrate', status: state.approved.handoff ? 'done' : (state.handoff ? 'active' : 'pending') },
-    { n: 5, key: 'day2',    name: 'Day-to-day ops',        tag: 'Steady state',     value: 'Roadmap', meta: 'Phase 3',                                                status: 'pending' },
+    { n: 1, key: 'assess',  name: 'Assessment',            tag: 'Estate findings',  value: (state.assess && state.assess.has_data) ? state.assess.server_count : '—', meta: serverCount === 1 ? 'server' : 'servers', status: state.approved.assess ? 'done' : 'pending' },
+    { n: 2, key: 'decide',  name: 'Decide',                tag: 'Target + database', value: decideValue, meta: decideMeta, status: state.approved.decide ? 'done' : 'pending' },
+    { n: 3, key: 'migrate', name: 'Migrate',               tag: 'Stand up server',  value: doneStepsText(), meta: migrateMeta, status: migrateStatus() },
+    { n: 4, key: 'handoff', name: 'Handoff',               tag: 'App team package', value: state.handoff ? 'Generated' : 'Pending', meta: handoffMeta, status: state.approved.handoff ? 'done' : (state.handoff ? 'active' : 'pending') },
+    { n: 5, key: 'day2',    name: 'Day-to-Day Ops',        tag: 'Steady state',     value: 'Roadmap', meta: 'Phase 3',                                                status: 'pending' },
   ];
   grid.innerHTML = cards.map(c => stageCardHtml(c)).join('');
 }
@@ -1094,7 +1512,42 @@ async function loadAssess() {
     document.getElementById('m-servers').textContent = d.server_count;
     document.getElementById('m-high').textContent    = d.high_findings;
     document.getElementById('m-medium').textContent  = d.medium_findings;
-    document.getElementById('m-file').textContent    = d.source_file || '—';
+    // Source file as a clickable link — calls /api/assess/open which opens the
+    // JSON in Notepad (or other apps via Explorer reveal for non-JSON types).
+    const fileEl = document.getElementById('m-file');
+    fileEl.innerHTML = '';
+    if (d.source_file) {
+      const a = document.createElement('a');
+      a.href = '#';
+      a.textContent = d.source_file;
+      a.style.cssText = 'color:var(--info);text-decoration:underline;cursor:pointer;font-weight:500';
+      a.onmouseover = function () { a.style.color = 'var(--info-strong, var(--info))'; a.style.textDecorationThickness = '2px'; };
+      a.onmouseout  = function () { a.style.color = 'var(--info)'; a.style.textDecorationThickness = ''; };
+      a.onclick = function (ev) {
+        ev.preventDefault();
+        openAssessmentFile(d.source_file);
+      };
+      fileEl.appendChild(a);
+      if (d.source_xlsx) {
+        const sep = document.createElement('span');
+        sep.textContent = ' · ';
+        sep.style.color = 'var(--fg-3)';
+        fileEl.appendChild(sep);
+        const ax = document.createElement('a');
+        ax.href = '#';
+        ax.textContent = d.source_xlsx;
+        ax.style.cssText = 'color:var(--info);text-decoration:underline;cursor:pointer;font-weight:500';
+        ax.onmouseover = function () { ax.style.color = 'var(--info-strong, var(--info))'; ax.style.textDecorationThickness = '2px'; };
+        ax.onmouseout  = function () { ax.style.color = 'var(--info)'; ax.style.textDecorationThickness = ''; };
+        ax.onclick = function (ev) {
+          ev.preventDefault();
+          openAssessmentFile(d.source_xlsx);
+        };
+        fileEl.appendChild(ax);
+      }
+    } else {
+      fileEl.textContent = '—';
+    }
 
     const rows = (d.per_server || []).map(s => {
       const verdict = s.high > 0 ? 'Blocked' : (s.medium > 0 ? 'Conditional' : 'Ready');
@@ -1112,13 +1565,22 @@ async function loadAssess() {
     renderHome();
   } catch (e) {
     document.getElementById('assess-source').textContent = 'Error: ' + e.message;
-    toast('Assess failed: ' + e.message, 'error');
+    // Suppress toast when the failure is "no server" — that's the expected
+    // state when index.html is rendered without server.ps1 behind it (preview
+    // tooling, offline review, etc.). Real fetch failures against a live
+    // server still show the toast.
+    if (isServerUnreachable(e)) {
+      console.warn('loadAssess: server unreachable, suppressing toast.', e);
+    } else {
+      toast('Assessment failed: ' + e.message, 'error');
+    }
   }
 }
 function showAssessPane(which) {
-  document.getElementById('assess-empty').style.display   = (which === 'empty')   ? 'block' : 'none';
-  document.getElementById('assess-running').style.display = (which === 'running') ? 'block' : 'none';
-  document.getElementById('assess-data').style.display    = (which === 'data')    ? 'block' : 'none';
+  document.getElementById('assess-empty').style.display         = (which === 'empty')        ? 'block' : 'none';
+  document.getElementById('assess-running').style.display       = (which === 'running')      ? 'block' : 'none';
+  document.getElementById('assess-rpt-uploaded').style.display  = (which === 'rpt-uploaded') ? 'block' : 'none';
+  document.getElementById('assess-data').style.display          = (which === 'data')         ? 'block' : 'none';
 }
 
 async function runAssessment() {
@@ -1179,31 +1641,498 @@ async function pollAssessment() {
     setTimeout(pollAssessment, 5000);
   }
 }
+
+async function openAssessmentFile(filename) {
+  // Calls /api/assess/open — the backend uses Find-AssessmentFile to locate
+  // the file anywhere under Assessment\Reports\*\ (per-run subfolders) or in
+  // the legacy flat Assessment\ dir, then opens it: Notepad for .json,
+  // Explorer-reveal for everything else.
+  try {
+    const r = await api('/api/assess/open', { method: 'POST', body: { file: filename } });
+    if (r.status === 'ok') {
+      toast('Opened ' + filename);
+    } else {
+      toast('Could not open ' + filename + ': ' + (r.error || 'unknown error'), 'error');
+    }
+  } catch (e) {
+    toast('Open failed: ' + e.message, 'error');
+  }
+}
+
+async function uploadAssessmentFile(file) {
+  if (!file) return;
+  // Reset the input so the same file can be re-selected later if needed.
+  const inputEl = document.getElementById('assess-upload-file');
+  if (inputEl) inputEl.value = '';
+
+  const lower = file.name.toLowerCase();
+
+  // .rpt / .txt: SSMS Results-to-Text export of the Phase 1 SQL. Upload raw,
+  // append to the list of .rpts staged for parsing, and show the status card.
+  // Multiple .rpts can be uploaded before clicking Parse — the wrapper
+  // merges them into one xlsx + JSON (needed for CMS estates where the host
+  // and its group must be assessed separately).
+  if (lower.endsWith('.rpt') || lower.endsWith('.txt')) {
+    try {
+      const buffer = await file.arrayBuffer();
+      const bytes = new Uint8Array(buffer);
+      let binStr = '';
+      const chunkSize = 32768;
+      for (let i = 0; i < bytes.length; i += chunkSize) {
+        binStr += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+      }
+      const content_b64 = btoa(binStr);
+      const r = await api('/api/assess/upload-raw', { method: 'POST', body: { filename: file.name, content_b64 } });
+      if (r.status === 'ok') {
+        addActivity('upload_rpt_file', 'saved · ' + r.saved_as);
+        if (!state._uploadedRpts) state._uploadedRpts = [];
+        // Append (allow re-uploading the same logical file — server uses
+        // unique saved_as names per upload so there's no collision).
+        state._uploadedRpts.push({
+          saved_as: r.saved_as,
+          original: file.name,
+          size:     file.size,
+          when:     new Date().toLocaleString()
+        });
+        renderRptUploadList();
+        showAssessPane('rpt-uploaded');
+        toast('Added ' + file.name + ' (' + state._uploadedRpts.length + ' file' + (state._uploadedRpts.length === 1 ? '' : 's') + ' staged)');
+      } else {
+        toast('Upload failed: ' + (r.error || 'unknown'), 'error');
+      }
+    } catch (e) {
+      toast('Upload failed: ' + e.message, 'error');
+    }
+    return;
+  }
+
+  // .xlsx / .csv / other formats: not accepted. Show the same message the
+  // server would return so the user understands *why*, not just that it failed.
+  if (lower.endsWith('.xlsx') || lower.endsWith('.csv') || lower.endsWith('.txt')) {
+    toast('Only .rpt and .json are accepted. The .rpt is the output of 01_Assessment_Script.sql run via SSMS — it contains the 15 data sections SQLPilot needs to produce findings, SKU recommendations, and the Cloud Migration Matrix.', 'error');
+    return;
+  }
+
+  if (!/\.json$/i.test(file.name)) {
+    toast('Upload must be .rpt or .json', 'error');
+    return;
+  }
+  let text;
+  try {
+    text = await file.text();
+  } catch (e) {
+    toast('Could not read file: ' + e.message, 'error');
+    return;
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(text);
+  } catch (e) {
+    toast('File is not valid JSON: ' + e.message, 'error');
+    return;
+  }
+  // Client-side shape check — server re-validates authoritatively.
+  if (!parsed || typeof parsed !== 'object' || !parsed.metadata || !parsed.servers) {
+    toast('JSON missing required "metadata" and/or "servers" keys', 'error');
+    return;
+  }
+  document.getElementById('assess-source').textContent = 'Uploading assessment JSON…';
+  try {
+    const r = await api('/api/assess/upload', { method: 'POST', body: { filename: file.name, content: parsed } });
+    if (r.status !== 'ok') {
+      toast('Upload failed: ' + (r.error || 'unknown'), 'error');
+      showAssessPane(state.assess ? 'data' : 'empty');
+      return;
+    }
+    addActivity('upload_phase1_assessment', 'saved as ' + (r.saved_as || 'new file'));
+    toast('Assessment uploaded · ' + (r.saved_as || 'saved'));
+    await loadAssess();
+  } catch (e) {
+    toast('Upload failed: ' + e.message, 'error');
+    showAssessPane(state.assess ? 'data' : 'empty');
+  }
+}
+
+/* =========================================================
+   Hero actions — run-assessment modal + upload from hero
+   ========================================================= */
+function openRunAssessmentModal() {
+  document.getElementById('run-assess-modal').style.display = 'flex';
+  // Always reset to Single Server tab + clear fields. No carried-over Node5
+  // default — recipient types their server name fresh each time.
+  setRunTab('single');
+  ['run-server-name','run-cms-host','run-cms-group'].forEach(id => {
+    const f = document.getElementById(id); if (f) f.value = '';
+  });
+  setTimeout(() => {
+    const f = document.getElementById('run-server-name');
+    if (f) f.focus();
+  }, 50);
+}
+function setRunTab(which) {
+  const tabs = { single: 'run-tab-single', cms: 'run-tab-cms' };
+  const panes = { single: 'run-pane-single', cms: 'run-pane-cms' };
+  Object.keys(tabs).forEach(k => {
+    const tab = document.getElementById(tabs[k]);
+    const pane = document.getElementById(panes[k]);
+    if (k === which) {
+      tab.style.borderBottomColor = 'var(--accent)';
+      tab.style.color = 'var(--fg-1)';
+      tab.style.fontWeight = '600';
+      pane.style.display = '';
+    } else {
+      tab.style.borderBottomColor = 'transparent';
+      tab.style.color = 'var(--fg-3)';
+      tab.style.fontWeight = '500';
+      pane.style.display = 'none';
+    }
+  });
+  // Move focus to the first field of the active pane
+  setTimeout(() => {
+    const focusId = which === 'single' ? 'run-server-name' : 'run-cms-host';
+    const f = document.getElementById(focusId); if (f) f.focus();
+  }, 20);
+  // Remember last-used tab so the next time the modal opens we can default to
+  // Single Server (current rule) — set here in case the rule changes.
+  window._lastRunTab = which;
+}
+function closeRunAssessmentModal() {
+  document.getElementById('run-assess-modal').style.display = 'none';
+}
+async function submitRunAssessment() {
+  // Branch on which tab is active.
+  const cmsActive = document.getElementById('run-pane-cms').style.display !== 'none';
+  let body = null;
+  let displayLabel = '';
+  if (cmsActive) {
+    const host  = document.getElementById('run-cms-host').value.trim();
+    const group = document.getElementById('run-cms-group').value.trim();
+    if (!host)  { toast('CMS host required', 'error'); return; }
+    if (!group) { toast('Group name required', 'error'); return; }
+    body = { server_name: host, cms_group: group };
+    displayLabel = group + ' (CMS group on ' + host + ')';
+  } else {
+    const name = document.getElementById('run-server-name').value.trim();
+    if (!name) { toast('Server name required', 'error'); return; }
+    body = { server_name: name };
+    displayLabel = name;
+  }
+  closeRunAssessmentModal();
+  // Set a sentinel BEFORE navigating so the assess view's auto loadAssess()
+  // call sees a job-in-progress and renders the running pane instead of
+  // re-displaying the previous run's data. We'll overwrite with the real
+  // job_id once /api/assess/run returns.
+  state._assessJob = '__pending__';
+  // Go to Assessment view so user can see the running state
+  goView('assess');
+  showAssessPane('running');
+  document.getElementById('assess-source').textContent = 'Starting Phase 1 against ' + displayLabel + '…';
+  const detailEl = document.getElementById('assess-running-detail');
+  if (detailEl) detailEl.textContent = 'Starting Phase 1 against ' + displayLabel + ' — this typically takes 3-5 minutes per server.';
+  const logEl = document.getElementById('assess-running-log');
+  if (logEl) logEl.innerHTML = '';
+  try {
+    const r = await api('/api/assess/run', { method: 'POST', body });
+    if (r.status !== 'started') {
+      toast('Assessment failed to start: ' + (r.error || 'unknown'), 'error');
+      state._assessJob = null;
+      showAssessPane(state.assess ? 'data' : 'empty');
+      return;
+    }
+    state._assessJob = r.job_id;
+    addActivity('run_phase1_assessment', 'started · ' + displayLabel + ' · job ' + r.job_id);
+    toast('Phase 1 started for ' + displayLabel);
+    pollAssessment();
+  } catch (e) {
+    toast('Assessment failed: ' + e.message, 'error');
+    state._assessJob = null;
+    showAssessPane(state.assess ? 'data' : 'empty');
+  }
+}
+async function uploadFromHero(file) {
+  if (!file) return;
+  document.getElementById('hero-upload-file').value = '';
+  goView('assess');
+  await uploadAssessmentFile(file);
+}
+
+/* =========================================================
+   Parse the uploaded .rpt(s) — fires the wrapper with -InputRpt
+   on all staged files at once. Wrapper merges them into one
+   $allData and produces one xlsx + JSON. Polls /api/assess/status
+   to detect the new FromUpload JSON, then refreshes the home page.
+   ========================================================= */
+async function parseUploadedRpt() {
+  const list = state._uploadedRpts || [];
+  if (list.length === 0) {
+    toast('No uploaded .rpt to parse', 'error');
+    return;
+  }
+  if (state._assessJob) {
+    toast('Another assessment job is already running', 'error');
+    return;
+  }
+  const filenames = list.map(x => x.saved_as);
+  showAssessPane('running');
+  document.getElementById('assess-source').textContent =
+    'Parsing ' + filenames.length + ' .rpt file(s) → Phase 1 deliverable…';
+  const detailEl = document.getElementById('assess-running-detail');
+  if (detailEl) {
+    detailEl.textContent = 'Wrapper is parsing ' + filenames.join(', ') + ' and building the full Stage 1 report.';
+  }
+  try {
+    const r = await api('/api/assess/parse-rpt', { method: 'POST', body: { filenames } });
+    if (r.status !== 'started') {
+      toast('Parse failed to start: ' + (r.error || 'unknown'), 'error');
+      showAssessPane('rpt-uploaded');
+      return;
+    }
+    state._assessJob = r.job_id;
+    addActivity('parse_rpt', 'started · ' + filenames.length + ' file(s) · job ' + r.job_id);
+    toast('Parsing ' + filenames.length + ' .rpt file(s) · job ' + r.job_id);
+    pollAssessment();
+  } catch (e) {
+    toast('Parse failed: ' + e.message, 'error');
+    showAssessPane('rpt-uploaded');
+  }
+}
+
+// Render the list of staged .rpts inside the rpt-uploaded pane. Called after
+// each upload and after a remove. Also updates the title/subtitle and Parse
+// button label to reflect single vs multi-file state.
+function renderRptUploadList() {
+  const list = state._uploadedRpts || [];
+  const listEl   = document.getElementById('rpt-up-list');
+  const titleEl  = document.getElementById('rpt-up-title');
+  const subEl    = document.getElementById('rpt-up-subtitle');
+  const parseBtn = document.getElementById('rpt-parse-btn');
+  if (!listEl) return;
+
+  if (list.length === 0) {
+    listEl.innerHTML = '';
+    if (titleEl)  titleEl.textContent = 'No files staged';
+    if (subEl)    subEl.textContent = 'Upload one or more .rpt files to begin.';
+    if (parseBtn) parseBtn.disabled = true;
+    return;
+  }
+
+  if (titleEl) titleEl.textContent = (list.length === 1)
+    ? 'SSMS .rpt uploaded'
+    : list.length + ' SSMS .rpt files staged';
+  if (subEl) subEl.textContent = (list.length === 1)
+    ? 'Ready to convert into the full Phase 1 deliverable (xlsx + JSON).'
+    : 'Wrapper will parse all files and merge into one Phase 1 deliverable.';
+  if (parseBtn) {
+    parseBtn.disabled = false;
+    parseBtn.textContent = (list.length === 1) ? 'Parse to JSON' : ('Parse ' + list.length + ' files to JSON');
+  }
+
+  listEl.innerHTML = list.map(function (f, idx) {
+    return '<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-md);margin-bottom:6px">'
+      + '<div style="width:24px;height:24px;border-radius:4px;background:var(--info-bg);color:var(--info-fg);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">' + (idx+1) + '</div>'
+      + '<div style="flex:1;min-width:0">'
+      +   '<div style="font-family:var(--mono);font-size:12px;color:var(--fg-1);word-break:break-all">' + escapeHtml(f.original) + '</div>'
+      +   '<div style="font-size:11px;color:var(--fg-3);margin-top:2px">saved as ' + escapeHtml(f.saved_as) + ' · ' + formatBytes(f.size) + ' · ' + escapeHtml(f.when) + '</div>'
+      + '</div>'
+      + '<button class="btn" onclick="removeRptUpload(' + idx + ')" style="font-size:11px;padding:4px 10px;color:var(--bad)">Remove</button>'
+      + '</div>';
+  }).join('');
+}
+
+function removeRptUpload(idx) {
+  if (!state._uploadedRpts) return;
+  state._uploadedRpts.splice(idx, 1);
+  renderRptUploadList();
+  if (state._uploadedRpts.length === 0) {
+    showAssessPane(state.assess ? 'data' : 'empty');
+  }
+}
+
+function resetRptUploads() {
+  state._uploadedRpts = [];
+  renderRptUploadList();
+  showAssessPane(state.assess ? 'data' : 'empty');
+  toast('Cleared staged uploads');
+}
+
+// Minimal HTML escaper for filenames/timestamps rendered into the list.
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function formatBytes(n) {
+  if (n == null) return '—';
+  if (n < 1024) return n + ' B';
+  if (n < 1024*1024) return (n/1024).toFixed(1) + ' KB';
+  return (n/(1024*1024)).toFixed(1) + ' MB';
+}
+
 function loadDecideFor(server) {
   state._decideServer = server;
   goView('decide');
 }
 
 /* =========================================================
-   Decide
+   Decide — multi-server index + per-server detail + DB picker
    ========================================================= */
-async function loadDecide() {
-  const server = state._decideServer || (state.assess && state.assess.per_server && state.assess.per_server[0] && state.assess.per_server[0].name) || TARGET_SERVER;
-  document.getElementById('decide-tag-line').textContent = 'stage 2 of 5 · ' + server;
-  document.getElementById('decide-grid').innerHTML = '<div class="empty">Loading verdicts for ' + server + '…</div>';
-  try {
-    const d = await api('/api/decide?server=' + encodeURIComponent(server));
-    state.decide = d;
-    renderDecide(d);
-    addActivity('consult_kb', server + ' · ' + (d.contributing_topics ? d.contributing_topics.length : 0) + ' topics matched');
-    // Re-render the workspace cards now that Decide data is loaded
-    renderHome();
-  } catch (e) {
-    document.getElementById('decide-grid').innerHTML = '<div class="empty">Error: ' + e.message + '</div>';
-    toast('Decide failed: ' + e.message, 'error');
-  }
+
+function showDecidePane(which) {
+  document.getElementById('decide-index').style.display  = (which === 'index')  ? 'block' : 'none';
+  document.getElementById('decide-detail').style.display = (which === 'detail') ? 'block' : 'none';
 }
-function renderDecide(d) {
+
+// Entry point — called by goView('decide'). Branches on server count.
+async function loadDecide() {
+  const servers = (state.assess && state.assess.per_server) ? state.assess.per_server : [];
+
+  // Single-server estate (or no assessment): legacy flow, detail pane only, no crumb.
+  if (servers.length <= 1) {
+    const only = servers[0] ? servers[0].name : (state._decideServer || TARGET_SERVER);
+    document.getElementById('back-to-servers').style.display = 'none';
+    showDecidePane('detail');
+    await loadDecideDetail(only);
+    return;
+  }
+
+  // Multi-server: if user already clicked a tile, jump to detail with crumb.
+  if (state._decideServer) {
+    document.getElementById('back-to-servers').style.display = 'inline-flex';
+    showDecidePane('detail');
+    await loadDecideDetail(state._decideServer);
+    return;
+  }
+
+  // Multi-server, no specific pick: show server-tile grid.
+  showDecidePane('index');
+  renderDecideIndex(servers);
+}
+
+function backToServerIndex() {
+  state._decideServer = null;
+  state.decide = null;
+  loadDecide();
+}
+
+// Render the multi-server tile grid. Tiles render immediately with "loading"
+// verdicts, then fire /api/decide in parallel for each server and fill in
+// real verdicts as responses arrive. Results are cached for the detail view.
+function renderDecideIndex(servers) {
+  document.getElementById('decide-index-tag').textContent =
+    'stage 2 of 5 · ' + servers.length + ' servers';
+
+  const grid = document.getElementById('server-tile-grid');
+  grid.innerHTML = servers.map(s => serverTileHtml(s, state.decideCache[s.name] || null)).join('');
+
+  // For each server not already cached, fetch in parallel.
+  servers.forEach(s => {
+    if (state.decideCache[s.name]) return;
+    api('/api/decide?server=' + encodeURIComponent(s.name))
+      .then(d => {
+        state.decideCache[s.name] = d;
+        const el = document.getElementById('tile-' + s.name);
+        if (el) el.outerHTML = serverTileHtml(s, d);
+      })
+      .catch(e => {
+        const el = document.getElementById('tile-' + s.name);
+        if (!el) return;
+        const verdictsEl = el.querySelector('.verdicts');
+        if (verdictsEl) {
+          verdictsEl.innerHTML = `<span style="color:var(--bad);font-size:11px">error: ${e.message}</span>`;
+        }
+      });
+  });
+}
+
+function serverTileHtml(s, decide) {
+  const findingsLine = (s.high || 0) + ' high · ' + (s.medium || 0) + ' medium';
+  const dbCount = (s.databases && s.databases.length) ? s.databases.length : 0;
+  const rec = decide
+    ? `<span class="rec-pill">→ ${decide.recommended_target.display.split('(')[0].trim()}</span>`
+    : `<span class="rec-pill muted">loading…</span>`;
+  const verdicts = decide
+    ? verdictRowHtml(decide)
+    : `<div class="verdict"><span class="dot pending"></span><span class="tgt">VM</span></div>
+       <div class="verdict"><span class="dot pending"></span><span class="tgt">MI</span></div>
+       <div class="verdict"><span class="dot pending"></span><span class="tgt">DB</span></div>`;
+  const dbLine = dbCount > 0 ? ' · ' + dbCount + ' database' + (dbCount === 1 ? '' : 's') : '';
+  return `<div class="server-tile" id="tile-${s.name}" onclick="loadDecideFor('${s.name}')">
+    <div class="row1">
+      <span class="name">${s.name}</span>
+      ${rec}
+    </div>
+    <div class="verdicts">${verdicts}</div>
+    <div class="findings-line">${findingsLine}${dbLine}</div>
+  </div>`;
+}
+
+function verdictRowHtml(decide) {
+  const shortNames = {
+    'azure_vm':     'VM',
+    'azure_sql_mi': 'MI',
+    'azure_sql_db': 'DB',
+    'sql_vm':       'VM',
+    'sql_mi':       'MI',
+    'sql_db':       'DB',
+  };
+  return decide.cards.map(c => {
+    const cls = c.label === 'Ready' ? 'good' : (c.label === 'Conditional' ? 'warn' : 'bad');
+    const short = shortNames[c.target_key] || c.target_key;
+    return `<div class="verdict"><span class="dot ${cls}"></span><span class="tgt">${short}</span><span class="lbl">${c.label}</span></div>`;
+  }).join('');
+}
+
+// Render the three target cards + DB picker for one server.
+async function loadDecideDetail(server) {
+  const headingEl = document.getElementById('decide-detail-heading');
+  const tagEl     = document.getElementById('decide-tag-line');
+  const servers = (state.assess && state.assess.per_server) ? state.assess.per_server : [];
+  const multi = servers.length > 1;
+
+  // Header: server name when multi-node (server is the subject), generic when single-node.
+  if (multi) {
+    headingEl.textContent = server;
+    tagEl.textContent     = 'target decision · ' + server;
+  } else {
+    headingEl.textContent = 'Target Decision';
+    tagEl.textContent     = 'stage 2 of 5 · ' + server;
+  }
+
+  document.getElementById('decide-grid').innerHTML =
+    '<div class="empty">Loading verdicts for ' + server + '…</div>';
+  document.getElementById('db-picker').style.display = 'none';
+
+  // Verdicts — use cache when available, else fetch.
+  try {
+    let d = state.decideCache[server];
+    if (!d) {
+      d = await api('/api/decide?server=' + encodeURIComponent(server));
+      state.decideCache[server] = d;
+    }
+    state.decide = d;
+    renderDecideCards(d);
+    addActivity('consult_kb', server + ' · ' +
+      (d.contributing_topics ? d.contributing_topics.length : 0) + ' topics matched');
+  } catch (e) {
+    document.getElementById('decide-grid').innerHTML =
+      '<div class="empty">Error: ' + e.message + '</div>';
+    toast('Decide failed: ' + e.message, 'error');
+    return;
+  }
+
+  // Database picker — populated from the server's databases array in /api/assess.
+  renderDbPicker(server);
+
+  // Workspace cards may need refreshing now that decide data is loaded
+  renderHome();
+}
+
+function renderDecideCards(d) {
   const rec = d.recommended_target.key;
   const cards = d.cards.map(c => {
     const isRec = c.target_key === rec;
@@ -1228,14 +2157,119 @@ function renderDecide(d) {
   document.getElementById('decide-grid').innerHTML = cards;
 }
 
+function renderDbPicker(server) {
+  const picker = document.getElementById('db-picker');
+  const list   = document.getElementById('db-list');
+
+  // Look up the server entry in /api/assess data for its databases array.
+  const servers = (state.assess && state.assess.per_server) ? state.assess.per_server : [];
+  const entry = servers.find(s => s.name === server);
+  const dbs = (entry && entry.databases) ? entry.databases : [];
+
+  if (!dbs.length) {
+    list.innerHTML = '<div class="empty">No databases reported for this server in the assessment.</div>';
+    picker.style.display = 'block';
+    return;
+  }
+
+  // Auto-select first ONLINE database for this server if nothing picked yet,
+  // or if the previously picked DB doesn't belong to this server.
+  const onlineDbs = dbs.filter(d => isOnline(d.state));
+  const stillValid = state.currentServer === server &&
+                     state.currentDb &&
+                     dbs.some(d => d.name === state.currentDb && isOnline(d.state));
+  if (!stillValid) {
+    state.currentServer = server;
+    state.currentDb = onlineDbs.length ? onlineDbs[0].name : null;
+  }
+
+  list.innerHTML = dbs.map(db => dbOptionHtml(server, db)).join('');
+  picker.style.display = 'block';
+  updateContinueButton();
+}
+
+function isOnline(stateStr) {
+  return !stateStr || /online/i.test(stateStr);
+}
+
+function dbOptionHtml(server, db) {
+  const online = isOnline(db.state);
+  const selected = (state.currentDb === db.name);
+  const cls = ['db-option'];
+  if (!online) cls.push('disabled');
+  if (online && selected) cls.push('selected');
+  const stateBadge = (db.state && !online) ? `<span class="db-state">${escapeAttr(db.state)}</span>` : '';
+  const handler = online
+    ? `onclick="pickDb('${escapeAttr(server)}','${escapeAttr(db.name)}')"`
+    : '';
+  return `<span class="${cls.join(' ')}" ${handler}>${escapeAttr(db.name)}${stateBadge}</span>`;
+}
+
+function pickDb(server, dbName) {
+  state.currentServer = server;
+  state.currentDb = dbName;
+  // Re-render just the picker (cheaper than a full reload)
+  renderDbPicker(server);
+}
+
+function updateContinueButton() {
+  const btn = document.getElementById('decide-continue-btn');
+  if (!btn) return;
+  const hasDb = !!state.currentDb;
+  btn.disabled = !hasDb;
+  btn.textContent = hasDb
+    ? ('Continue to Migrate · ' + state.currentDb + ' →')
+    : 'Select a database to continue';
+}
+
+// Continue button — gate Decide stage, persist currentServer/currentDb, go to Migrate.
+function continueFromDecide() {
+  if (!state.currentDb) {
+    toast('Select a database first', 'error');
+    return;
+  }
+  // Make sure currentServer is set even on single-node flows where we may not
+  // have hit the picker path.
+  if (!state.currentServer) {
+    const servers = (state.assess && state.assess.per_server) ? state.assess.per_server : [];
+    state.currentServer = (servers[0] && servers[0].name) || TARGET_SERVER;
+  }
+  state.approved.decide = true;
+  addActivity('approve_stage', 'decide · ' + state.currentServer + ' / ' + state.currentDb);
+  toast('Decide approved · ' + state.currentServer + ' / ' + state.currentDb);
+  goView('migrate');
+}
+
+// Small XSS helper — escape strings before interpolating into HTML attributes.
+function escapeAttr(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/'/g, '&#39;')
+    .replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 /* =========================================================
    Migrate
    ========================================================= */
-function renderMigrate() {
+
+// Helper — resolve the (server, db) pair for Migrate / Handoff.
+// Prefers Decide-stage selections; falls back to first server in assessment, then legacy constants.
+function activeServer() {
+  if (state.currentServer) return state.currentServer;
   if (state.assess && state.assess.per_server && state.assess.per_server[0]) {
-    document.getElementById('migrate-sub').textContent =
-      state.assess.per_server[0].name + ' on-prem → new Azure SQL VM · 8 sub-steps';
+    return state.assess.per_server[0].name;
   }
+  return TARGET_SERVER;
+}
+function activeDb() {
+  if (state.currentDb) return state.currentDb;
+  return TARGET_DB;
+}
+
+function renderMigrate() {
+  const srv = activeServer();
+  const db  = activeDb();
+  document.getElementById('migrate-sub').textContent =
+    srv + ' on-prem → new Azure SQL VM · DB: ' + db + ' · 8 sub-steps';
   // Sync provision status from VM state
   if (state.vm.state === 'running' && state.migrate.steps[0].status === 'pending') {
     state.migrate.steps[0].status = 'done';
@@ -1254,12 +2288,21 @@ function migrateRowHtml(step) {
   const badge = step.real
     ? '<span class="badge-real">Real</span>'
     : '<span class="badge-phase3">Phase 3</span>';
+  // Inline action button for the Provision target VM step — clicking it runs
+  // the same `terraform apply` flow as the global Create VM button in the
+  // page header, but it sits where the user expects it (next to the step it
+  // affects). Hidden once the VM exists.
+  let inlineAction = '';
+  if (step.id === 'provision' && step.status !== 'done' && step.status !== 'running') {
+    inlineAction = '<button class="btn btn-action" style="margin-right:10px" onclick="createVm()">Create VM</button>';
+  }
   return `<div class="migrate-row">
     ${dotHtml}
     <div class="migrate-body">
       <div class="migrate-title ${titleClass}">${step.title}</div>
       <div class="migrate-sub ${subClass}">${step.sub}</div>
     </div>
+    ${inlineAction}
     ${badge}
   </div>`;
 }
@@ -1273,6 +2316,7 @@ async function startMigration() {
   if (state.vm.state !== 'running') {
     setStep('provision', 'running');
     log.innerHTML += '<div class="line">[terraform] apply starting...</div>';
+    setTerraformInFlight('apply');
     try {
       const r = await api('/api/terraform', { method: 'POST', body: { action: 'apply' } });
       if (r.status === 'ok') {
@@ -1283,25 +2327,30 @@ async function startMigration() {
         setStep('provision', 'failed');
         log.innerHTML += '<div class="line">[terraform] ERROR: ' + (r.error||'unknown') + '</div>';
         toast('Provisioning failed', 'error');
+        clearTerraformInFlight();
         return;
       }
     } catch (e) {
       setStep('provision', 'failed');
       log.innerHTML += '<div class="line">[terraform] EXCEPTION: ' + e.message + '</div>';
       toast('Provisioning failed: ' + e.message, 'error');
+      clearTerraformInFlight();
       return;
     }
+    clearTerraformInFlight();
     await pollStatus();
   } else {
     setStep('provision', 'done', 'already running');
   }
 
   // Step 2: Restore
+  const restoreSrv = activeServer();
+  const restoreDb  = activeDb();
   setStep('restore', 'running');
-  log.innerHTML += '<div class="line">[restore] BACKUP TO URL / RESTORE FROM URL...</div>';
+  log.innerHTML += '<div class="line">[restore] BACKUP ' + restoreDb + ' from ' + restoreSrv + ' → RESTORE FROM URL...</div>';
   try {
     const r = await api('/api/restore', { method: 'POST', body: {
-      database: TARGET_DB, source: TARGET_SERVER, target: state.vm.ip || 'auto'
+      database: restoreDb, source: restoreSrv, target: state.vm.ip || 'auto'
     }});
     if (r.status === 'ok') {
       state.migrate.restore_result = r;
@@ -1358,9 +2407,34 @@ function setStep(id, status, sub) {
    Handoff
    ========================================================= */
 function renderHandoff() {
+  // Gate the handoff button on migration progress. The handoff document
+  // requires at least Provision target VM (step 0, real) to have completed,
+  // because the handoff pulls connection strings from terraform output.
+  // Without a deployed VM there is literally nothing to hand off to.
+  const realSteps = (state.migrate.steps || []).filter(s => s.real);
+  const realDone  = realSteps.filter(s => s.status === 'done').length;
+  const provisionDone = ((state.migrate.steps || [])[0] || {}).status === 'done';
+  const handoffEnabled = provisionDone;  // gate: VM must exist
+
   if (!state.handoff) {
     document.getElementById('handoff-empty').style.display = 'block';
     document.getElementById('handoff-content').style.display = 'none';
+    const emptyEl = document.getElementById('handoff-empty');
+    const msgEl = emptyEl.querySelector('div');
+    const btnEl = emptyEl.querySelector('button');
+    if (handoffEnabled) {
+      msgEl.textContent = 'No handoff generated yet. Click Generate handoff to build the app-team package from the current migration state.';
+      btnEl.disabled = false;
+      btnEl.style.opacity = '';
+      btnEl.style.cursor = '';
+      btnEl.title = '';
+    } else {
+      msgEl.textContent = 'Complete the Migration stage first — provision the target VM, then return here. Handoff needs a deployed VM to produce connection strings.';
+      btnEl.disabled = true;
+      btnEl.style.opacity = '0.5';
+      btnEl.style.cursor = 'not-allowed';
+      btnEl.title = 'Provision target VM (Stage 3) must complete first.';
+    }
     return;
   }
   document.getElementById('handoff-empty').style.display = 'none';
@@ -1392,17 +2466,19 @@ function renderHandoff() {
 }
 
 async function generateHandoff() {
-  toast('Generating handoff…');
+  const srv = activeServer();
+  const db  = activeDb();
+  toast('Generating handoff for ' + db + '…');
   try {
     const r = await api('/api/handoff', { method: 'POST', body: {
-      database: TARGET_DB,
-      source: TARGET_SERVER,
+      database: db,
+      source: srv,
       restore_result: state.migrate.restore_result,
       validate_result: state.migrate.validate_result,
     }});
     state.handoff = r;
     renderHandoff();
-    addActivity('generate_handoff', TARGET_DB + ' · ready to send');
+    addActivity('generate_handoff', srv + ' / ' + db + ' · ready to send');
   } catch (e) {
     toast('Handoff failed: ' + e.message, 'error');
   }
@@ -1410,12 +2486,13 @@ async function generateHandoff() {
 
 function copyHandoffEmail() {
   if (!state.handoff) return;
+  const db = activeDb();
   // Approximate the email format on the client side
   const h = state.handoff;
   const lines = [];
-  lines.push(`Subject: ${TARGET_DB} migration complete - please update connection strings`);
+  lines.push(`Subject: ${db} migration complete - please update connection strings`);
   lines.push('');
-  lines.push(`Database ${TARGET_DB} has been migrated from ${h.source.server} to a new Azure SQL VM.`);
+  lines.push(`Database ${db} has been migrated from ${h.source.server} to a new Azure SQL VM.`);
   lines.push('Please update your connection strings and verify functionality.');
   lines.push('');
   lines.push('NEW CONNECTION:');
@@ -1430,7 +2507,7 @@ function copyHandoffEmail() {
 function signoffHandoff() {
   state.approved.handoff = true;
   toast('Handoff signed off · audit trail updated');
-  addActivity('signoff_handoff', TARGET_DB);
+  addActivity('signoff_handoff', activeServer() + ' / ' + activeDb());
   renderHome();
 }
 
@@ -1444,6 +2521,83 @@ function connectEvents() {
 }
 
 /* =========================================================
+   Drag-and-drop upload — covers the hero banner and the Estate
+   page's drop zone. The window-level handlers prevent the browser's
+   default of navigating to a file dropped outside our zones (which
+   would unload SQLPilot entirely — common UX trap).
+   ========================================================= */
+function setupDragDrop() {
+  // Defense: kill default drag-over / drop on the whole window so a missed
+  // drop doesn't navigate the tab to the file.
+  window.addEventListener('dragover', function (e) { e.preventDefault(); }, false);
+  window.addEventListener('drop',     function (e) { e.preventDefault(); }, false);
+
+  // Helper: is this drag carrying actual files? (not text, not a link, etc.)
+  function hasFiles(ev) {
+    if (!ev.dataTransfer) return false;
+    const types = ev.dataTransfer.types;
+    if (!types) return false;
+    for (let i = 0; i < types.length; i++) {
+      if (types[i] === 'Files') return true;
+    }
+    return false;
+  }
+
+  // Estate-page drop zone (visible, dashed).
+  const zone = document.getElementById('assess-drop-zone');
+  if (zone) {
+    const baseBorder = 'var(--border)';
+    const baseBg     = 'var(--bg-subtle)';
+    function highlight() {
+      zone.style.borderColor = 'var(--info)';
+      zone.style.background  = 'var(--info-bg, rgba(37,99,235,0.08))';
+      zone.style.color       = 'var(--fg-1)';
+    }
+    function unhighlight() {
+      zone.style.borderColor = baseBorder;
+      zone.style.background  = baseBg;
+      zone.style.color       = 'var(--fg-2)';
+    }
+    zone.addEventListener('dragenter', function (e) { if (hasFiles(e)) { e.preventDefault(); highlight(); } });
+    zone.addEventListener('dragover',  function (e) { if (hasFiles(e)) { e.preventDefault(); highlight(); } });
+    zone.addEventListener('dragleave', function (e) {
+      // Only unhighlight when actually leaving the zone (not when moving onto a child).
+      if (e.target === zone) unhighlight();
+    });
+    zone.addEventListener('drop', function (e) {
+      if (!hasFiles(e)) return;
+      e.preventDefault();
+      unhighlight();
+      const f = e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f) uploadAssessmentFile(f);
+    });
+  }
+
+  // Hero banner — whole-banner drop, with a hint that only appears mid-drag.
+  const hero = document.querySelector('.workspace-title');
+  const hint = document.getElementById('hero-drop-hint');
+  if (hero) {
+    hero.addEventListener('dragenter', function (e) {
+      if (hasFiles(e)) { e.preventDefault(); if (hint) hint.style.display = 'block'; }
+    });
+    hero.addEventListener('dragover', function (e) {
+      if (hasFiles(e)) { e.preventDefault(); if (hint) hint.style.display = 'block'; }
+    });
+    hero.addEventListener('dragleave', function (e) {
+      // Hide when leaving the hero entirely.
+      if (e.target === hero && hint) hint.style.display = 'none';
+    });
+    hero.addEventListener('drop', function (e) {
+      if (!hasFiles(e)) return;
+      e.preventDefault();
+      if (hint) hint.style.display = 'none';
+      const f = e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f) uploadFromHero(f);
+    });
+  }
+}
+
+/* =========================================================
    Startup
    ========================================================= */
 function start() {
@@ -1453,6 +2607,7 @@ function start() {
   connectEvents();
   // Pre-warm Assess data so the front page card shows real numbers
   loadAssess().catch(() => {});
+  setupDragDrop();
 }
 start();
 </script>

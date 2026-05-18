@@ -57,6 +57,9 @@ function Initialize-RestoreCoords {
     #   2. $script:ScriptRoot\Terraform   (sibling of agent.ps1)
     #   3. $script:ScriptRoot             (agent.ps1 lives in the TF dir itself)
     #   4. current working directory
+    # Detect by presence of *.tf files (more robust than .terraform\ which only
+    # exists after `terraform init` runs — and the agent runs init from terraform.ps1
+    # earlier in the pipeline).
     if (-not $TerraformDir) {
         $candidates = @()
         if ($script:ScriptRoot) {
@@ -65,15 +68,18 @@ function Initialize-RestoreCoords {
         }
         $candidates += (Get-Location).Path
         foreach ($c in $candidates) {
-            if ($c -and (Test-Path (Join-Path $c '.terraform'))) {
-                $TerraformDir = $c
-                break
+            if ($c -and (Test-Path $c)) {
+                $tf = Get-ChildItem -Path $c -Filter '*.tf' -ErrorAction SilentlyContinue | Select-Object -First 1
+                if ($tf) {
+                    $TerraformDir = $c
+                    break
+                }
             }
         }
     }
 
-    if (-not $TerraformDir -or -not (Test-Path (Join-Path $TerraformDir '.terraform'))) {
-        throw "Could not locate the SQLPilot Terraform directory (looked for .terraform marker). Pass -TerraformDir explicitly."
+    if (-not $TerraformDir -or -not (Test-Path $TerraformDir)) {
+        throw "Could not locate the SQLPilot Terraform directory (looked for *.tf files). Pass -TerraformDir explicitly."
     }
 
     Write-Host "[restore] Reading coordinates from terraform output ($TerraformDir)..." -ForegroundColor DarkGray

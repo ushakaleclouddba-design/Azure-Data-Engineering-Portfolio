@@ -41,13 +41,42 @@
 # ---------------------------------------------------------------------------
 $script:TfDir = $null
 
+# Locate the SQLPilot Terraform directory. Strategy:
+#   1. If caller passed -TerraformDir, use it.
+#   2. Walk a list of candidates (ScriptRoot\Terraform, ScriptRoot, cwd),
+#      pick the first one that contains *.tf files.
+#   3. If the picked dir has no .terraform\ marker (i.e. `terraform init`
+#      was never run), run `terraform init` once automatically. This is
+#      the fresh-install case — recipient extracts the zip, has .tf files
+#      but no .terraform\ yet.
 function Resolve-TerraformDir {
     [CmdletBinding()]
     param (
         [string] $TerraformDir
     )
 
-    if ($TerraformDir -and (Test-Path (Join-Path $TerraformDir '.terraform'))) {
+    function _DirHasTf {
+        param([string] $D)
+        if (-not $D -or -not (Test-Path $D)) { return $false }
+        $tf = Get-ChildItem -Path $D -Filter '*.tf' -ErrorAction SilentlyContinue | Select-Object -First 1
+        return [bool] $tf
+    }
+
+    function _EnsureInit {
+        param([string] $D)
+        $marker = Join-Path $D '.terraform'
+        if (Test-Path $marker) { return }  # already initialized
+        Write-Host "[terraform] $D has no .terraform\ marker — running 'terraform init' (one-time)..." -ForegroundColor DarkCyan
+        $proc = Start-Process -FilePath 'terraform' -ArgumentList @("-chdir=$D", 'init', '-input=false') `
+            -NoNewWindow -Wait -PassThru -ErrorAction Stop
+        if ($proc.ExitCode -ne 0) {
+            throw "terraform init failed in '$D' (exit $($proc.ExitCode)). Run 'terraform -chdir=$D init' manually for details."
+        }
+        Write-Host "[terraform] init OK" -ForegroundColor DarkGreen
+    }
+
+    if ($TerraformDir -and (_DirHasTf $TerraformDir)) {
+        _EnsureInit $TerraformDir
         return $TerraformDir
     }
 
@@ -59,11 +88,12 @@ function Resolve-TerraformDir {
     $candidates += (Get-Location).Path
 
     foreach ($c in $candidates) {
-        if ($c -and (Test-Path (Join-Path $c '.terraform'))) {
+        if (_DirHasTf $c) {
+            _EnsureInit $c
             return $c
         }
     }
-    throw "Could not locate the SQLPilot Terraform directory (looked for .terraform marker in: $($candidates -join '; ')). Pass -TerraformDir or run `terraform init` first."
+    throw "Could not locate the SQLPilot Terraform directory (looked for *.tf files in: $($candidates -join '; ')). Pass -TerraformDir explicitly."
 }
 
 

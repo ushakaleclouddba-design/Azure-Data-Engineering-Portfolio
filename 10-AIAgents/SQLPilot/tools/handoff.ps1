@@ -45,6 +45,9 @@ function Invoke-RealGenerateHandoff {
 
     # ---------------------------------------------------------------------
     # Locate Terraform dir, pull live outputs.
+    # Detect by *.tf files. The terraform tool runs `terraform init` before
+    # this stage, so we can be confident the dir is initialized — but the
+    # marker presence isn't our way of finding the dir, the .tf files are.
     # ---------------------------------------------------------------------
     if (-not $TerraformDir) {
         $candidates = @()
@@ -54,14 +57,17 @@ function Invoke-RealGenerateHandoff {
         }
         $candidates += (Get-Location).Path
         foreach ($c in $candidates) {
-            if ($c -and (Test-Path (Join-Path $c '.terraform'))) {
-                $TerraformDir = $c
-                break
+            if ($c -and (Test-Path $c)) {
+                $tf = Get-ChildItem -Path $c -Filter '*.tf' -ErrorAction SilentlyContinue | Select-Object -First 1
+                if ($tf) {
+                    $TerraformDir = $c
+                    break
+                }
             }
         }
     }
-    if (-not $TerraformDir -or -not (Test-Path (Join-Path $TerraformDir '.terraform'))) {
-        throw "Could not locate the SQLPilot Terraform directory. Pass -TerraformDir explicitly."
+    if (-not $TerraformDir -or -not (Test-Path $TerraformDir)) {
+        throw "Could not locate the SQLPilot Terraform directory (looked for *.tf files). Pass -TerraformDir explicitly."
     }
 
     $tfJson = & terraform -chdir="$TerraformDir" output -json 2>$null

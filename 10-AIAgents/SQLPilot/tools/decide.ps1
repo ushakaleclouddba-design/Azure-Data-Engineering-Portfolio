@@ -69,21 +69,28 @@ function Initialize-DecidePhase1 {
 
     if (-not $JsonPath) {
         # Find the latest Migration_Assessment_Report_*.json. The Phase 1
-        # wrapper writes alongside itself, but the canonical location for
-        # the demo is the SQL_Migration_Assessment_Agent_AI folder.
-        $candidates = @(
-            'C:\Users\ushakale\Documents\Temp\SQL_Migration_Assessment_Agent_AI'
-        )
-        if ($script:ScriptRoot) { $candidates += $script:ScriptRoot }
-        foreach ($d in $candidates) {
-            if ($d -and (Test-Path $d)) {
-                $latest = Get-ChildItem -Path $d -Filter 'Migration_Assessment_Report_*.json' -ErrorAction SilentlyContinue |
-                    Sort-Object LastWriteTime -Descending | Select-Object -First 1
-                if ($latest) {
-                    $JsonPath = $latest.FullName
-                    break
-                }
-            }
+        # wrapper writes into per-run subfolders under Assessment\Reports\
+        # (e.g. Reports\2026-05-15_1501_Node5\) — we recurse to find them.
+        # Falls back to the legacy flat Assessment\ dir for back-compat with
+        # older output files left over from before the folder restructure.
+        $assessmentRoot = 'C:\SQLPilot\Assessment'
+        $reportsRoot    = Join-Path $assessmentRoot 'Reports'
+        $allMatches = @()
+        if (Test-Path $reportsRoot) {
+            $files = Get-ChildItem -Path $reportsRoot -Recurse -Filter 'Migration_Assessment_Report_*.json' -ErrorAction SilentlyContinue
+            if ($files) { $allMatches += $files }
+        }
+        if (Test-Path $assessmentRoot) {
+            $files = Get-ChildItem -Path $assessmentRoot -Filter 'Migration_Assessment_Report_*.json' -ErrorAction SilentlyContinue
+            if ($files) { $allMatches += $files }
+        }
+        if ($script:ScriptRoot -and (Test-Path $script:ScriptRoot)) {
+            $files = Get-ChildItem -Path $script:ScriptRoot -Filter 'Migration_Assessment_Report_*.json' -ErrorAction SilentlyContinue
+            if ($files) { $allMatches += $files }
+        }
+        if ($allMatches.Count -gt 0) {
+            $latest = $allMatches | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+            $JsonPath = $latest.FullName
         }
     }
     if (-not $JsonPath -or -not (Test-Path $JsonPath)) {

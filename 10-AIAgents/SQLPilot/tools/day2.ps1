@@ -43,7 +43,7 @@ function Initialize-Day2Coords {
     [CmdletBinding()]
     param ([string] $TerraformDir)
 
-    # Locate the Terraform module.
+    # Locate the Terraform module. Detect by *.tf files (not .terraform marker).
     if (-not $TerraformDir) {
         $candidates = @()
         if ($script:ScriptRoot) {
@@ -52,14 +52,17 @@ function Initialize-Day2Coords {
         }
         $candidates += (Get-Location).Path
         foreach ($c in $candidates) {
-            if ($c -and (Test-Path (Join-Path $c '.terraform'))) {
-                $TerraformDir = $c
-                break
+            if ($c -and (Test-Path $c)) {
+                $tf = Get-ChildItem -Path $c -Filter '*.tf' -ErrorAction SilentlyContinue | Select-Object -First 1
+                if ($tf) {
+                    $TerraformDir = $c
+                    break
+                }
             }
         }
     }
-    if (-not $TerraformDir -or -not (Test-Path (Join-Path $TerraformDir '.terraform'))) {
-        throw "Could not locate the SQLPilot Terraform directory. Pass -TerraformDir explicitly."
+    if (-not $TerraformDir -or -not (Test-Path $TerraformDir)) {
+        throw "Could not locate the SQLPilot Terraform directory (looked for *.tf files). Pass -TerraformDir explicitly."
     }
 
     $tfJson = & terraform -chdir="$TerraformDir" output -json 2>$null

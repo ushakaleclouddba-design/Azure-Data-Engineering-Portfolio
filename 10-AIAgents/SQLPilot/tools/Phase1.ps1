@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     SQLPilot - Phase 1 integration tool (JSON edition).
 
@@ -18,7 +18,7 @@
 .NOTES
     Author : Kale
     Phase 1 lives at:
-        C:\Users\ushakale\Documents\Temp\SQL_Migration_Assessment_Agent_AI\Generate_Assessment_Report.ps1
+        C:\SQLPilot\Assessment\Generate_Assessment_Report.ps1
 
     Phase 1 was modified to write a parallel .json file alongside the .xlsx
     on every run. This tool reads that .json - no Excel parsing required.
@@ -45,7 +45,7 @@ function Invoke-Phase1Assessment {
         [Parameter(Mandatory = $true)]
         [string] $SourceServer,
 
-        [string] $Phase1Wrapper = 'C:\Users\ushakale\Documents\Temp\SQL_Migration_Assessment_Agent_AI\Generate_Assessment_Report.ps1',
+        [string] $Phase1Wrapper = 'C:\SQLPilot\Assessment\Generate_Assessment_Report.ps1',
 
         # If a Phase 1 JSON newer than this many minutes exists, reuse it.
         # Set 0 to always force a fresh run.
@@ -58,14 +58,16 @@ function Invoke-Phase1Assessment {
         throw "Phase 1 wrapper not found at: $Phase1Wrapper"
     }
 
-    # Phase 1 reports land next to the wrapper, both .xlsx and .json with
-    # the same base name: Migration_Assessment_Report_YYYY-MM-DD_HHMM.<ext>
+    # Phase 1 reports land in per-run subfolders under <phase1Dir>\Reports\
+    # (e.g. Reports\2026-05-15_1501_Node5\Migration_Assessment_Report_*.json).
+    # We recurse to find them. Legacy flat reports (directly in $phase1Dir)
+    # are also included for back-compat.
     $phase1Dir = Split-Path -Parent $Phase1Wrapper
 
     # Try to reuse a recent report unless told otherwise.
     if (-not $ForceFresh -and $ReuseWindowMinutes -gt 0) {
         $cutoff = (Get-Date).AddMinutes(-$ReuseWindowMinutes)
-        $recent = Get-ChildItem -Path $phase1Dir -Filter 'Migration_Assessment_Report_*.json' -ErrorAction SilentlyContinue |
+        $recent = Get-ChildItem -Path $phase1Dir -Recurse -Filter 'Migration_Assessment_Report_*.json' -ErrorAction SilentlyContinue |
                   Where-Object { $_.LastWriteTime -gt $cutoff } |
                   Sort-Object LastWriteTime -Descending |
                   Select-Object -First 1
@@ -97,7 +99,7 @@ function Invoke-Phase1Assessment {
 
     Write-Host "[phase1]  Running Phase 1 against $SourceServer..." -ForegroundColor DarkCyan
 
-    $beforeFiles = @(Get-ChildItem -Path $phase1Dir -Filter 'Migration_Assessment_Report_*.json' -ErrorAction SilentlyContinue)
+    $beforeFiles = @(Get-ChildItem -Path $phase1Dir -Recurse -Filter 'Migration_Assessment_Report_*.json' -ErrorAction SilentlyContinue)
     $beforeNames = $beforeFiles | ForEach-Object { $_.FullName }
 
     $start = Get-Date
@@ -114,7 +116,7 @@ function Invoke-Phase1Assessment {
     }
     $elapsed = (Get-Date) - $start
 
-    $afterFiles = @(Get-ChildItem -Path $phase1Dir -Filter 'Migration_Assessment_Report_*.json' -ErrorAction SilentlyContinue)
+    $afterFiles = @(Get-ChildItem -Path $phase1Dir -Recurse -Filter 'Migration_Assessment_Report_*.json' -ErrorAction SilentlyContinue)
     $newFiles   = $afterFiles | Where-Object { $beforeNames -notcontains $_.FullName }
 
     if ($newFiles.Count -eq 0) {
