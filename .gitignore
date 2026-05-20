@@ -1,0 +1,16 @@
+.DS_Store
+._*
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan
+.terraform/
+.terraform.lock.hcl
+terraform.tfvars
+*.env
+.env
+*.log
