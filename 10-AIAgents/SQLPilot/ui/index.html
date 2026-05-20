@@ -133,7 +133,7 @@
   /* =========================================================
      Layout
      ========================================================= */
-  .page { max-width: 1080px; margin: 0 auto; padding: 16px 32px 64px; }
+  .page { max-width: 1600px; margin: 0 auto; padding: 16px 32px 64px; }
 
   .toolbar {
     display: flex; align-items: center; justify-content: space-between;
@@ -897,7 +897,7 @@
         <div class="metric"><div class="label">Servers</div><div class="value" id="m-servers">—</div></div>
         <div class="metric"><div class="label">High findings</div><div class="value bad" id="m-high">—</div></div>
         <div class="metric"><div class="label">Medium</div><div class="value warn" id="m-medium">—</div></div>
-        <div class="metric"><div class="label">Source file</div><div class="value" style="font-size:12px;color:var(--fg-2);word-break:break-all" id="m-file">—</div></div>
+        <div class="metric"><div class="label">Source files</div><div class="value" style="font-size:12px;color:var(--fg-2);word-break:break-all" id="m-file">—</div></div>
       </div>
 
       <div class="table-label">PER SERVER</div>
@@ -1350,6 +1350,13 @@ async function createVm() {
   } finally {
     clearTerraformInFlight();
     pollStatus();
+    // Re-render the Migrate page so step 1 status circle updates (green ✓)
+    // and the inline 'Create VM' button hides now that the VM exists.
+    // Without this, step 1 stays visually pending and the button stays
+    // active even though the VM is up — a confusing state-mismatch bug.
+    if (typeof renderMigrate === 'function') {
+      try { renderMigrate(); } catch (re) { /* ignore if migrate not rendered yet */ }
+    }
   }
 }
 
@@ -1507,43 +1514,75 @@ async function loadAssess() {
     }
     state.assess = d;
     showAssessPane('data');
+    // Subtitle shows the SOURCE of the assessment (what the user uploaded or
+    // ran against), not the derived .json output. Three cases:
+    //   1. Single .rpt upload      → "5 servers · from Allnodes.rpt"
+    //   2. Multi-file .rpt upload  → "5 servers · from 2 .rpt files"
+    //   3. Live SQL Phase 1 run    → "5 servers · live SQL assessment"
+    //      (no source_rpt in metadata for that path)
+    let sourceLabel = '';
+    if (d.source_rpts && d.source_rpts.length > 1) {
+      sourceLabel = 'from ' + d.source_rpts.length + ' .rpt files';
+    } else if (d.source_rpt) {
+      sourceLabel = 'from ' + d.source_rpt;
+    } else if (d.source_rpts && d.source_rpts.length === 1) {
+      sourceLabel = 'from ' + d.source_rpts[0];
+    } else {
+      sourceLabel = 'live SQL assessment';
+    }
     document.getElementById('assess-source').textContent =
-      d.server_count + ' servers · ' + (d.source_file || '');
+      d.server_count + ' servers · ' + sourceLabel;
     document.getElementById('m-servers').textContent = d.server_count;
     document.getElementById('m-high').textContent    = d.high_findings;
     document.getElementById('m-medium').textContent  = d.medium_findings;
-    // Source file as a clickable link — calls /api/assess/open which opens the
-    // JSON in Notepad (or other apps via Explorer reveal for non-JSON types).
+    // Source files as card-style rows. Two separate cards (JSON and XLSX) each
+    // with a colored tag, filename link, and "TYPE · size" metadata.
+    // Matches the visual language of the upload-confirmation list (see
+    // renderRptUploadList) so the app feels consistent across stages.
     const fileEl = document.getElementById('m-file');
     fileEl.innerHTML = '';
     if (d.source_file) {
-      const a = document.createElement('a');
-      a.href = '#';
-      a.textContent = d.source_file;
-      a.style.cssText = 'color:var(--info);text-decoration:underline;cursor:pointer;font-weight:500';
-      a.onmouseover = function () { a.style.color = 'var(--info-strong, var(--info))'; a.style.textDecorationThickness = '2px'; };
-      a.onmouseout  = function () { a.style.color = 'var(--info)'; a.style.textDecorationThickness = ''; };
-      a.onclick = function (ev) {
-        ev.preventDefault();
-        openAssessmentFile(d.source_file);
-      };
-      fileEl.appendChild(a);
-      if (d.source_xlsx) {
-        const sep = document.createElement('span');
-        sep.textContent = ' · ';
-        sep.style.color = 'var(--fg-3)';
-        fileEl.appendChild(sep);
-        const ax = document.createElement('a');
-        ax.href = '#';
-        ax.textContent = d.source_xlsx;
-        ax.style.cssText = 'color:var(--info);text-decoration:underline;cursor:pointer;font-weight:500';
-        ax.onmouseover = function () { ax.style.color = 'var(--info-strong, var(--info))'; ax.style.textDecorationThickness = '2px'; };
-        ax.onmouseout  = function () { ax.style.color = 'var(--info)'; ax.style.textDecorationThickness = ''; };
-        ax.onclick = function (ev) {
+      // Helper to build one file card. tagBg/tagFg are CSS variable names.
+      function buildFileCard(typeLabel, fname, sizeBytes, tagBg, tagFg) {
+        const card = document.createElement('div');
+        card.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg-card);border:0.5px solid var(--border);border-radius:var(--r-md);margin-bottom:6px';
+
+        const tag = document.createElement('div');
+        tag.textContent = typeLabel;
+        tag.style.cssText = 'width:36px;height:24px;border-radius:4px;background:' + tagBg + ';color:' + tagFg + ';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;letter-spacing:0.5px;flex-shrink:0';
+        card.appendChild(tag);
+
+        const meta = document.createElement('div');
+        meta.style.cssText = 'flex:1;min-width:0';
+
+        const a = document.createElement('a');
+        a.href = '#';
+        a.textContent = fname;
+        a.style.cssText = 'display:block;color:var(--info);text-decoration:underline;cursor:pointer;font-weight:500;font-size:12px;word-break:break-all';
+        a.onmouseover = function () { a.style.color = 'var(--info-strong, var(--info))'; a.style.textDecorationThickness = '2px'; };
+        a.onmouseout  = function () { a.style.color = 'var(--info)'; a.style.textDecorationThickness = ''; };
+        a.onclick = function (ev) {
           ev.preventDefault();
-          openAssessmentFile(d.source_xlsx);
+          openAssessmentFile(fname);
         };
-        fileEl.appendChild(ax);
+        meta.appendChild(a);
+
+        if (typeof sizeBytes === 'number' && sizeBytes > 0) {
+          const sub = document.createElement('div');
+          sub.textContent = typeLabel + ' · ' + formatBytes(sizeBytes);
+          sub.style.cssText = 'font-size:10px;color:var(--fg-3);margin-top:2px';
+          meta.appendChild(sub);
+        }
+
+        card.appendChild(meta);
+        return card;
+      }
+
+      // JSON card uses info color (blue), XLSX uses good color (green) — matches
+      // typical app conventions for these file types.
+      fileEl.appendChild(buildFileCard('JSON', d.source_file, d.source_file_size, 'var(--info-bg)', 'var(--info-fg)'));
+      if (d.source_xlsx) {
+        fileEl.appendChild(buildFileCard('XLSX', d.source_xlsx, d.source_xlsx_size, 'var(--good-bg)', 'var(--good-fg)'));
       }
     } else {
       fileEl.textContent = '—';
@@ -1650,7 +1689,7 @@ async function openAssessmentFile(filename) {
   try {
     const r = await api('/api/assess/open', { method: 'POST', body: { file: filename } });
     if (r.status === 'ok') {
-      toast('Opened ' + filename);
+      toast('Opening ' + filename);
     } else {
       toast('Could not open ' + filename + ': ' + (r.error || 'unknown error'), 'error');
     }
@@ -1974,6 +2013,13 @@ function formatBytes(n) {
 }
 
 function loadDecideFor(server) {
+  // Context-switch detection: if user clicks a different server than was
+  // last in flight, reset Migrate state. The previous server's restore
+  // shouldn't bleed into this server's Migrate page.
+  if (state.currentServer && state.currentServer !== server) {
+    resetMigrateState();
+    state.currentDb = null;  // also drop the prev DB selection
+  }
   state._decideServer = server;
   goView('decide');
 }
@@ -2206,10 +2252,43 @@ function dbOptionHtml(server, db) {
 }
 
 function pickDb(server, dbName) {
+  // Context-switch detection: if user picks a different (server, db) than what's
+  // currently in flight, reset the Migrate page state. Stale progress from a
+  // previous database's migration would otherwise show as completed for this
+  // new database — a confusing and dishonest state.
+  // Audit log (state.activity) is preserved across context changes — history
+  // is sacred, the previous restore still happened and belongs in the trail.
+  const changed = (state.currentServer !== server) || (state.currentDb !== dbName);
+  if (changed) {
+    resetMigrateState();
+  }
   state.currentServer = server;
   state.currentDb = dbName;
   // Re-render just the picker (cheaper than a full reload)
   renderDbPicker(server);
+}
+
+// Reset the per-migration state on the Migrate page (steps + result objects).
+// Called when the user picks a different (server, database) so the Migrate
+// page accurately reflects the new selection, not the previous one.
+// VM state and audit log are NOT reset — they live above the migration scope.
+function resetMigrateState() {
+  if (!state.migrate || !state.migrate.steps) return;
+  state.migrate.steps.forEach(function (s) { s.status = 'pending'; s.detail = null; });
+  // Provision step is fleet-wide: if a VM is running, mark it done immediately.
+  if (state.vm && state.vm.state === 'running') {
+    state.migrate.steps[0].status = 'done';
+    state.migrate.steps[0].detail = 'already running';
+  }
+  state.migrate.restore_result = null;
+  state.migrate.validate_result = null;
+  // Clear the streaming log on the Migrate page if it's visible.
+  var log = document.getElementById('stream-log');
+  if (log) { log.innerHTML = ''; log.classList.remove('show'); }
+  // Re-render Migrate page so the change is visible immediately.
+  if (typeof renderMigrate === 'function') {
+    try { renderMigrate(); } catch (e) { /* migrate page not yet mounted */ }
+  }
 }
 
 function updateContinueButton() {
@@ -2320,7 +2399,7 @@ async function startMigration() {
     try {
       const r = await api('/api/terraform', { method: 'POST', body: { action: 'apply' } });
       if (r.status === 'ok') {
-        setStep('provision', 'done', '9 resources · ' + r.duration_seconds + 's');
+        setStep('provision', 'done', (r.resources_added || '?') + ' resources · ' + r.duration_seconds + 's');
         log.innerHTML += '<div class="line">[terraform] ' + (r.resources_added||'?') + ' resources created at ' + r.public_ip + '</div>';
         addActivity('apply_terraform', 'action=apply · ' + r.duration_seconds + 's');
       } else {
@@ -2347,7 +2426,7 @@ async function startMigration() {
   const restoreSrv = activeServer();
   const restoreDb  = activeDb();
   setStep('restore', 'running');
-  log.innerHTML += '<div class="line">[restore] BACKUP ' + restoreDb + ' from ' + restoreSrv + ' → RESTORE FROM URL...</div>';
+  log.innerHTML += '<div class="line">[backup] BACKUP ' + restoreDb + ' from ' + restoreSrv + ' → blob storage...</div>';
   try {
     const r = await api('/api/restore', { method: 'POST', body: {
       database: restoreDb, source: restoreSrv, target: state.vm.ip || 'auto'

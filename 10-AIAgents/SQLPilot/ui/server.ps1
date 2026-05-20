@@ -369,16 +369,104 @@ function Invoke-Route {
         $totalHigh = 0; $totalMed = 0
         foreach ($srv in $data.servers.PSObject.Properties) {
             $sHigh = 0; $sMed = 0
-            foreach ($sectionLabel in @('06_DB_Level_Findings','07_TSQL_Code_Scan','08_SKU_Features')) {
-                $section = $srv.Value.$sectionLabel
-                if ($section) {
-                    foreach ($row in @($section)) {
-                        $sev = "$($row.Severity)".ToLower()
-                        if ($sev -match 'high')        { $sHigh++ }
-                        elseif ($sev -match 'medium')  { $sMed++ }
+
+            # ----------------------------------------------------------------
+            # Severity rollup. Mirrors the XLSX wrapper's Remediation Plan
+            # logic in Generate_Assessment_Report.ps1 (~line 1155 onward) so
+            # the dashboard count agrees with the Excel deliverable.
+            #
+            # Earlier versions of this endpoint only counted sections 6/7/8
+            # and the dashboard reported 0 High while the XLSX showed 8 High
+            # — a credibility bug for any audience that opened both files.
+            # ----------------------------------------------------------------
+
+            # Section 06 — DB-Level Findings (explicit Severity column)
+            $section = $srv.Value.'06_DB_Level_Findings'
+            if ($section) {
+                foreach ($row in @($section)) {
+                    $sev = "$($row.Severity)".ToLower()
+                    if     ($sev -match 'high')   { $sHigh++ }
+                    elseif ($sev -match 'medium') { $sMed++ }
+                }
+            }
+
+            # Section 07 — TSQL Code Scan (explicit Severity column)
+            $section = $srv.Value.'07_TSQL_Code_Scan'
+            if ($section) {
+                foreach ($row in @($section)) {
+                    $sev = "$($row.Severity)".ToLower()
+                    if     ($sev -match 'high')   { $sHigh++ }
+                    elseif ($sev -match 'medium') { $sMed++ }
+                }
+            }
+
+            # Section 08 — SKU Features (explicit Severity column)
+            $section = $srv.Value.'08_SKU_Features'
+            if ($section) {
+                foreach ($row in @($section)) {
+                    $sev = "$($row.Severity)".ToLower()
+                    if     ($sev -match 'high')   { $sHigh++ }
+                    elseif ($sev -match 'medium') { $sMed++ }
+                }
+            }
+
+            # Section 04 — SQL Agent Jobs flagged High via MIRelevance
+            # (CmdExec/PowerShell/SSIS subsystems block MI migration)
+            $section = $srv.Value.'04_SQL_Agent_Jobs'
+            if ($section) {
+                foreach ($row in @($section)) {
+                    $rel = "$($row.MIRelevance)".ToLower()
+                    if ($rel -match 'high') { $sHigh++ }
+                }
+            }
+
+            # Section 11 — Availability Groups with DISCONNECTED replicas
+            # (must be HEALTHY before MI Link or cutover — counted High)
+            $section = $srv.Value.'11_Availability_Groups'
+            if ($section) {
+                foreach ($row in @($section)) {
+                    if ("$($row.ConnectedState)" -eq 'DISCONNECTED') { $sHigh++ }
+                }
+            }
+
+            # Section 09 — CLR Assemblies with UNSAFE/EXTERNAL_ACCESS
+            # (not supported on MI — counted High via Verdict column)
+            $section = $srv.Value.'09_CLR_Assemblies'
+            if ($section) {
+                foreach ($row in @($section)) {
+                    $v = "$($row.Verdict)".ToLower()
+                    if ($v -match 'high' -or $v -match 'unsafe') { $sHigh++ }
+                }
+            }
+
+            # Section 02 — xp_cmdshell enabled (High, not supported on MI)
+            $section = $srv.Value.'02_Instance_Configuration'
+            if ($section) {
+                foreach ($row in @($section)) {
+                    if ("$($row.ConfigName)" -eq 'xp_cmdshell' -and "$($row.ValueInUse)" -eq '1') {
+                        $sHigh++
                     }
                 }
             }
+
+            # Section 03 — Linked Servers with legacy provider (Medium)
+            $section = $srv.Value.'03_Linked_Servers'
+            if ($section) {
+                foreach ($row in @($section)) {
+                    $mi = "$($row.MICompatibility)"
+                    if ($mi -match 'WARN') { $sMed++ }
+                }
+            }
+
+            # Section 05 — TDE-encrypted databases (Medium, cert migration needed)
+            $section = $srv.Value.'05_Database_Inventory'
+            if ($section) {
+                foreach ($row in @($section)) {
+                    $tde = "$($row.IsTDEEncrypted)"
+                    if ($tde -eq '1' -or $tde -eq 'True') { $sMed++ }
+                }
+            }
+
             $totalHigh += $sHigh
             $totalMed  += $sMed
 
@@ -425,16 +513,35 @@ function Invoke-Route {
             }
         }
 
+        # File sizes for the Source-files card on the UI. We expose bytes;
+        # the client formats with formatBytes(). Null when a file isn't found.
+        $sourceFileSize = $latest.Length
+        $sourceXlsxSize = $null
+        if ($xlsxName) {
+            $xlsxPath = Join-Path $latestDir $xlsxName
+            if (Test-Path -Path $xlsxPath -PathType Leaf) {
+                $sourceXlsxSize = (Get-Item -Path $xlsxPath).Length
+            }
+        }
+
         Send-Json -Response $Response -Body @{
-            has_data        = $true
-            source_file     = $latest.Name
-            source_xlsx     = $xlsxName
-            generated_at    = $data.metadata.generated_at
-            file_mtime      = $latest.LastWriteTime.ToString('o')
-            server_count    = $perServer.Count
-            high_findings   = $totalHigh
-            medium_findings = $totalMed
-            per_server      = $perServer
+            has_data         = $true
+            source_file      = $latest.Name
+            source_xlsx      = $xlsxName
+            source_file_size = $sourceFileSize
+            source_xlsx_size = $sourceXlsxSize
+            # Pass the original .rpt filename(s) from the JSON metadata so the UI
+            # can show "5 servers · from Allnodes.rpt" instead of the derived .json
+            # name. Either source_rpt (single file) or source_rpts (multi-file CMS
+            # + host split) will be present — whichever the wrapper set.
+            source_rpt       = $data.metadata.source_rpt
+            source_rpts      = $data.metadata.source_rpts
+            generated_at     = $data.metadata.generated_at
+            file_mtime       = $latest.LastWriteTime.ToString('o')
+            server_count     = $perServer.Count
+            high_findings    = $totalHigh
+            medium_findings  = $totalMed
+            per_server       = $perServer
         }
         return
     }
