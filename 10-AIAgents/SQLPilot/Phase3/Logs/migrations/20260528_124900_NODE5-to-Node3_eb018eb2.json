@@ -1,0 +1,256 @@
+{
+  "status": "partial",
+  "source": "NODE5",
+  "destination": "Node3",
+  "scope": "db",
+  "engine": "dbatools",
+  "databases": [
+    "SQLPilot_DcDcTest",
+    "SQLPilot_DcDcTest2"
+  ],
+  "shared_path": "\\\\NODE5\\SQLPilotShare",
+  "reachable": true,
+  "mode": "dbatools live (db)",
+  "steps": [
+    {
+      "step": "tde",
+      "detail": {
+        "status": "error",
+        "source": "NODE5",
+        "destination": "Node3",
+        "engine": "dbatools",
+        "tde_databases": [],
+        "certificates_migrated": [],
+        "skipped": [],
+        "dmk_created": false,
+        "notes": null,
+        "error": "Secret 'DestDmkPassword' not available. Set environment variable 'SQLPILOT_DMK_PWD' (production: source from a secrets vault)."
+      },
+      "status": "error"
+    },
+    {
+      "step": "databases",
+      "detail": {
+        "status": "ok",
+        "engine": "dbatools",
+        "source": "NODE5",
+        "destination": "Node3",
+        "migrated": [
+          {
+            "name": "SQLPilot_DcDcTest",
+            "notes": "",
+            "status": "Successful"
+          },
+          {
+            "name": "SQLPilot_DcDcTest2",
+            "notes": "",
+            "status": "Successful"
+          }
+        ],
+        "skipped": [],
+        "failed": [],
+        "elapsed_seconds": 44,
+        "note": null
+      },
+      "status": "ok"
+    },
+    {
+      "step": "logins",
+      "detail": {
+        "status": "ok",
+        "engine": "dbatools",
+        "source": "NODE5",
+        "destination": "Node3",
+        "scope": "logins for 2 database(s)",
+        "migrated": [],
+        "skipped": [
+          {
+            "name": "USHADC0\\ushakale",
+            "reason": "Already exists on destination"
+          }
+        ],
+        "failed": [],
+        "elapsed_seconds": 3,
+        "note": null
+      },
+      "status": "ok"
+    },
+    {
+      "step": "jobs",
+      "detail": {
+        "status": "ok",
+        "engine": "dbatools",
+        "source": "NODE5",
+        "destination": "Node3",
+        "migrated": [
+          {
+            "name": "NODE1_SQLPilot_TestJob",
+            "notes": "",
+            "status": "Successful"
+          }
+        ],
+        "skipped": [
+          {
+            "name": "BankingDataLoad_Every10Min",
+            "notes": "Job is dependent on database: AutoLoans_DB, Compliance_DB, CreditCards_DB, FraudDetection_DB, HumanResources_DB, Insurance_DB, Mortgage_DB, RetailBanking_DB, TradeFinance_DB, WealthMgmt_DB",
+            "status": "Skipped"
+          },
+          {
+            "name": "CommandLog Cleanup",
+            "notes": "Already exists on destination",
+            "status": "Skipped"
+          },
+          {
+            "name": "DatabaseBackup - SYSTEM_DATABASES - FULL",
+            "notes": "Already exists on destination",
+            "status": "Skipped"
+          },
+          {
+            "name": "DatabaseBackup - USER_DATABASES - DIFF",
+            "notes": "Already exists on destination",
+            "status": "Skipped"
+          },
+          {
+            "name": "DatabaseBackup - USER_DATABASES - FULL",
+            "notes": "Already exists on destination",
+            "status": "Skipped"
+          },
+          {
+            "name": "DatabaseBackup - USER_DATABASES - LOG",
+            "notes": "Already exists on destination",
+            "status": "Skipped"
+          },
+          {
+            "name": "DatabaseIntegrityCheck - SYSTEM_DATABASES",
+            "notes": "Already exists on destination",
+            "status": "Skipped"
+          },
+          {
+            "name": "DatabaseIntegrityCheck - USER_DATABASES",
+            "notes": "Already exists on destination",
+            "status": "Skipped"
+          },
+          {
+            "name": "IndexOptimize - USER_DATABASES",
+            "notes": "Already exists on destination",
+            "status": "Skipped"
+          },
+          {
+            "name": "Output File Cleanup",
+            "notes": "Already exists on destination",
+            "status": "Skipped"
+          },
+          {
+            "name": "sp_delete_backuphistory",
+            "notes": "Already exists on destination",
+            "status": "Skipped"
+          },
+          {
+            "name": "sp_purge_jobhistory",
+            "notes": "Already exists on destination",
+            "status": "Skipped"
+          },
+          {
+            "name": "SQLPilotDemo - Nightly Audit Roll-up",
+            "notes": "Job is dependent on database: SQLPilotDemo",
+            "status": "Skipped"
+          },
+          {
+            "name": "SSIS Server Maintenance Job",
+            "notes": "Job is dependent on login ##MS_SSISServerCleanupJobLogin##",
+            "status": "Skipped"
+          },
+          {
+            "name": "syspolicy_purge_history",
+            "notes": "Already exists on destination",
+            "status": "Skipped"
+          }
+        ],
+        "failed": [
+          {
+            "name": "",
+            "notes": "",
+            "status": ""
+          }
+        ],
+        "warnings": [],
+        "elapsed_seconds": 9,
+        "note": null
+      },
+      "status": "ok"
+    },
+    {
+      "step": "linked_servers",
+      "detail": {
+        "status": "ok",
+        "engine": "dbatools",
+        "source": "NODE5",
+        "destination": "Node3",
+        "migrated": [
+          {
+            "name": "NODE1",
+            "notes": "SQLNCLI",
+            "status": "Successful"
+          },
+          {
+            "name": "NODE1_TEST_LINK",
+            "notes": "SQLNCLI",
+            "status": "Successful"
+          }
+        ],
+        "skipped": [],
+        "failed": [],
+        "warnings": [
+          {
+            "warning": "Linked-server remote passwords are not migrated by dbatools either (SQL limitation); re-enter them on the destination."
+          }
+        ],
+        "elapsed_seconds": 4,
+        "note": null
+      },
+      "status": "ok"
+    },
+    {
+      "step": "ssis",
+      "detail": {
+        "status": "skipped",
+        "engine": "dbatools",
+        "source": "NODE5",
+        "destination": "Node3",
+        "supported": false,
+        "migrated": [],
+        "note": "No SSISDB catalog found on source. msdb/file-system package migration is not supported by current dbatools — manual migration only if you use them.",
+        "elapsed_seconds": 1
+      },
+      "status": "skipped"
+    },
+    {
+      "step": "validate",
+      "detail": {
+        "status": "ok",
+        "destination": "Node3",
+        "databases_checked": 2,
+        "all_passed": true,
+        "results": [
+          {
+            "database": "SQLPilot_DcDcTest",
+            "errors": 0,
+            "passed": true
+          },
+          {
+            "database": "SQLPilot_DcDcTest2",
+            "errors": 0,
+            "passed": true
+          }
+        ],
+        "total_errors": 0,
+        "elapsed_seconds": 2
+      },
+      "status": "ok"
+    }
+  ],
+  "package_path": null,
+  "elapsed_seconds": 94,
+  "note": null,
+  "engine_requested": "dbatools"
+}

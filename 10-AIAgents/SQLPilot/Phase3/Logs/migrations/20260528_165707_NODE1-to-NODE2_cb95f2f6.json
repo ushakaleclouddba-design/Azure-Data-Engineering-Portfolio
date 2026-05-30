@@ -1,0 +1,122 @@
+{
+  "status": "error",
+  "source": "NODE1",
+  "destination": "NODE2",
+  "scope": "db",
+  "engine": "dbatools",
+  "databases": [
+    "SQLPilot_DcDcTest",
+    "SQLPilot_DcDcTest2"
+  ],
+  "shared_path": "\\\\NODE1\\SQLPilotShare",
+  "reachable": true,
+  "mode": "dbatools live (db)",
+  "steps": [
+    {
+      "detail": {
+        "status": "error",
+        "source": "NODE1",
+        "destination": "NODE2",
+        "engine": "dbatools",
+        "tde_databases": [],
+        "certificates_migrated": [],
+        "skipped": [],
+        "dmk_created": false,
+        "notes": null,
+        "error": "TDE discovery failed: The 'Invoke-Sqlcmd' command was found in the module 'SqlServer', but the module could not be loaded. For more information, run 'Import-Module SqlServer'."
+      },
+      "step": "tde",
+      "status": "error"
+    },
+    {
+      "detail": {
+        "status": "error",
+        "engine": "dbatools",
+        "source": "NODE1",
+        "destination": "NODE2",
+        "migrated": [],
+        "skipped": [],
+        "failed": [
+          {
+            "name": "SQLPilot_DcDcTest",
+            "status": "Failed",
+            "notes": "Failed to restore database"
+          },
+          {
+            "name": "SQLPilot_DcDcTest2",
+            "status": "Failed",
+            "notes": "Failed to restore database"
+          },
+          {
+            "error": "[16:58:16][Test-DbaBackupInformation] File C:\\Data\\SQLPilot_DcDcTest.mdf already exists on Node2 and owned by another database, cannot restore",
+            "name": "(unknown)"
+          },
+          {
+            "error": "[16:58:16][Test-DbaBackupInformation] File C:\\Log\\SQLPilot_DcDcTest_log.ldf already exists on Node2 and owned by another database, cannot restore",
+            "name": "(unknown)"
+          },
+          {
+            "error": "[16:58:16][Restore-DbaDatabase] Database SQLPilot_DcDcTest unable to be restored, see warnings for details",
+            "name": "(unknown)"
+          },
+          {
+            "error": "[16:58:16][Copy-DbaDatabase] Failure attempting to restore SQLPilot_DcDcTest to NODE2",
+            "name": "(unknown)"
+          },
+          {
+            "error": "[16:58:19][Test-DbaBackupInformation] File C:\\Data\\SQLPilot_DcDcTest2.mdf already exists on Node2 and owned by another database, cannot restore",
+            "name": "(unknown)"
+          },
+          {
+            "error": "[16:58:19][Test-DbaBackupInformation] File C:\\Log\\SQLPilot_DcDcTest2_log.ldf already exists on Node2 and owned by another database, cannot restore",
+            "name": "(unknown)"
+          },
+          {
+            "error": "[16:58:19][Restore-DbaDatabase] Database SQLPilot_DcDcTest2 unable to be restored, see warnings for details",
+            "name": "(unknown)"
+          },
+          {
+            "error": "[16:58:19][Copy-DbaDatabase] Failure attempting to restore SQLPilot_DcDcTest2 to NODE2",
+            "name": "(unknown)"
+          }
+        ],
+        "elapsed_seconds": 17,
+        "note": null,
+        "error": "Copy-DbaDatabase migrated 0 databases. First issue: [16:58:16][Test-DbaBackupInformation] File C:\\Data\\SQLPilot_DcDcTest.mdf already exists on Node2 and owned by another database, cannot restore"
+      },
+      "step": "databases",
+      "status": "error"
+    },
+    {
+      "note": "Blocked: the databases step did not complete successfully (error). Downstream steps depend on the migrated databases and were not run. Resolve the database migration (see the databases step error), then re-run.",
+      "step": "logins",
+      "status": "blocked"
+    },
+    {
+      "note": "Blocked: the databases step did not complete successfully (error). Downstream steps depend on the migrated databases and were not run. Resolve the database migration (see the databases step error), then re-run.",
+      "step": "jobs",
+      "status": "blocked"
+    },
+    {
+      "note": "Blocked: the databases step did not complete successfully (error). Downstream steps depend on the migrated databases and were not run. Resolve the database migration (see the databases step error), then re-run.",
+      "step": "linked_servers",
+      "status": "blocked"
+    },
+    {
+      "note": "Blocked: the databases step did not complete successfully (error). Downstream steps depend on the migrated databases and were not run. Resolve the database migration (see the databases step error), then re-run.",
+      "step": "ssis",
+      "status": "blocked"
+    },
+    {
+      "note": "Blocked: the databases step did not complete successfully (error). Downstream steps depend on the migrated databases and were not run. Resolve the database migration (see the databases step error), then re-run.",
+      "step": "validate",
+      "status": "blocked"
+    }
+  ],
+  "package_path": null,
+  "elapsed_seconds": 65,
+  "note": null,
+  "halted_at": "databases",
+  "error": "Blocked: the databases step did not complete successfully (error). Downstream steps depend on the migrated databases and were not run. Resolve the database migration (see the databases step error), then re-run.",
+  "engine_requested": "dbatools"
+}

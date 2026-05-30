@@ -1,0 +1,96 @@
+{
+  "status": "error",
+  "source": "NODE1",
+  "destination": "NODE2",
+  "scope": "db",
+  "engine": "dbatools",
+  "databases": [
+    "TDE_Demo_DB_Banking"
+  ],
+  "shared_path": "\\\\NODE1\\SQLPilotShare",
+  "reachable": true,
+  "mode": "dbatools live (db)",
+  "steps": [
+    {
+      "detail": {
+        "status": "error",
+        "source": "NODE1",
+        "destination": "NODE2",
+        "engine": "dbatools",
+        "tde_databases": [],
+        "certificates_migrated": [],
+        "skipped": [],
+        "dmk_created": false,
+        "notes": null,
+        "error": "TDE discovery failed: The 'Invoke-Sqlcmd' command was found in the module 'SqlServer', but the module could not be loaded. For more information, run 'Import-Module SqlServer'."
+      },
+      "step": "tde",
+      "status": "error"
+    },
+    {
+      "detail": {
+        "status": "error",
+        "engine": "dbatools",
+        "source": "NODE1",
+        "destination": "NODE2",
+        "migrated": [],
+        "skipped": [],
+        "failed": [
+          {
+            "status": "Failed",
+            "notes": "Microsoft.Data.SqlClient.SqlError: Cannot find server certificate with thumbprint '0x499DB0531058383DDE04B96524B258EEE6C49CD7'.",
+            "name": "TDE_Demo_DB_Banking"
+          },
+          {
+            "name": "(unknown)",
+            "error": "[18:39:49][Invoke-DbaAdvancedRestore] Failed to restore db TDE_Demo_DB_Banking, stopping | Microsoft.Data.SqlClient.SqlError: Cannot find server certificate with thumbprint '0x499DB0531058383DDE04B96524B258EEE6C49CD7'."
+          },
+          {
+            "name": "(unknown)",
+            "error": "[18:39:50][Restore-DbaDatabase] Failure | Microsoft.Data.SqlClient.SqlError: Cannot find server certificate with thumbprint '0x499DB0531058383DDE04B96524B258EEE6C49CD7'."
+          },
+          {
+            "name": "(unknown)",
+            "error": "[18:39:50][Copy-DbaDatabase] Failure attempting to restore TDE_Demo_DB_Banking to NODE2 | Microsoft.Data.SqlClient.SqlError: Cannot find server certificate with thumbprint '0x499DB0531058383DDE04B96524B258EEE6C49CD7'."
+          }
+        ],
+        "elapsed_seconds": 22,
+        "note": null,
+        "error": "Copy-DbaDatabase migrated 0 databases. First issue: [18:39:49][Invoke-DbaAdvancedRestore] Failed to restore db TDE_Demo_DB_Banking, stopping | Microsoft.Data.SqlClient.SqlError: Cannot find server certificate with thumbprint '0x499DB0531058383DDE04B96524B258EEE6C49CD7'."
+      },
+      "step": "databases",
+      "status": "error"
+    },
+    {
+      "note": "Blocked: the databases step did not complete successfully (error). Downstream steps depend on the migrated databases and were not run. Resolve the database migration (see the databases step error), then re-run.",
+      "step": "logins",
+      "status": "blocked"
+    },
+    {
+      "note": "Blocked: the databases step did not complete successfully (error). Downstream steps depend on the migrated databases and were not run. Resolve the database migration (see the databases step error), then re-run.",
+      "step": "jobs",
+      "status": "blocked"
+    },
+    {
+      "note": "Blocked: the databases step did not complete successfully (error). Downstream steps depend on the migrated databases and were not run. Resolve the database migration (see the databases step error), then re-run.",
+      "step": "linked_servers",
+      "status": "blocked"
+    },
+    {
+      "note": "Blocked: the databases step did not complete successfully (error). Downstream steps depend on the migrated databases and were not run. Resolve the database migration (see the databases step error), then re-run.",
+      "step": "ssis",
+      "status": "blocked"
+    },
+    {
+      "note": "Blocked: the databases step did not complete successfully (error). Downstream steps depend on the migrated databases and were not run. Resolve the database migration (see the databases step error), then re-run.",
+      "step": "validate",
+      "status": "blocked"
+    }
+  ],
+  "package_path": null,
+  "elapsed_seconds": 45,
+  "note": null,
+  "halted_at": "databases",
+  "error": "Blocked: the databases step did not complete successfully (error). Downstream steps depend on the migrated databases and were not run. Resolve the database migration (see the databases step error), then re-run.",
+  "engine_requested": "dbatools"
+}

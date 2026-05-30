@@ -1,0 +1,237 @@
+{
+  "status": "partial",
+  "source": "NODE1",
+  "destination": "Node6",
+  "scope": "db",
+  "engine": "dbatools",
+  "databases": [
+    "SQLPilot_DcDcTest"
+  ],
+  "shared_path": "\\\\NODE1\\SQLPilotShare",
+  "reachable": true,
+  "mode": "dbatools live (db)",
+  "steps": [
+    {
+      "status": "error",
+      "detail": {
+        "status": "error",
+        "source": "NODE1",
+        "destination": "Node6",
+        "engine": "dbatools",
+        "tde_databases": [],
+        "certificates_migrated": [],
+        "skipped": [],
+        "dmk_created": false,
+        "notes": null,
+        "error": "TDE discovery failed: The 'Invoke-Sqlcmd' command was found in the module 'SqlServer', but the module could not be loaded. For more information, run 'Import-Module SqlServer'."
+      },
+      "step": "tde"
+    },
+    {
+      "status": "ok",
+      "detail": {
+        "status": "ok",
+        "engine": "dbatools",
+        "source": "NODE1",
+        "destination": "Node6",
+        "migrated": [
+          {
+            "name": "SQLPilot_DcDcTest",
+            "status": "Successful",
+            "notes": ""
+          }
+        ],
+        "skipped": [],
+        "failed": [],
+        "elapsed_seconds": 25,
+        "note": null
+      },
+      "step": "databases"
+    },
+    {
+      "status": "ok",
+      "detail": {
+        "status": "ok",
+        "engine": "dbatools",
+        "source": "NODE1",
+        "destination": "Node6",
+        "scope": "logins for 1 database(s)",
+        "migrated": [],
+        "skipped": [
+          {
+            "name": "sqlpilot_testuser",
+            "reason": "Already exists on destination"
+          },
+          {
+            "name": "USHADC0\\ushakale",
+            "reason": "Already exists on destination"
+          }
+        ],
+        "failed": [],
+        "elapsed_seconds": 6,
+        "note": null
+      },
+      "step": "logins"
+    },
+    {
+      "status": "ok",
+      "detail": {
+        "status": "ok",
+        "engine": "dbatools",
+        "source": "NODE1",
+        "destination": "Node6",
+        "migrated": [],
+        "skipped": [
+          {
+            "name": "CommandLog Cleanup",
+            "status": "Skipped",
+            "notes": "Already exists on destination"
+          },
+          {
+            "name": "DatabaseBackup - SYSTEM_DATABASES - FULL",
+            "status": "Skipped",
+            "notes": "Already exists on destination"
+          },
+          {
+            "name": "DatabaseBackup - USER_DATABASES - DIFF",
+            "status": "Skipped",
+            "notes": "Already exists on destination"
+          },
+          {
+            "name": "DatabaseBackup - USER_DATABASES - FULL",
+            "status": "Skipped",
+            "notes": "Already exists on destination"
+          },
+          {
+            "name": "DatabaseBackup - USER_DATABASES - LOG",
+            "status": "Skipped",
+            "notes": "Already exists on destination"
+          },
+          {
+            "name": "DatabaseIntegrityCheck - SYSTEM_DATABASES",
+            "status": "Skipped",
+            "notes": "Already exists on destination"
+          },
+          {
+            "name": "DatabaseIntegrityCheck - USER_DATABASES",
+            "status": "Skipped",
+            "notes": "Already exists on destination"
+          },
+          {
+            "name": "IndexOptimize - USER_DATABASES",
+            "status": "Skipped",
+            "notes": "Already exists on destination"
+          },
+          {
+            "name": "NODE1_SQLPilot_TestJob",
+            "status": "Skipped",
+            "notes": "Already exists on destination"
+          },
+          {
+            "name": "Output File Cleanup",
+            "status": "Skipped",
+            "notes": "Already exists on destination"
+          },
+          {
+            "name": "sp_delete_backuphistory",
+            "status": "Skipped",
+            "notes": "Already exists on destination"
+          },
+          {
+            "name": "sp_purge_jobhistory",
+            "status": "Skipped",
+            "notes": "Already exists on destination"
+          },
+          {
+            "name": "SQLPilot_TestJob_OlaTokens",
+            "status": "Skipped",
+            "notes": "Already exists on destination"
+          },
+          {
+            "name": "SQLPilot_TestJob_TSQL",
+            "status": "Skipped",
+            "notes": "Already exists on destination"
+          },
+          {
+            "name": "syspolicy_purge_history",
+            "status": "Skipped",
+            "notes": "Already exists on destination"
+          }
+        ],
+        "failed": [],
+        "warnings": [],
+        "elapsed_seconds": 18,
+        "note": null
+      },
+      "step": "jobs"
+    },
+    {
+      "status": "ok",
+      "detail": {
+        "status": "ok",
+        "engine": "dbatools",
+        "source": "NODE1",
+        "destination": "Node6",
+        "migrated": [],
+        "skipped": [
+          {
+            "name": "NODE1_TEST_LINK",
+            "status": "Skipped",
+            "notes": "Already exists on destination"
+          },
+          {
+            "name": "SQLPILOT_TEST_LINK",
+            "status": "Skipped",
+            "notes": "Already exists on destination"
+          }
+        ],
+        "failed": [],
+        "warnings": [
+          {
+            "warning": "Linked-server remote passwords are not migrated by dbatools either (SQL limitation); re-enter them on the destination."
+          }
+        ],
+        "elapsed_seconds": 6,
+        "note": null
+      },
+      "step": "linked_servers"
+    },
+    {
+      "status": "skipped",
+      "detail": {
+        "status": "skipped",
+        "engine": "dbatools",
+        "source": "NODE1",
+        "destination": "Node6",
+        "supported": false,
+        "migrated": [],
+        "note": "No SSISDB catalog found on source. msdb/file-system package migration is not supported by current dbatools — manual migration only if you use them.",
+        "elapsed_seconds": 1
+      },
+      "step": "ssis"
+    },
+    {
+      "status": "ok",
+      "detail": {
+        "status": "ok",
+        "destination": "Node6",
+        "databases_checked": 1,
+        "all_passed": true,
+        "results": [
+          {
+            "errors": 0,
+            "passed": true,
+            "database": "SQLPilot_DcDcTest"
+          }
+        ],
+        "total_errors": 0,
+        "elapsed_seconds": 1
+      },
+      "step": "validate"
+    }
+  ],
+  "package_path": null,
+  "elapsed_seconds": 80,
+  "note": null,
+  "engine_requested": "dbatools"
+}

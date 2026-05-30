@@ -1,0 +1,236 @@
+{
+  "status": "partial",
+  "source": "NODE1",
+  "destination": "NODE2",
+  "scope": "db",
+  "engine": "native",
+  "databases": [
+    "SQLPilot_DcDcTest",
+    "SQLPilot_DcDcTest2"
+  ],
+  "shared_path": "\\\\NODE1\\SQLPilotShare",
+  "reachable": true,
+  "mode": "native live (db)",
+  "steps": [
+    {
+      "detail": {
+        "status": "error",
+        "source": "NODE1",
+        "destination": "NODE2",
+        "engine": "native",
+        "tde_databases": [],
+        "certificates_migrated": [],
+        "skipped": [],
+        "dmk_created": false,
+        "notes": null,
+        "error": "Secret 'DestDmkPassword' not available. Set environment variable 'SQLPILOT_DMK_PWD' (production: source from a secrets vault)."
+      },
+      "status": "error",
+      "step": "tde"
+    },
+    {
+      "detail": {
+        "status": "ok",
+        "engine": "native",
+        "source": "NODE1",
+        "destination": "NODE2",
+        "migrated": [
+          {
+            "name": "SQLPilot_DcDcTest",
+            "status": "Success",
+            "recovery": "RECOVERY"
+          },
+          {
+            "name": "SQLPilot_DcDcTest2",
+            "status": "Success",
+            "recovery": "RECOVERY"
+          }
+        ],
+        "skipped": [],
+        "failed": [],
+        "elapsed_seconds": 4,
+        "note": "native BACKUP/RESTORE · downtime = migration duration (full-backup cutover). Minimal-downtime log-chain cutover is roadmap."
+      },
+      "status": "ok",
+      "step": "databases"
+    },
+    {
+      "detail": {
+        "status": "ok",
+        "engine": "native",
+        "source": "NODE1",
+        "destination": "NODE2",
+        "scope": "logins for 2 database(s)",
+        "migrated": [
+          "sqlpilot_testuser"
+        ],
+        "skipped": [
+          {
+            "name": "USHADC0\\ushakale",
+            "reason": "already exists on destination"
+          }
+        ],
+        "failed": [],
+        "elapsed_seconds": 0,
+        "note": "native SID-preserving T-SQL · 1 login(s) migrated to NODE2 (orphaned-user-safe)."
+      },
+      "status": "ok",
+      "step": "logins"
+    },
+    {
+      "detail": {
+        "status": "ok",
+        "engine": "native",
+        "source": "NODE1",
+        "destination": "NODE2",
+        "migrated": [
+          {
+            "name": "SQLPilot_TestJob_OlaTokens",
+            "steps": 1,
+            "owner_mapped": true,
+            "schedules": 0
+          },
+          {
+            "name": "SQLPilot_TestJob_TSQL",
+            "steps": 1,
+            "owner_mapped": true,
+            "schedules": 1
+          }
+        ],
+        "skipped": [
+          {
+            "name": "CommandLog Cleanup",
+            "reason": "exists on destination"
+          },
+          {
+            "name": "DatabaseBackup - SYSTEM_DATABASES - FULL",
+            "reason": "exists on destination"
+          },
+          {
+            "name": "DatabaseBackup - USER_DATABASES - DIFF",
+            "reason": "exists on destination"
+          },
+          {
+            "name": "DatabaseBackup - USER_DATABASES - FULL",
+            "reason": "exists on destination"
+          },
+          {
+            "name": "DatabaseBackup - USER_DATABASES - LOG",
+            "reason": "exists on destination"
+          },
+          {
+            "name": "DatabaseIntegrityCheck - SYSTEM_DATABASES",
+            "reason": "exists on destination"
+          },
+          {
+            "name": "DatabaseIntegrityCheck - USER_DATABASES",
+            "reason": "exists on destination"
+          },
+          {
+            "name": "IndexOptimize - USER_DATABASES",
+            "reason": "exists on destination"
+          },
+          {
+            "name": "NODE1_SQLPilot_TestJob",
+            "reason": "exists on destination"
+          },
+          {
+            "name": "Output File Cleanup",
+            "reason": "exists on destination"
+          },
+          {
+            "name": "sp_delete_backuphistory",
+            "reason": "exists on destination"
+          },
+          {
+            "name": "sp_purge_jobhistory",
+            "reason": "exists on destination"
+          },
+          {
+            "name": "syspolicy_purge_history",
+            "reason": "exists on destination"
+          }
+        ],
+        "failed": [],
+        "warnings": [],
+        "elapsed_seconds": 1,
+        "note": "native msdb scripting · 2 job(s) migrated. Proxy/credential-based steps need the proxy on the destination (see warnings)."
+      },
+      "status": "ok",
+      "step": "jobs"
+    },
+    {
+      "detail": {
+        "status": "ok",
+        "engine": "native",
+        "source": "NODE1",
+        "destination": "NODE2",
+        "migrated": [
+          {
+            "name": "NODE1_TEST_LINK",
+            "login_mappings": 1,
+            "data_source": "NODE2",
+            "password_reentry_needed": false,
+            "product": ""
+          },
+          {
+            "name": "SQLPILOT_TEST_LINK",
+            "login_mappings": 1,
+            "data_source": "Node3",
+            "password_reentry_needed": false,
+            "product": ""
+          }
+        ],
+        "skipped": [],
+        "failed": [],
+        "warnings": [],
+        "elapsed_seconds": 0,
+        "note": "native sp_addlinkedserver · 2 linked server(s). Remote passwords are NOT migratable (SQL limitation) - re-enter on destination where flagged."
+      },
+      "status": "ok",
+      "step": "linked_servers"
+    },
+    {
+      "detail": {
+        "status": "skipped",
+        "engine": "native",
+        "source": "NODE1",
+        "destination": "NODE2",
+        "supported": false,
+        "migrated": [],
+        "note": "SSIS migration is NOT supported in native (T-SQL) mode. The SSISDB catalog's key hierarchy cannot be moved via T-SQL. Options: (1) use dbatools mode (Copy-DbaSsisPackage for msdb/file packages), or (2) migrate the SSISDB catalog manually via Microsoft's documented procedure (back up SSISDB + back up its master key with a password, restore both on the destination, re-open the master key).",
+        "elapsed_seconds": 0
+      },
+      "status": "skipped",
+      "step": "ssis"
+    },
+    {
+      "detail": {
+        "status": "ok",
+        "destination": "NODE2",
+        "databases_checked": 2,
+        "all_passed": true,
+        "results": [
+          {
+            "database": "SQLPilot_DcDcTest",
+            "passed": true,
+            "errors": 0
+          },
+          {
+            "database": "SQLPilot_DcDcTest2",
+            "passed": true,
+            "errors": 0
+          }
+        ],
+        "total_errors": 0,
+        "elapsed_seconds": 1
+      },
+      "status": "ok",
+      "step": "validate"
+    }
+  ],
+  "package_path": null,
+  "elapsed_seconds": 8,
+  "note": null,
+  "engine_requested": "native"
+}

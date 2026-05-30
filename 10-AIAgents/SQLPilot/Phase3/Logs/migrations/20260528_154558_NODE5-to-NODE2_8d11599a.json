@@ -1,0 +1,219 @@
+{
+  "status": "ok",
+  "source": "NODE5",
+  "destination": "NODE2",
+  "scope": "db",
+  "engine": "native",
+  "databases": [
+    "SQLPilotDemo"
+  ],
+  "shared_path": "\\\\NODE5\\SQLPilotShare",
+  "reachable": true,
+  "mode": "native live (db)",
+  "steps": [
+    {
+      "detail": {
+        "status": "ok",
+        "source": "NODE5",
+        "destination": "NODE2",
+        "engine": "native",
+        "tde_databases": [],
+        "certificates_migrated": [],
+        "skipped": [],
+        "dmk_created": false,
+        "notes": "No TDE-encrypted databases in scope; TDE step skipped (no work required)."
+      },
+      "step": "tde",
+      "status": "ok"
+    },
+    {
+      "detail": {
+        "status": "ok",
+        "engine": "native",
+        "source": "NODE5",
+        "destination": "NODE2",
+        "migrated": [
+          {
+            "name": "SQLPilotDemo",
+            "status": "Success",
+            "recovery": "RECOVERY"
+          }
+        ],
+        "skipped": [],
+        "failed": [],
+        "elapsed_seconds": 2,
+        "note": "native BACKUP/RESTORE · downtime = migration duration (full-backup cutover). Minimal-downtime log-chain cutover is roadmap."
+      },
+      "step": "databases",
+      "status": "ok"
+    },
+    {
+      "detail": {
+        "status": "ok",
+        "engine": "native",
+        "source": "NODE5",
+        "destination": "NODE2",
+        "scope": "logins for 1 database(s)",
+        "migrated": [],
+        "skipped": [
+          {
+            "reason": "already exists on destination",
+            "name": "sqlpilot_app"
+          },
+          {
+            "reason": "already exists on destination",
+            "name": "USHADC0\\ushakale"
+          }
+        ],
+        "failed": [],
+        "elapsed_seconds": 0,
+        "note": "native SID-preserving T-SQL · 0 login(s) migrated to NODE2 (orphaned-user-safe)."
+      },
+      "step": "logins",
+      "status": "ok"
+    },
+    {
+      "detail": {
+        "status": "ok",
+        "engine": "native",
+        "source": "NODE5",
+        "destination": "NODE2",
+        "migrated": [],
+        "skipped": [
+          {
+            "reason": "exists on destination",
+            "name": "BankingDataLoad_Every10Min"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "CommandLog Cleanup"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "DatabaseBackup - SYSTEM_DATABASES - FULL"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "DatabaseBackup - USER_DATABASES - DIFF"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "DatabaseBackup - USER_DATABASES - FULL"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "DatabaseBackup - USER_DATABASES - LOG"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "DatabaseIntegrityCheck - SYSTEM_DATABASES"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "DatabaseIntegrityCheck - USER_DATABASES"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "IndexOptimize - USER_DATABASES"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "NODE1_SQLPilot_TestJob"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "Output File Cleanup"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "sp_delete_backuphistory"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "sp_purge_jobhistory"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "SQLPilotDemo - Nightly Audit Roll-up"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "SSIS Server Maintenance Job"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "syspolicy_purge_history"
+          }
+        ],
+        "failed": [],
+        "warnings": [],
+        "elapsed_seconds": 0,
+        "note": "native msdb scripting · 0 job(s) migrated. Proxy/credential-based steps need the proxy on the destination (see warnings)."
+      },
+      "step": "jobs",
+      "status": "ok"
+    },
+    {
+      "detail": {
+        "status": "ok",
+        "engine": "native",
+        "source": "NODE5",
+        "destination": "NODE2",
+        "migrated": [],
+        "skipped": [
+          {
+            "reason": "exists on destination",
+            "name": "NODE1"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "NODE1_TEST_LINK"
+          }
+        ],
+        "failed": [],
+        "warnings": [],
+        "elapsed_seconds": 0,
+        "note": "native sp_addlinkedserver · 0 linked server(s). Remote passwords are NOT migratable (SQL limitation) - re-enter on destination where flagged."
+      },
+      "step": "linked_servers",
+      "status": "ok"
+    },
+    {
+      "detail": {
+        "status": "skipped",
+        "engine": "native",
+        "source": "NODE5",
+        "destination": "NODE2",
+        "supported": false,
+        "migrated": [],
+        "note": "SSIS migration is NOT supported in native (T-SQL) mode. The SSISDB catalog's key hierarchy cannot be moved via T-SQL. Options: (1) use dbatools mode (Copy-DbaSsisCatalog, which migrates the SSISDB catalog), or (2) migrate the SSISDB catalog manually via Microsoft's documented procedure (back up SSISDB + back up its master key with a password, restore both on the destination, re-open the master key).",
+        "elapsed_seconds": 0
+      },
+      "step": "ssis",
+      "status": "skipped"
+    },
+    {
+      "detail": {
+        "status": "ok",
+        "destination": "NODE2",
+        "databases_checked": 1,
+        "all_passed": true,
+        "results": [
+          {
+            "errors": 0,
+            "passed": true,
+            "database": "SQLPilotDemo"
+          }
+        ],
+        "total_errors": 0,
+        "elapsed_seconds": 1
+      },
+      "step": "validate",
+      "status": "ok"
+    }
+  ],
+  "package_path": null,
+  "elapsed_seconds": 5,
+  "note": "Completed native live migration (db), 1 database(s), modular pipeline.",
+  "engine_requested": "native"
+}

@@ -1,0 +1,28 @@
+{
+  "status": "error",
+  "source": "NODE5",
+  "destination": "NODE2",
+  "scope": "db",
+  "engine": "native",
+  "databases": [
+    "SQLPilot_DcDcTest",
+    "SQLPilot_DcDcTest2",
+    "SQLPilotDemo"
+  ],
+  "shared_path": "\\\\NODE5\\SQLPilotShare",
+  "reachable": true,
+  "mode": "native live (db)",
+  "steps": [
+    {
+      "step": "preflight-share",
+      "status": "error",
+      "note": "Backup share not usable: '\\\\NODE5\\SQLPilotShare'. The live backup/restore path needs a UNC share that the SOURCE can write to and the DESTINATION can read from. Create it (e.g. on NODE5: New-SmbShare -Name SQLPilotShare -Path <folder> -FullAccess <SQL service accounts>) and grant BOTH SQL Server service accounts read/write, then re-run. Underlying error: The network name cannot be found. : '\\\\NODE5\\SQLPilotShare\\sqlpilot_preflight_bc760e29.tmp'"
+    }
+  ],
+  "package_path": null,
+  "elapsed_seconds": 2,
+  "note": null,
+  "halted_at": "preflight-share",
+  "error": "Backup share not usable: '\\\\NODE5\\SQLPilotShare'. The live backup/restore path needs a UNC share that the SOURCE can write to and the DESTINATION can read from. Create it (e.g. on NODE5: New-SmbShare -Name SQLPilotShare -Path <folder> -FullAccess <SQL service accounts>) and grant BOTH SQL Server service accounts read/write, then re-run. Underlying error: The network name cannot be found. : '\\\\NODE5\\SQLPilotShare\\sqlpilot_preflight_bc760e29.tmp'",
+  "engine_requested": "native"
+}

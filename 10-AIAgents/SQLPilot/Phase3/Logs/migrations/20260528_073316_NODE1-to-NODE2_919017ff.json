@@ -1,0 +1,254 @@
+{
+  "status": "partial",
+  "source": "NODE1",
+  "destination": "NODE2",
+  "scope": "db",
+  "engine": "dbatools",
+  "databases": [
+    "SQLPilot_DcDcTest",
+    "SQLPilot_DcDcTest2"
+  ],
+  "shared_path": "\\\\NODE1\\SQLPilotShare",
+  "reachable": true,
+  "mode": "dbatools live (db)",
+  "steps": [
+    {
+      "status": "error",
+      "step": "tde",
+      "detail": {
+        "status": "error",
+        "source": "NODE1",
+        "destination": "NODE2",
+        "engine": "dbatools",
+        "tde_databases": [],
+        "certificates_migrated": [],
+        "skipped": [],
+        "dmk_created": false,
+        "notes": null,
+        "error": "Secret 'DestDmkPassword' not available. Set environment variable 'SQLPILOT_DMK_PWD' (production: source from a secrets vault)."
+      }
+    },
+    {
+      "status": "ok",
+      "step": "databases",
+      "detail": {
+        "status": "ok",
+        "engine": "dbatools",
+        "source": "NODE1",
+        "destination": "NODE2",
+        "migrated": [
+          {
+            "status": "Successful",
+            "notes": "",
+            "name": "SQLPilot_DcDcTest"
+          },
+          {
+            "status": "Successful",
+            "notes": "",
+            "name": "SQLPilot_DcDcTest2"
+          }
+        ],
+        "skipped": [],
+        "failed": [],
+        "elapsed_seconds": 30,
+        "note": null
+      }
+    },
+    {
+      "status": "ok",
+      "step": "logins",
+      "detail": {
+        "status": "ok",
+        "engine": "dbatools",
+        "source": "NODE1",
+        "destination": "NODE2",
+        "scope": "logins for 2 database(s)",
+        "migrated": [
+          "sqlpilot_testuser"
+        ],
+        "skipped": [
+          {
+            "reason": "Already exists on destination",
+            "name": "USHADC0\\ushakale"
+          }
+        ],
+        "failed": [],
+        "elapsed_seconds": 15,
+        "note": null
+      }
+    },
+    {
+      "status": "ok",
+      "step": "jobs",
+      "detail": {
+        "status": "ok",
+        "engine": "dbatools",
+        "source": "NODE1",
+        "destination": "NODE2",
+        "migrated": [
+          {
+            "status": "Successful",
+            "notes": "",
+            "name": "SQLPilot_TestJob_OlaTokens"
+          },
+          {
+            "status": "Successful",
+            "notes": "",
+            "name": "SQLPilot_TestJob_TSQL"
+          }
+        ],
+        "skipped": [
+          {
+            "status": "Skipped",
+            "notes": "Already exists on destination",
+            "name": "CommandLog Cleanup"
+          },
+          {
+            "status": "Skipped",
+            "notes": "Already exists on destination",
+            "name": "DatabaseBackup - SYSTEM_DATABASES - FULL"
+          },
+          {
+            "status": "Skipped",
+            "notes": "Already exists on destination",
+            "name": "DatabaseBackup - USER_DATABASES - DIFF"
+          },
+          {
+            "status": "Skipped",
+            "notes": "Already exists on destination",
+            "name": "DatabaseBackup - USER_DATABASES - FULL"
+          },
+          {
+            "status": "Skipped",
+            "notes": "Already exists on destination",
+            "name": "DatabaseBackup - USER_DATABASES - LOG"
+          },
+          {
+            "status": "Skipped",
+            "notes": "Already exists on destination",
+            "name": "DatabaseIntegrityCheck - SYSTEM_DATABASES"
+          },
+          {
+            "status": "Skipped",
+            "notes": "Already exists on destination",
+            "name": "DatabaseIntegrityCheck - USER_DATABASES"
+          },
+          {
+            "status": "Skipped",
+            "notes": "Already exists on destination",
+            "name": "IndexOptimize - USER_DATABASES"
+          },
+          {
+            "status": "Skipped",
+            "notes": "Already exists on destination",
+            "name": "NODE1_SQLPilot_TestJob"
+          },
+          {
+            "status": "Skipped",
+            "notes": "Already exists on destination",
+            "name": "Output File Cleanup"
+          },
+          {
+            "status": "Skipped",
+            "notes": "Already exists on destination",
+            "name": "sp_delete_backuphistory"
+          },
+          {
+            "status": "Skipped",
+            "notes": "Already exists on destination",
+            "name": "sp_purge_jobhistory"
+          },
+          {
+            "status": "Skipped",
+            "notes": "Already exists on destination",
+            "name": "syspolicy_purge_history"
+          }
+        ],
+        "failed": [
+          {
+            "status": "",
+            "notes": "",
+            "name": ""
+          },
+          {
+            "status": "",
+            "notes": "",
+            "name": ""
+          }
+        ],
+        "warnings": [],
+        "elapsed_seconds": 7,
+        "note": null
+      }
+    },
+    {
+      "status": "error",
+      "step": "linked_servers",
+      "detail": {
+        "status": "error",
+        "engine": "dbatools",
+        "source": "NODE1",
+        "destination": "NODE2",
+        "migrated": [],
+        "skipped": [],
+        "failed": [],
+        "warnings": [
+          {
+            "warning": "[07:34:57][Connect-DbaInstance] Failure | Error connecting to [NODE1]: A network-related or instance-specific error occurred while establishing a connection to SQL Server. The server was not found or was not accessible. Verify that the instance name is correct and that SQL Server is configured to allow remote connections. (provider: TCP Provider, error: 40 - Could not open a connection to SQL Server)"
+          },
+          {
+            "warning": "[07:34:57][Copy-DbaLinkedServer] Failure | A network-related or instance-specific error occurred while establishing a connection to SQL Server. The server was not found or was not accessible. Verify that the instance name is correct and that SQL Server is configured to allow remote connections. (provider: TCP Provider, error: 40 - Could not open a connection to SQL Server)"
+          },
+          {
+            "warning": "Linked-server remote passwords are not migrated by dbatools either (SQL limitation); re-enter them on the destination."
+          }
+        ],
+        "elapsed_seconds": 16,
+        "note": null,
+        "error": "Copy-DbaLinkedServer emitted warnings with no result: [07:34:57][Connect-DbaInstance] Failure | Error connecting to [NODE1]: A network-related or instance-specific error occurred while establishing a connection to SQL Server. The server was not found or was not accessible. Verify that the instance name is correct and that SQL Server is configured to allow remote connections. (provider: TCP Provider, error: 40 - Could not open a connection to SQL Server) | [07:34:57][Copy-DbaLinkedServer] Failure | A network-related or instance-specific error occurred while establishing a connection to SQL Server. The server was not found or was not accessible. Verify that the instance name is correct and that SQL Server is configured to allow remote connections. (provider: TCP Provider, error: 40 - Could not open a connection to SQL Server)"
+      }
+    },
+    {
+      "status": "skipped",
+      "step": "ssis",
+      "detail": {
+        "status": "skipped",
+        "engine": "dbatools",
+        "source": "NODE1",
+        "destination": "NODE2",
+        "supported": false,
+        "migrated": [],
+        "note": "No SSISDB catalog found on source. msdb/file-system package migration is not supported by current dbatools — manual migration only if you use them.",
+        "elapsed_seconds": 2
+      }
+    },
+    {
+      "status": "ok",
+      "step": "validate",
+      "detail": {
+        "status": "ok",
+        "destination": "NODE2",
+        "databases_checked": 2,
+        "all_passed": true,
+        "results": [
+          {
+            "passed": true,
+            "errors": 0,
+            "database": "SQLPilot_DcDcTest"
+          },
+          {
+            "passed": true,
+            "errors": 0,
+            "database": "SQLPilot_DcDcTest2"
+          }
+        ],
+        "total_errors": 0,
+        "elapsed_seconds": 3
+      }
+    }
+  ],
+  "package_path": null,
+  "elapsed_seconds": 102,
+  "note": null,
+  "engine_requested": "dbatools"
+}

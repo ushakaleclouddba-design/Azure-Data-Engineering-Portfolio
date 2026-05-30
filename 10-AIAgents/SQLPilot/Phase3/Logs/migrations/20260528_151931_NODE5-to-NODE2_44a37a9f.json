@@ -1,0 +1,224 @@
+{
+  "status": "ok",
+  "source": "NODE5",
+  "destination": "NODE2",
+  "scope": "db",
+  "engine": "native",
+  "databases": [
+    "SQLPilot_DcDcTest"
+  ],
+  "shared_path": "\\\\NODE5\\SQLPilotShare",
+  "reachable": true,
+  "mode": "native live (db)",
+  "steps": [
+    {
+      "step": "tde",
+      "status": "ok",
+      "detail": {
+        "status": "ok",
+        "source": "NODE5",
+        "destination": "NODE2",
+        "engine": "native",
+        "tde_databases": [],
+        "certificates_migrated": [],
+        "skipped": [],
+        "dmk_created": false,
+        "notes": "No TDE-encrypted databases in scope; TDE step skipped (no work required)."
+      }
+    },
+    {
+      "step": "databases",
+      "status": "ok",
+      "detail": {
+        "status": "ok",
+        "engine": "native",
+        "source": "NODE5",
+        "destination": "NODE2",
+        "migrated": [
+          {
+            "name": "SQLPilot_DcDcTest",
+            "status": "Success",
+            "recovery": "RECOVERY"
+          }
+        ],
+        "skipped": [],
+        "failed": [],
+        "elapsed_seconds": 2,
+        "note": "native BACKUP/RESTORE · downtime = migration duration (full-backup cutover). Minimal-downtime log-chain cutover is roadmap."
+      }
+    },
+    {
+      "step": "logins",
+      "status": "ok",
+      "detail": {
+        "status": "ok",
+        "engine": "native",
+        "source": "NODE5",
+        "destination": "NODE2",
+        "scope": "logins for 1 database(s)",
+        "migrated": [],
+        "skipped": [
+          {
+            "reason": "already exists on destination",
+            "name": "USHADC0\\ushakale"
+          }
+        ],
+        "failed": [],
+        "elapsed_seconds": 0,
+        "note": "native SID-preserving T-SQL · 0 login(s) migrated to NODE2 (orphaned-user-safe)."
+      }
+    },
+    {
+      "step": "jobs",
+      "status": "partial",
+      "detail": {
+        "status": "partial",
+        "engine": "native",
+        "source": "NODE5",
+        "destination": "NODE2",
+        "migrated": [
+          {
+            "name": "SSIS Server Maintenance Job",
+            "owner_mapped": false,
+            "steps": 2,
+            "schedules": 1
+          }
+        ],
+        "skipped": [
+          {
+            "reason": "exists on destination",
+            "name": "CommandLog Cleanup"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "DatabaseBackup - SYSTEM_DATABASES - FULL"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "DatabaseBackup - USER_DATABASES - DIFF"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "DatabaseBackup - USER_DATABASES - FULL"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "DatabaseBackup - USER_DATABASES - LOG"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "DatabaseIntegrityCheck - SYSTEM_DATABASES"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "DatabaseIntegrityCheck - USER_DATABASES"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "IndexOptimize - USER_DATABASES"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "NODE1_SQLPilot_TestJob"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "Output File Cleanup"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "sp_delete_backuphistory"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "sp_purge_jobhistory"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "SQLPilotDemo - Nightly Audit Roll-up"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "syspolicy_purge_history"
+          }
+        ],
+        "failed": [
+          {
+            "error": "The specified @database_name ('CreditCards_DB') does not exist.\r\nThe specified '@step_id' is invalid (valid values are: 1..1).\r\nThe specified '@step_id' is invalid (valid values are: 1..1).\r\nThe specified '@step_id' is invalid (valid values are: 1..1).\r\nThe specified '@step_id' is invalid (valid values are: 1..1).\r\nThe specified '@step_id' is invalid (valid values are: 1..1).\r\nThe specified '@step_id' is invalid (valid values are: 1..1).\r\nThe specified '@step_id' is invalid (valid values are: 1..1).\r\nThe specified '@step_id' is invalid (valid values are: 1..1).\r\nThe specified '@step_id' is invalid (valid values are: 1..1). \r\n Msg 14262, Level 16, State 1, Procedure sp_verify_jobstep, Line 262.",
+            "name": "BankingDataLoad_Every10Min"
+          }
+        ],
+        "warnings": [
+          {
+            "warning": "Owner login '##MS_SSISServerCleanupJobLogin##' not found on destination; job created under connecting principal. Migrate logins first.",
+            "job": "SSIS Server Maintenance Job"
+          }
+        ],
+        "elapsed_seconds": 1,
+        "note": "native msdb scripting · 1 job(s) migrated. Proxy/credential-based steps need the proxy on the destination (see warnings)."
+      }
+    },
+    {
+      "step": "linked_servers",
+      "status": "ok",
+      "detail": {
+        "status": "ok",
+        "engine": "native",
+        "source": "NODE5",
+        "destination": "NODE2",
+        "migrated": [],
+        "skipped": [
+          {
+            "reason": "exists on destination",
+            "name": "NODE1"
+          },
+          {
+            "reason": "exists on destination",
+            "name": "NODE1_TEST_LINK"
+          }
+        ],
+        "failed": [],
+        "warnings": [],
+        "elapsed_seconds": 0,
+        "note": "native sp_addlinkedserver · 0 linked server(s). Remote passwords are NOT migratable (SQL limitation) - re-enter on destination where flagged."
+      }
+    },
+    {
+      "step": "ssis",
+      "status": "skipped",
+      "detail": {
+        "status": "skipped",
+        "engine": "native",
+        "source": "NODE5",
+        "destination": "NODE2",
+        "supported": false,
+        "migrated": [],
+        "note": "SSIS migration is NOT supported in native (T-SQL) mode. The SSISDB catalog's key hierarchy cannot be moved via T-SQL. Options: (1) use dbatools mode (Copy-DbaSsisCatalog, which migrates the SSISDB catalog), or (2) migrate the SSISDB catalog manually via Microsoft's documented procedure (back up SSISDB + back up its master key with a password, restore both on the destination, re-open the master key).",
+        "elapsed_seconds": 0
+      }
+    },
+    {
+      "step": "validate",
+      "status": "ok",
+      "detail": {
+        "status": "ok",
+        "destination": "NODE2",
+        "databases_checked": 1,
+        "all_passed": true,
+        "results": [
+          {
+            "database": "SQLPilot_DcDcTest",
+            "errors": 0,
+            "passed": true
+          }
+        ],
+        "total_errors": 0,
+        "elapsed_seconds": 1
+      }
+    }
+  ],
+  "package_path": null,
+  "elapsed_seconds": 7,
+  "note": "Completed native live migration (db), 1 database(s), modular pipeline.",
+  "engine_requested": "native"
+}

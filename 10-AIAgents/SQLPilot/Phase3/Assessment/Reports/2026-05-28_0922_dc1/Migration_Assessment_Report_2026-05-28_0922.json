@@ -1,0 +1,3725 @@
+{
+  "metadata": {
+    "generated_at": "2026-05-28T09:25:22.5200159-07:00",
+    "phase1_version": "1.0",
+    "servers_assessed": 6,
+    "source_xlsx": "C:\\SQLPilot\\Assessment\\Reports\\2026-05-28_0922_dc1\\Migration_Assessment_Report_2026-05-28_0922.xlsx",
+    "section_labels": [
+      "01_Instance_Summary",
+      "02_Instance_Configuration",
+      "03_Linked_Servers",
+      "04_SQL_Agent_Jobs",
+      "05_Database_Inventory",
+      "06_DB_Level_Findings",
+      "07_TSQL_Code_Scan",
+      "08_SKU_Features",
+      "09_CLR_Assemblies",
+      "10_Database_Files",
+      "11_Availability_Groups",
+      "12_Database_Mirroring",
+      "13_Log_Shipping_Primary",
+      "13_Log_Shipping_Secondary",
+      "14_Replication_Subscribers",
+      "14_Replication_Publishers",
+      "15_Cloud_Migration_Matrix"
+    ]
+  },
+  "servers": {
+    "NODE1": {
+      "01_Instance_Summary": [
+        {
+          "Section": "01_Instance_Summary",
+          "ServerName": "NODE1",
+          "MachineName": "node1",
+          "InstanceName": null,
+          "Edition": "Developer Edition (64-bit)",
+          "ProductVersion": "15.0.4430.1",
+          "ProductLevel": "RTM",
+          "CULevel": "CU32",
+          "ServerCollation": "SQL_Latin1_General_CP1_CI_AS",
+          "IsClustered": "No",
+          "HadrEnabled": "Yes",
+          "AuthMode": "Mixed Mode",
+          "UserDatabaseCount": 8,
+          "LinkedServerCount": 2,
+          "EnabledAgentJobs": 15,
+          "AssessedAt": "2026-05-28T09:23:14.3718043"
+        }
+      ],
+      "02_Instance_Configuration": [
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "Ad Hoc Distributed Queries",
+          "ValueInUse": 0,
+          "Description": "Enable or disable Ad Hoc Distributed Queries",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "backup compression default",
+          "ValueInUse": 1,
+          "Description": "Enable compression of backups by default",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "clr enabled",
+          "ValueInUse": 0,
+          "Description": "CLR user code execution enabled in the server",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "cost threshold for parallelism",
+          "ValueInUse": 40,
+          "Description": "cost threshold for parallelism",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "max degree of parallelism",
+          "ValueInUse": 4,
+          "Description": "maximum degree of parallelism",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "max server memory (MB)",
+          "ValueInUse": 6144,
+          "Description": "Maximum size of server memory (MB)",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "Ole Automation Procedures",
+          "ValueInUse": 0,
+          "Description": "Enable or disable Ole Automation Procedures",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "optimize for ad hoc workloads",
+          "ValueInUse": 1,
+          "Description": "When this option is set, plan cache size is further reduced for single-use adhoc OLTP workload.",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "remote access",
+          "ValueInUse": 1,
+          "Description": "Allow remote access",
+          "MIRelevance": "Info — RPC; review for managed targets"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "xp_cmdshell",
+          "ValueInUse": 0,
+          "Description": "Enable or disable command shell",
+          "MIRelevance": "Info"
+        }
+      ],
+      "03_Linked_Servers": [
+        {
+          "Section": "03_Linked_Servers",
+          "LinkedServerName": "NODE1_TEST_LINK",
+          "Product": "",
+          "Provider": "SQLNCLI",
+          "DataSource": "NODE2",
+          "RemoteLoginEnabled": false,
+          "RpcOutEnabled": false,
+          "DataAccessEnabled": true,
+          "MICompatibility": "WARN — legacy provider; MI requires MSOLEDBSQL"
+        },
+        {
+          "Section": "03_Linked_Servers",
+          "LinkedServerName": "SQLPILOT_TEST_LINK",
+          "Product": "",
+          "Provider": "SQLNCLI",
+          "DataSource": "Node3",
+          "RemoteLoginEnabled": false,
+          "RpcOutEnabled": false,
+          "DataAccessEnabled": true,
+          "MICompatibility": "WARN — legacy provider; MI requires MSOLEDBSQL"
+        }
+      ],
+      "04_SQL_Agent_Jobs": [
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "Output File Cleanup",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 1,
+          "Subsystems": "CMDEXEC",
+          "MIRelevance": "High — uses CmdExec/PowerShell/SSIS, redesign for managed SQL"
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "SQLPilot_TestJob_OlaTokens",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 1,
+          "Subsystems": "CMDEXEC",
+          "MIRelevance": "High — uses CmdExec/PowerShell/SSIS, redesign for managed SQL"
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "CommandLog Cleanup",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseBackup - SYSTEM_DATABASES - FULL",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseBackup - USER_DATABASES - DIFF",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseBackup - USER_DATABASES - FULL",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseBackup - USER_DATABASES - LOG",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseIntegrityCheck - SYSTEM_DATABASES",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseIntegrityCheck - USER_DATABASES",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "IndexOptimize - USER_DATABASES",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "NODE1_SQLPilot_TestJob",
+          "Status": "Enabled",
+          "TotalSteps": 2,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL, TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "sp_delete_backuphistory",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "sp_purge_jobhistory",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "SQLPilot_TestJob_TSQL",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        }
+      ],
+      "05_Database_Inventory": [
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 6,
+          "DatabaseName": "AcquiredBanks_OnPrem",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-03-24T18:54:34.3",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 3152
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 5,
+          "DatabaseName": "CoreBank_OnPrem",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-03-24T18:48:15.157",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 3728
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 8,
+          "DatabaseName": "LRS_Demo_DB_Customers",
+          "State": "RESTORING",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-04-20T16:50:29.43",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 96
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 7,
+          "DatabaseName": "LRS_Demo_DB_Loans",
+          "State": "RESTORING",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-04-20T16:50:28.79",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 96
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 9,
+          "DatabaseName": "LRS_Demo_DB_Payments",
+          "State": "RESTORING",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-04-20T16:50:30.043",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 192
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 11,
+          "DatabaseName": "SQLPilot_DcDcTest",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-05-26T17:13:27.793",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 16
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 12,
+          "DatabaseName": "SQLPilot_DcDcTest2",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-05-26T19:01:04.59",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 16
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 10,
+          "DatabaseName": "TDE_Demo_DB_Banking",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-04-21T16:16:30.397",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": true,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 120
+        }
+      ],
+      "06_DB_Level_Findings": [
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "AcquiredBanks_OnPrem",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "CoreBank_OnPrem",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "SQLPilot_DcDcTest",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "SQLPilot_DcDcTest2",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "TDE_Demo_DB_Banking",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        }
+      ],
+      "07_TSQL_Code_Scan": [],
+      "08_SKU_Features": [
+        {
+          "Section": "08_SKU_Features",
+          "DatabaseName": "TDE_Demo_DB_Banking",
+          "FeatureName": "TransparentDatabaseEncryption",
+          "Severity": "Info",
+          "Note": "Feature present; review case by case"
+        }
+      ],
+      "09_CLR_Assemblies": [],
+      "10_Database_Files": [
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "AcquiredBanks_OnPrem",
+          "LogicalName": "AcquiredBanks_OnPrem_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\AcquiredBanks_OnPrem_log.ldf",
+          "SizeMB": 648,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "AcquiredBanks_OnPrem",
+          "LogicalName": "AcquiredBanks_OnPrem",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\AcquiredBanks_OnPrem.mdf",
+          "SizeMB": 2504,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "CoreBank_OnPrem",
+          "LogicalName": "CoreBank_OnPrem_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\CoreBank_OnPrem_log.ldf",
+          "SizeMB": 648,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "CoreBank_OnPrem",
+          "LogicalName": "CoreBank_OnPrem",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\CoreBank_OnPrem.mdf",
+          "SizeMB": 3080,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "LRS_Demo_DB_Customers",
+          "LogicalName": "LRS_Demo_DB_Customers_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\LRS_Demo_DB_Customers_log.ldf",
+          "SizeMB": 32,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "LRS_Demo_DB_Customers",
+          "LogicalName": "LRS_Demo_DB_Customers",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\LRS_Demo_DB_Customers.mdf",
+          "SizeMB": 64,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "LRS_Demo_DB_Loans",
+          "LogicalName": "LRS_Demo_DB_Loans_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\LRS_Demo_DB_Loans_log.ldf",
+          "SizeMB": 32,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "LRS_Demo_DB_Loans",
+          "LogicalName": "LRS_Demo_DB_Loans",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\LRS_Demo_DB_Loans.mdf",
+          "SizeMB": 64,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "LRS_Demo_DB_Payments",
+          "LogicalName": "LRS_Demo_DB_Payments_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\LRS_Demo_DB_Payments_log.ldf",
+          "SizeMB": 64,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "LRS_Demo_DB_Payments",
+          "LogicalName": "LRS_Demo_DB_Payments",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\LRS_Demo_DB_Payments.mdf",
+          "SizeMB": 128,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "SQLPilot_DcDcTest",
+          "LogicalName": "SQLPilot_DcDcTest_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\SQLPilot_DcDcTest_log.ldf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "SQLPilot_DcDcTest",
+          "LogicalName": "SQLPilot_DcDcTest",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\SQLPilot_DcDcTest.mdf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "SQLPilot_DcDcTest2",
+          "LogicalName": "SQLPilot_DcDcTest2_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\SQLPilot_DcDcTest2_log.ldf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "SQLPilot_DcDcTest2",
+          "LogicalName": "SQLPilot_DcDcTest2",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\SQLPilot_DcDcTest2.mdf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "TDE_Demo_DB_Banking",
+          "LogicalName": "TDE_Demo_DB_Banking_Log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\log\\TDE_Demo_DB_Banking.ldf",
+          "SizeMB": 20,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "TDE_Demo_DB_Banking",
+          "LogicalName": "TDE_Demo_DB_Banking_Data",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\data\\TDE_Demo_DB_Banking.mdf",
+          "SizeMB": 100,
+          "MIVerdict": "OK"
+        }
+      ],
+      "11_Availability_Groups": [
+        {
+          "Section": "11_Availability_Groups",
+          "AGName": "UshaAg19",
+          "IsDistributedAG": false,
+          "ReplicaServer": "node1",
+          "AvailabilityMode": "SYNCHRONOUS_COMMIT",
+          "FailoverMode": "AUTOMATIC",
+          "Role": "PRIMARY",
+          "SyncHealth": "HEALTHY",
+          "ConnectedState": "CONNECTED",
+          "OperationalState": "ONLINE"
+        },
+        {
+          "Section": "11_Availability_Groups",
+          "AGName": "UshaAg19",
+          "IsDistributedAG": false,
+          "ReplicaServer": "Node2",
+          "AvailabilityMode": "SYNCHRONOUS_COMMIT",
+          "FailoverMode": "AUTOMATIC",
+          "Role": "SECONDARY",
+          "SyncHealth": "HEALTHY",
+          "ConnectedState": "CONNECTED",
+          "OperationalState": null
+        }
+      ],
+      "12_Database_Mirroring": [],
+      "13_Log_Shipping_Primary": [],
+      "13_Log_Shipping_Secondary": [],
+      "14_Replication_Subscribers": [],
+      "14_Replication_Publishers": [],
+      "15_Cloud_Migration_Matrix": [
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "Azure VM (SQL on IaaS)",
+          "Fit": "Yes",
+          "Reason": "Best compatibility option. Carries over almost all on-prem features. Validate OS, edition, licensing, HA/DR, storage, and version support."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "AWS EC2 (SQL on IaaS)",
+          "Fit": "Yes",
+          "Reason": "Best AWS compatibility option. Validate licensing model (BYOL vs LI), EBS/FSx storage, AD domain dependency, and HA/DR strategy."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "GCP Compute Engine (SQL on IaaS)",
+          "Fit": "Yes",
+          "Reason": "Best GCP compatibility option. Validate licensing, persistent-disk storage, AD/IAM dependencies, and HA/DR strategy."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "Azure SQL Managed Instance",
+          "Fit": "No",
+          "Reason": "Format version analysis: max DB format = 904 (904 = SQL 2019; MI Link blocked, use DMS or backup/restore). Blockers found: FileStream/FileTable=0, In-Memory OLTP=0, UNSAFE/EXTERNAL CLR=0, Risky Agent jobs=2, Linked Servers=2."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "Azure SQL Database",
+          "Fit": "No",
+          "Reason": "Single-DB target. Anything instance-level (Agent jobs, linked servers, cross-DB queries, CLR, FileStream) blocks this. Ideal for clean app-level workloads only."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "AWS RDS for SQL Server",
+          "Fit": "No",
+          "Reason": "RDS restricts OS access, has option-group feature gates, no SQL Agent CmdExec/PowerShell/SSIS subsystems, no xp_cmdshell, and limited linked-server support. Validate edition + version availability."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "GCP Cloud SQL for SQL Server",
+          "Fit": "No",
+          "Reason": "Most restrictive managed SQL Server option. No SQL Agent until recently, limited linked-server support, no FileStream, and tight feature gates. Validate Cloud SQL Server version availability."
+        }
+      ]
+    },
+    "NODE2": {
+      "01_Instance_Summary": [
+        {
+          "Section": "01_Instance_Summary",
+          "ServerName": "NODE2",
+          "MachineName": "Node2",
+          "InstanceName": null,
+          "Edition": "Developer Edition (64-bit)",
+          "ProductVersion": "15.0.4430.1",
+          "ProductLevel": "RTM",
+          "CULevel": "CU32",
+          "ServerCollation": "SQL_Latin1_General_CP1_CI_AS",
+          "IsClustered": "No",
+          "HadrEnabled": "Yes",
+          "AuthMode": "Mixed Mode",
+          "UserDatabaseCount": 4,
+          "LinkedServerCount": 2,
+          "EnabledAgentJobs": 15,
+          "AssessedAt": "2026-05-28T09:23:17.24409"
+        }
+      ],
+      "02_Instance_Configuration": [
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "Ad Hoc Distributed Queries",
+          "ValueInUse": 0,
+          "Description": "Enable or disable Ad Hoc Distributed Queries",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "backup compression default",
+          "ValueInUse": 1,
+          "Description": "Enable compression of backups by default",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "clr enabled",
+          "ValueInUse": 0,
+          "Description": "CLR user code execution enabled in the server",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "cost threshold for parallelism",
+          "ValueInUse": 50,
+          "Description": "cost threshold for parallelism",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "max degree of parallelism",
+          "ValueInUse": 4,
+          "Description": "maximum degree of parallelism",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "max server memory (MB)",
+          "ValueInUse": 6144,
+          "Description": "Maximum size of server memory (MB)",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "Ole Automation Procedures",
+          "ValueInUse": 0,
+          "Description": "Enable or disable Ole Automation Procedures",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "optimize for ad hoc workloads",
+          "ValueInUse": 1,
+          "Description": "When this option is set, plan cache size is further reduced for single-use adhoc OLTP workload.",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "remote access",
+          "ValueInUse": 1,
+          "Description": "Allow remote access",
+          "MIRelevance": "Info — RPC; review for managed targets"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "xp_cmdshell",
+          "ValueInUse": 0,
+          "Description": "Enable or disable command shell",
+          "MIRelevance": "Info"
+        }
+      ],
+      "03_Linked_Servers": [
+        {
+          "Section": "03_Linked_Servers",
+          "LinkedServerName": "NODE1_TEST_LINK",
+          "Product": "",
+          "Provider": "SQLNCLI",
+          "DataSource": "NODE2",
+          "RemoteLoginEnabled": false,
+          "RpcOutEnabled": false,
+          "DataAccessEnabled": true,
+          "MICompatibility": "WARN — legacy provider; MI requires MSOLEDBSQL"
+        },
+        {
+          "Section": "03_Linked_Servers",
+          "LinkedServerName": "SQLPILOT_TEST_LINK",
+          "Product": "",
+          "Provider": "SQLNCLI",
+          "DataSource": "Node3",
+          "RemoteLoginEnabled": false,
+          "RpcOutEnabled": false,
+          "DataAccessEnabled": true,
+          "MICompatibility": "WARN — legacy provider; MI requires MSOLEDBSQL"
+        }
+      ],
+      "04_SQL_Agent_Jobs": [
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "Output File Cleanup",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 1,
+          "Subsystems": "CmdExec",
+          "MIRelevance": "High — uses CmdExec/PowerShell/SSIS, redesign for managed SQL"
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "SQLPilot_TestJob_OlaTokens",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 1,
+          "Subsystems": "CMDEXEC",
+          "MIRelevance": "High — uses CmdExec/PowerShell/SSIS, redesign for managed SQL"
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "CommandLog Cleanup",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseBackup - SYSTEM_DATABASES - FULL",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseBackup - USER_DATABASES - DIFF",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseBackup - USER_DATABASES - FULL",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseBackup - USER_DATABASES - LOG",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseIntegrityCheck - SYSTEM_DATABASES",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseIntegrityCheck - USER_DATABASES",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "IndexOptimize - USER_DATABASES",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "NODE1_SQLPilot_TestJob",
+          "Status": "Enabled",
+          "TotalSteps": 2,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL, TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "sp_delete_backuphistory",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "sp_purge_jobhistory",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "SQLPilot_TestJob_TSQL",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        }
+      ],
+      "05_Database_Inventory": [
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 6,
+          "DatabaseName": "AcquiredBanks_OnPrem",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "sa",
+          "CreatedAt": "2026-03-24T20:35:55.663",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 3152
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 5,
+          "DatabaseName": "CoreBank_OnPrem",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "sa",
+          "CreatedAt": "2026-03-24T20:35:55.66",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 3728
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 7,
+          "DatabaseName": "SQLPilot_DcDcTest",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-05-28T08:29:40.653",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 16
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 8,
+          "DatabaseName": "SQLPilot_DcDcTest2",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-05-28T08:29:42.547",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 16
+        }
+      ],
+      "06_DB_Level_Findings": [
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "SQLPilot_DcDcTest",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "SQLPilot_DcDcTest2",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        }
+      ],
+      "07_TSQL_Code_Scan": [],
+      "08_SKU_Features": [],
+      "09_CLR_Assemblies": [],
+      "10_Database_Files": [
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "AcquiredBanks_OnPrem",
+          "LogicalName": "AcquiredBanks_OnPrem_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\AcquiredBanks_OnPrem_log.ldf",
+          "SizeMB": 648,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "AcquiredBanks_OnPrem",
+          "LogicalName": "AcquiredBanks_OnPrem",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\AcquiredBanks_OnPrem.mdf",
+          "SizeMB": 2504,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "CoreBank_OnPrem",
+          "LogicalName": "CoreBank_OnPrem_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\CoreBank_OnPrem_log.ldf",
+          "SizeMB": 648,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "CoreBank_OnPrem",
+          "LogicalName": "CoreBank_OnPrem",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\CoreBank_OnPrem.mdf",
+          "SizeMB": 3080,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "SQLPilot_DcDcTest",
+          "LogicalName": "SQLPilot_DcDcTest_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\SQLPilot_DcDcTest_log.ldf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "SQLPilot_DcDcTest",
+          "LogicalName": "SQLPilot_DcDcTest",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\SQLPilot_DcDcTest.mdf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "SQLPilot_DcDcTest2",
+          "LogicalName": "SQLPilot_DcDcTest2_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\SQLPilot_DcDcTest2_log.ldf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "SQLPilot_DcDcTest2",
+          "LogicalName": "SQLPilot_DcDcTest2",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\SQLPilot_DcDcTest2.mdf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        }
+      ],
+      "11_Availability_Groups": [
+        {
+          "Section": "11_Availability_Groups",
+          "AGName": "UshaAg19",
+          "IsDistributedAG": false,
+          "ReplicaServer": "node1",
+          "AvailabilityMode": "SYNCHRONOUS_COMMIT",
+          "FailoverMode": "AUTOMATIC",
+          "Role": null,
+          "SyncHealth": null,
+          "ConnectedState": null,
+          "OperationalState": null
+        },
+        {
+          "Section": "11_Availability_Groups",
+          "AGName": "UshaAg19",
+          "IsDistributedAG": false,
+          "ReplicaServer": "Node2",
+          "AvailabilityMode": "SYNCHRONOUS_COMMIT",
+          "FailoverMode": "AUTOMATIC",
+          "Role": "SECONDARY",
+          "SyncHealth": "HEALTHY",
+          "ConnectedState": "CONNECTED",
+          "OperationalState": "ONLINE"
+        }
+      ],
+      "12_Database_Mirroring": [],
+      "13_Log_Shipping_Primary": [],
+      "13_Log_Shipping_Secondary": [],
+      "14_Replication_Subscribers": [],
+      "14_Replication_Publishers": [],
+      "15_Cloud_Migration_Matrix": [
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "Azure VM (SQL on IaaS)",
+          "Fit": "Yes",
+          "Reason": "Best compatibility option. Carries over almost all on-prem features. Validate OS, edition, licensing, HA/DR, storage, and version support."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "AWS EC2 (SQL on IaaS)",
+          "Fit": "Yes",
+          "Reason": "Best AWS compatibility option. Validate licensing model (BYOL vs LI), EBS/FSx storage, AD domain dependency, and HA/DR strategy."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "GCP Compute Engine (SQL on IaaS)",
+          "Fit": "Yes",
+          "Reason": "Best GCP compatibility option. Validate licensing, persistent-disk storage, AD/IAM dependencies, and HA/DR strategy."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "Azure SQL Managed Instance",
+          "Fit": "No",
+          "Reason": "Format version analysis: max DB format = 904 (904 = SQL 2019; MI Link blocked, use DMS or backup/restore). Blockers found: FileStream/FileTable=0, In-Memory OLTP=0, UNSAFE/EXTERNAL CLR=0, Risky Agent jobs=2, Linked Servers=2."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "Azure SQL Database",
+          "Fit": "No",
+          "Reason": "Single-DB target. Anything instance-level (Agent jobs, linked servers, cross-DB queries, CLR, FileStream) blocks this. Ideal for clean app-level workloads only."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "AWS RDS for SQL Server",
+          "Fit": "No",
+          "Reason": "RDS restricts OS access, has option-group feature gates, no SQL Agent CmdExec/PowerShell/SSIS subsystems, no xp_cmdshell, and limited linked-server support. Validate edition + version availability."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "GCP Cloud SQL for SQL Server",
+          "Fit": "No",
+          "Reason": "Most restrictive managed SQL Server option. No SQL Agent until recently, limited linked-server support, no FileStream, and tight feature gates. Validate Cloud SQL Server version availability."
+        }
+      ]
+    },
+    "Node3": {
+      "01_Instance_Summary": [
+        {
+          "Section": "01_Instance_Summary",
+          "ServerName": "Node3",
+          "MachineName": "Node3",
+          "InstanceName": null,
+          "Edition": "Developer Edition (64-bit)",
+          "ProductVersion": "16.0.4245.2",
+          "ProductLevel": "RTM",
+          "CULevel": "CU24",
+          "ServerCollation": "SQL_Latin1_General_CP1_CI_AS",
+          "IsClustered": "No",
+          "HadrEnabled": "Yes",
+          "AuthMode": "Mixed Mode",
+          "UserDatabaseCount": 7,
+          "LinkedServerCount": 0,
+          "EnabledAgentJobs": 12,
+          "AssessedAt": "2026-05-28T09:23:21.3983622"
+        }
+      ],
+      "02_Instance_Configuration": [
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "Ad Hoc Distributed Queries",
+          "ValueInUse": 0,
+          "Description": "Enable or disable Ad Hoc Distributed Queries",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "backup compression default",
+          "ValueInUse": 1,
+          "Description": "Enable compression of backups by default",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "clr enabled",
+          "ValueInUse": 0,
+          "Description": "CLR user code execution enabled in the server",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "cost threshold for parallelism",
+          "ValueInUse": 50,
+          "Description": "cost threshold for parallelism",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "max degree of parallelism",
+          "ValueInUse": 4,
+          "Description": "maximum degree of parallelism",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "max server memory (MB)",
+          "ValueInUse": 6144,
+          "Description": "Maximum size of server memory (MB)",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "Ole Automation Procedures",
+          "ValueInUse": 0,
+          "Description": "Enable or disable Ole Automation Procedures",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "optimize for ad hoc workloads",
+          "ValueInUse": 1,
+          "Description": "When this option is set, plan cache size is further reduced for single-use adhoc OLTP workload.",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "remote access",
+          "ValueInUse": 1,
+          "Description": "Allow remote access",
+          "MIRelevance": "Info — RPC; review for managed targets"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "xp_cmdshell",
+          "ValueInUse": 0,
+          "Description": "Enable or disable command shell",
+          "MIRelevance": "Info"
+        }
+      ],
+      "03_Linked_Servers": [],
+      "04_SQL_Agent_Jobs": [
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "Output File Cleanup",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 1,
+          "Subsystems": "CMDEXEC",
+          "MIRelevance": "High — uses CmdExec/PowerShell/SSIS, redesign for managed SQL"
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "CommandLog Cleanup",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseBackup - SYSTEM_DATABASES - FULL",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseBackup - USER_DATABASES - DIFF",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseBackup - USER_DATABASES - FULL",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseBackup - USER_DATABASES - LOG",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseIntegrityCheck - SYSTEM_DATABASES",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseIntegrityCheck - USER_DATABASES",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "IndexOptimize - USER_DATABASES",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "sp_delete_backuphistory",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "sp_purge_jobhistory",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        }
+      ],
+      "05_Database_Inventory": [
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 7,
+          "DatabaseName": "AdventureWorks2022",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 160,
+          "DBFormat": 957,
+          "FormatNotes": "SQL 2022 RTM",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-03-26T14:23:43",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 272
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 8,
+          "DatabaseName": "AdventureWorksLT2022",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 160,
+          "DBFormat": 957,
+          "FormatNotes": "SQL 2022 RTM",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-03-26T14:24:36.643",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 23
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 9,
+          "DatabaseName": "HRManagement_OnPrem",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 160,
+          "DBFormat": null,
+          "FormatNotes": "unknown format",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-03-26T14:36:27.66",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 3728
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 11,
+          "DatabaseName": "Loans_OnPrem",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 160,
+          "DBFormat": null,
+          "FormatNotes": "unknown format",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-04-28T17:46:54.25",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 60
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 6,
+          "DatabaseName": "Northwind",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 160,
+          "DBFormat": 957,
+          "FormatNotes": "SQL 2022 RTM",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-03-26T11:53:38.28",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 80
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 10,
+          "DatabaseName": "Payroll_OnPrem",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 160,
+          "DBFormat": null,
+          "FormatNotes": "unknown format",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-03-26T16:08:58.543",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 3536
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 5,
+          "DatabaseName": "pubs",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 160,
+          "DBFormat": 957,
+          "FormatNotes": "SQL 2022 RTM",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-03-26T11:50:48.237",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 16
+        }
+      ],
+      "06_DB_Level_Findings": [
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "Northwind",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "pubs",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        }
+      ],
+      "07_TSQL_Code_Scan": [],
+      "08_SKU_Features": [],
+      "09_CLR_Assemblies": [],
+      "10_Database_Files": [
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "AdventureWorks2022",
+          "LogicalName": "AdventureWorks2022_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\AdventureWorks2022_log.ldf",
+          "SizeMB": 72,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "AdventureWorks2022",
+          "LogicalName": "AdventureWorks2022",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\AdventureWorks2022.mdf",
+          "SizeMB": 200,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "AdventureWorksLT2022",
+          "LogicalName": "AdventureWorksLT2022_Log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\AdventureWorksLT2022_log.ldf",
+          "SizeMB": 2,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "AdventureWorksLT2022",
+          "LogicalName": "AdventureWorksLT2022_Data",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\AdventureWorksLT2022.mdf",
+          "SizeMB": 21,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "HRManagement_OnPrem",
+          "LogicalName": "HRManagement_OnPrem_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Program Files\\Microsoft SQL Server\\MSSQL16.MSSQLSERVER\\MSSQL\\DATA\\HRManagement_OnPrem_log.ldf",
+          "SizeMB": 1160,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "HRManagement_OnPrem",
+          "LogicalName": "HRManagement_OnPrem",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Program Files\\Microsoft SQL Server\\MSSQL16.MSSQLSERVER\\MSSQL\\DATA\\HRManagement_OnPrem.mdf",
+          "SizeMB": 2568,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "Loans_OnPrem",
+          "LogicalName": "Loans_OnPrem_Log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\log\\Loans_OnPrem.ldf",
+          "SizeMB": 10,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "Loans_OnPrem",
+          "LogicalName": "Loans_OnPrem_Data",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\data\\Loans_OnPrem.mdf",
+          "SizeMB": 50,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "Northwind",
+          "LogicalName": "Northwind_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\Northwind_log.ldf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "Northwind",
+          "LogicalName": "Northwind",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\Northwind.mdf",
+          "SizeMB": 72,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "Payroll_OnPrem",
+          "LogicalName": "Payroll_OnPrem_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Program Files\\Microsoft SQL Server\\MSSQL16.MSSQLSERVER\\MSSQL\\DATA\\Payroll_OnPrem_log.ldf",
+          "SizeMB": 1224,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "Payroll_OnPrem",
+          "LogicalName": "Payroll_OnPrem",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Program Files\\Microsoft SQL Server\\MSSQL16.MSSQLSERVER\\MSSQL\\DATA\\Payroll_OnPrem.mdf",
+          "SizeMB": 2312,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "pubs",
+          "LogicalName": "pubs_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Program Files\\Microsoft SQL Server\\MSSQL16.MSSQLSERVER\\MSSQL\\DATA\\pubs_log.ldf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "pubs",
+          "LogicalName": "pubs",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Program Files\\Microsoft SQL Server\\MSSQL16.MSSQLSERVER\\MSSQL\\DATA\\pubs.mdf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        }
+      ],
+      "11_Availability_Groups": [
+        {
+          "Section": "11_Availability_Groups",
+          "AGName": "UshaAg22",
+          "IsDistributedAG": null,
+          "ReplicaServer": "Node3",
+          "AvailabilityMode": null,
+          "FailoverMode": null,
+          "Role": "RESOLVING",
+          "SyncHealth": "NOT_HEALTHY",
+          "ConnectedState": "DISCONNECTED",
+          "OperationalState": null
+        },
+        {
+          "Section": "11_Availability_Groups",
+          "AGName": "UshaAg22MI",
+          "IsDistributedAG": null,
+          "ReplicaServer": "Node3",
+          "AvailabilityMode": null,
+          "FailoverMode": null,
+          "Role": "RESOLVING",
+          "SyncHealth": "NOT_HEALTHY",
+          "ConnectedState": "DISCONNECTED",
+          "OperationalState": null
+        }
+      ],
+      "12_Database_Mirroring": [],
+      "13_Log_Shipping_Primary": [],
+      "13_Log_Shipping_Secondary": [],
+      "14_Replication_Subscribers": [],
+      "14_Replication_Publishers": [],
+      "15_Cloud_Migration_Matrix": [
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "Azure VM (SQL on IaaS)",
+          "Fit": "Yes",
+          "Reason": "Best compatibility option. Carries over almost all on-prem features. Validate OS, edition, licensing, HA/DR, storage, and version support."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "AWS EC2 (SQL on IaaS)",
+          "Fit": "Yes",
+          "Reason": "Best AWS compatibility option. Validate licensing model (BYOL vs LI), EBS/FSx storage, AD domain dependency, and HA/DR strategy."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "GCP Compute Engine (SQL on IaaS)",
+          "Fit": "Yes",
+          "Reason": "Best GCP compatibility option. Validate licensing, persistent-disk storage, AD/IAM dependencies, and HA/DR strategy."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "Azure SQL Managed Instance",
+          "Fit": "No",
+          "Reason": "Format version analysis: max DB format = 957 (957 = SQL 2022 RTM; MI Link blocked, use DMS or backup/restore). Blockers found: FileStream/FileTable=0, In-Memory OLTP=0, UNSAFE/EXTERNAL CLR=0, Risky Agent jobs=1, Linked Servers=0."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "Azure SQL Database",
+          "Fit": "No",
+          "Reason": "Single-DB target. Anything instance-level (Agent jobs, linked servers, cross-DB queries, CLR, FileStream) blocks this. Ideal for clean app-level workloads only."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "AWS RDS for SQL Server",
+          "Fit": "No",
+          "Reason": "RDS restricts OS access, has option-group feature gates, no SQL Agent CmdExec/PowerShell/SSIS subsystems, no xp_cmdshell, and limited linked-server support. Validate edition + version availability."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "GCP Cloud SQL for SQL Server",
+          "Fit": "No",
+          "Reason": "Most restrictive managed SQL Server option. No SQL Agent until recently, limited linked-server support, no FileStream, and tight feature gates. Validate Cloud SQL Server version availability."
+        }
+      ]
+    },
+    "Node4": {
+      "01_Instance_Summary": [
+        {
+          "Section": "01_Instance_Summary",
+          "ServerName": "Node4",
+          "MachineName": "Node4",
+          "InstanceName": null,
+          "Edition": "Developer Edition (64-bit)",
+          "ProductVersion": "16.0.4245.2",
+          "ProductLevel": "RTM",
+          "CULevel": "CU24",
+          "ServerCollation": "SQL_Latin1_General_CP1_CI_AS",
+          "IsClustered": "No",
+          "HadrEnabled": "Yes",
+          "AuthMode": "Mixed Mode",
+          "UserDatabaseCount": 5,
+          "LinkedServerCount": 1,
+          "EnabledAgentJobs": 12,
+          "AssessedAt": "2026-05-28T09:23:22.7480957"
+        }
+      ],
+      "02_Instance_Configuration": [
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "Ad Hoc Distributed Queries",
+          "ValueInUse": 0,
+          "Description": "Enable or disable Ad Hoc Distributed Queries",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "backup compression default",
+          "ValueInUse": 1,
+          "Description": "Enable compression of backups by default",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "clr enabled",
+          "ValueInUse": 0,
+          "Description": "CLR user code execution enabled in the server",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "cost threshold for parallelism",
+          "ValueInUse": 50,
+          "Description": "cost threshold for parallelism",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "max degree of parallelism",
+          "ValueInUse": 4,
+          "Description": "maximum degree of parallelism",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "max server memory (MB)",
+          "ValueInUse": 6144,
+          "Description": "Maximum size of server memory (MB)",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "Ole Automation Procedures",
+          "ValueInUse": 0,
+          "Description": "Enable or disable Ole Automation Procedures",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "optimize for ad hoc workloads",
+          "ValueInUse": 1,
+          "Description": "When this option is set, plan cache size is further reduced for single-use adhoc OLTP workload.",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "remote access",
+          "ValueInUse": 1,
+          "Description": "Allow remote access",
+          "MIRelevance": "Info — RPC; review for managed targets"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "xp_cmdshell",
+          "ValueInUse": 0,
+          "Description": "Enable or disable command shell",
+          "MIRelevance": "Info"
+        }
+      ],
+      "03_Linked_Servers": [
+        {
+          "Section": "03_Linked_Servers",
+          "LinkedServerName": "NODE1_TEST_LINK",
+          "Product": "",
+          "Provider": "SQLNCLI",
+          "DataSource": "NODE2",
+          "RemoteLoginEnabled": false,
+          "RpcOutEnabled": false,
+          "DataAccessEnabled": true,
+          "MICompatibility": "WARN — legacy provider; MI requires MSOLEDBSQL"
+        }
+      ],
+      "04_SQL_Agent_Jobs": [
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "CommandLog Cleanup",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseBackup - SYSTEM_DATABASES - FULL",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseBackup - USER_DATABASES - DIFF",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseBackup - USER_DATABASES - FULL",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseBackup - USER_DATABASES - LOG",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseIntegrityCheck - SYSTEM_DATABASES",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseIntegrityCheck - USER_DATABASES",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "IndexOptimize - USER_DATABASES",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "NODE1_SQLPilot_TestJob",
+          "Status": "Enabled",
+          "TotalSteps": 2,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL, TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "sp_delete_backuphistory",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "sp_purge_jobhistory",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        }
+      ],
+      "05_Database_Inventory": [
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 5,
+          "DatabaseName": "HRManagement_OnPrem",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 160,
+          "DBFormat": null,
+          "FormatNotes": "unknown format",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-03-26T16:53:07.09",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 3728
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 7,
+          "DatabaseName": "Loans_OnPrem",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 160,
+          "DBFormat": null,
+          "FormatNotes": "unknown format",
+          "OwnerLogin": "sa",
+          "CreatedAt": "2026-04-28T18:27:12.847",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 60
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 6,
+          "DatabaseName": "Payroll_OnPrem",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 160,
+          "DBFormat": null,
+          "FormatNotes": "unknown format",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-03-26T16:53:21.223",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 3536
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 8,
+          "DatabaseName": "SQLPilot_DcDcTest",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 957,
+          "FormatNotes": "SQL 2022 RTM",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-05-27T13:41:32.647",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 16
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 9,
+          "DatabaseName": "SQLPilot_DcDcTest2",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 957,
+          "FormatNotes": "SQL 2022 RTM",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-05-27T13:41:36.387",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 16
+        }
+      ],
+      "06_DB_Level_Findings": [
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "SQLPilot_DcDcTest",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "SQLPilot_DcDcTest2",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        }
+      ],
+      "07_TSQL_Code_Scan": [],
+      "08_SKU_Features": [],
+      "09_CLR_Assemblies": [],
+      "10_Database_Files": [
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "HRManagement_OnPrem",
+          "LogicalName": "HRManagement_OnPrem_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\HRManagement_OnPrem_log.ldf",
+          "SizeMB": 1160,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "HRManagement_OnPrem",
+          "LogicalName": "HRManagement_OnPrem",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\HRManagement_OnPrem.mdf",
+          "SizeMB": 2568,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "Loans_OnPrem",
+          "LogicalName": "Loans_OnPrem_Log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\log\\Loans_OnPrem.ldf",
+          "SizeMB": 10,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "Loans_OnPrem",
+          "LogicalName": "Loans_OnPrem_Data",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\data\\Loans_OnPrem.mdf",
+          "SizeMB": 50,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "Payroll_OnPrem",
+          "LogicalName": "Payroll_OnPrem_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\Payroll_OnPrem_log.ldf",
+          "SizeMB": 1224,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "Payroll_OnPrem",
+          "LogicalName": "Payroll_OnPrem",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\Payroll_OnPrem.mdf",
+          "SizeMB": 2312,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "SQLPilot_DcDcTest",
+          "LogicalName": "SQLPilot_DcDcTest_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\SQLPilot_DcDcTest_log.ldf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "SQLPilot_DcDcTest",
+          "LogicalName": "SQLPilot_DcDcTest",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\SQLPilot_DcDcTest.mdf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "SQLPilot_DcDcTest2",
+          "LogicalName": "SQLPilot_DcDcTest2_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\SQLPilot_DcDcTest2_log.ldf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "SQLPilot_DcDcTest2",
+          "LogicalName": "SQLPilot_DcDcTest2",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\SQLPilot_DcDcTest2.mdf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        }
+      ],
+      "11_Availability_Groups": [
+        {
+          "Section": "11_Availability_Groups",
+          "AGName": "UshaAg22",
+          "IsDistributedAG": null,
+          "ReplicaServer": "Node4",
+          "AvailabilityMode": null,
+          "FailoverMode": null,
+          "Role": "RESOLVING",
+          "SyncHealth": "NOT_HEALTHY",
+          "ConnectedState": "DISCONNECTED",
+          "OperationalState": null
+        },
+        {
+          "Section": "11_Availability_Groups",
+          "AGName": "UshaAg22MI",
+          "IsDistributedAG": null,
+          "ReplicaServer": "Node4",
+          "AvailabilityMode": null,
+          "FailoverMode": null,
+          "Role": "RESOLVING",
+          "SyncHealth": "NOT_HEALTHY",
+          "ConnectedState": "DISCONNECTED",
+          "OperationalState": null
+        }
+      ],
+      "12_Database_Mirroring": [],
+      "13_Log_Shipping_Primary": [],
+      "13_Log_Shipping_Secondary": [],
+      "14_Replication_Subscribers": [],
+      "14_Replication_Publishers": [],
+      "15_Cloud_Migration_Matrix": [
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "Azure VM (SQL on IaaS)",
+          "Fit": "Yes",
+          "Reason": "Best compatibility option. Carries over almost all on-prem features. Validate OS, edition, licensing, HA/DR, storage, and version support."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "AWS EC2 (SQL on IaaS)",
+          "Fit": "Yes",
+          "Reason": "Best AWS compatibility option. Validate licensing model (BYOL vs LI), EBS/FSx storage, AD domain dependency, and HA/DR strategy."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "GCP Compute Engine (SQL on IaaS)",
+          "Fit": "Yes",
+          "Reason": "Best GCP compatibility option. Validate licensing, persistent-disk storage, AD/IAM dependencies, and HA/DR strategy."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "Azure SQL Managed Instance",
+          "Fit": "Yes",
+          "Reason": "Format version analysis: max DB format = 957 (957 = SQL 2022 RTM; MI Link blocked, use DMS or backup/restore). Blockers found: FileStream/FileTable=0, In-Memory OLTP=0, UNSAFE/EXTERNAL CLR=0, Risky Agent jobs=0, Linked Servers=1."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "Azure SQL Database",
+          "Fit": "No",
+          "Reason": "Single-DB target. Anything instance-level (Agent jobs, linked servers, cross-DB queries, CLR, FileStream) blocks this. Ideal for clean app-level workloads only."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "AWS RDS for SQL Server",
+          "Fit": "Yes",
+          "Reason": "RDS restricts OS access, has option-group feature gates, no SQL Agent CmdExec/PowerShell/SSIS subsystems, no xp_cmdshell, and limited linked-server support. Validate edition + version availability."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "GCP Cloud SQL for SQL Server",
+          "Fit": "No",
+          "Reason": "Most restrictive managed SQL Server option. No SQL Agent until recently, limited linked-server support, no FileStream, and tight feature gates. Validate Cloud SQL Server version availability."
+        }
+      ]
+    },
+    "NODE5": {
+      "01_Instance_Summary": [
+        {
+          "Section": "01_Instance_Summary",
+          "ServerName": "NODE5",
+          "MachineName": "Node5",
+          "InstanceName": null,
+          "Edition": "Developer Edition (64-bit)",
+          "ProductVersion": "15.0.4430.1",
+          "ProductLevel": "RTM",
+          "CULevel": "CU32",
+          "ServerCollation": "SQL_Latin1_General_CP1_CI_AS",
+          "IsClustered": "No",
+          "HadrEnabled": "No",
+          "AuthMode": "Mixed Mode",
+          "UserDatabaseCount": 21,
+          "LinkedServerCount": 2,
+          "EnabledAgentJobs": 16,
+          "AssessedAt": "2026-05-28T09:23:33.212524"
+        }
+      ],
+      "02_Instance_Configuration": [
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "Ad Hoc Distributed Queries",
+          "ValueInUse": 0,
+          "Description": "Enable or disable Ad Hoc Distributed Queries",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "backup compression default",
+          "ValueInUse": 1,
+          "Description": "Enable compression of backups by default",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "clr enabled",
+          "ValueInUse": 1,
+          "Description": "CLR user code execution enabled in the server",
+          "MIRelevance": "Medium — review CLR assemblies"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "cost threshold for parallelism",
+          "ValueInUse": 50,
+          "Description": "cost threshold for parallelism",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "max degree of parallelism",
+          "ValueInUse": 4,
+          "Description": "maximum degree of parallelism",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "max server memory (MB)",
+          "ValueInUse": 6144,
+          "Description": "Maximum size of server memory (MB)",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "Ole Automation Procedures",
+          "ValueInUse": 0,
+          "Description": "Enable or disable Ole Automation Procedures",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "optimize for ad hoc workloads",
+          "ValueInUse": 1,
+          "Description": "When this option is set, plan cache size is further reduced for single-use adhoc OLTP workload.",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "remote access",
+          "ValueInUse": 1,
+          "Description": "Allow remote access",
+          "MIRelevance": "Info — RPC; review for managed targets"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "xp_cmdshell",
+          "ValueInUse": 1,
+          "Description": "Enable or disable command shell",
+          "MIRelevance": "High — usually unsupported on managed SQL"
+        }
+      ],
+      "03_Linked_Servers": [
+        {
+          "Section": "03_Linked_Servers",
+          "LinkedServerName": "NODE1",
+          "Product": "SQL Server",
+          "Provider": "SQLNCLI",
+          "DataSource": "NODE1",
+          "RemoteLoginEnabled": true,
+          "RpcOutEnabled": true,
+          "DataAccessEnabled": true,
+          "MICompatibility": "WARN — legacy provider; MI requires MSOLEDBSQL"
+        },
+        {
+          "Section": "03_Linked_Servers",
+          "LinkedServerName": "NODE1_TEST_LINK",
+          "Product": "",
+          "Provider": "SQLNCLI",
+          "DataSource": "NODE2",
+          "RemoteLoginEnabled": false,
+          "RpcOutEnabled": false,
+          "DataAccessEnabled": true,
+          "MICompatibility": "WARN — legacy provider; MI requires MSOLEDBSQL"
+        }
+      ],
+      "04_SQL_Agent_Jobs": [
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "Output File Cleanup",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 1,
+          "Subsystems": "CmdExec",
+          "MIRelevance": "High — uses CmdExec/PowerShell/SSIS, redesign for managed SQL"
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "BankingDataLoad_Every10Min",
+          "Status": "Enabled",
+          "TotalSteps": 10,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL, TSQL, TSQL, TSQL, TSQL, TSQL, TSQL, TSQL, TSQL, TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "CommandLog Cleanup",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseBackup - SYSTEM_DATABASES - FULL",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseBackup - USER_DATABASES - DIFF",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseBackup - USER_DATABASES - FULL",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseBackup - USER_DATABASES - LOG",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseIntegrityCheck - SYSTEM_DATABASES",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "DatabaseIntegrityCheck - USER_DATABASES",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "IndexOptimize - USER_DATABASES",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "NODE1_SQLPilot_TestJob",
+          "Status": "Enabled",
+          "TotalSteps": 2,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL, TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "sp_delete_backuphistory",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "sp_purge_jobhistory",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        },
+        {
+          "Section": "04_SQL_Agent_Jobs",
+          "JobName": "SQLPilotDemo - Nightly Audit Roll-up",
+          "Status": "Enabled",
+          "TotalSteps": 1,
+          "RiskySteps": 0,
+          "Subsystems": "TSQL",
+          "MIRelevance": "Info — review job dependencies on file paths, proxies, etc."
+        }
+      ],
+      "05_Database_Inventory": [
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 8,
+          "DatabaseName": "AcquiredBanks_OnPrem_POC",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-03-26T18:35:25.187",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 208
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 13,
+          "DatabaseName": "AutoLoans_DB",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-04-06T13:55:41.437",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 208
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 21,
+          "DatabaseName": "BankingDW_DB",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-04-06T14:42:49.227",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 336
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 16,
+          "DatabaseName": "Compliance_DB",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-04-06T13:55:42.377",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 144
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 7,
+          "DatabaseName": "CoreBank_OnPrem_POC",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-03-26T18:34:34.78",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 208
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 14,
+          "DatabaseName": "CreditCards_DB",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-04-06T13:55:41.777",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 208
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 17,
+          "DatabaseName": "FraudDetection_DB",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-04-06T13:55:42.66",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 144
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 20,
+          "DatabaseName": "HumanResources_DB",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-04-06T13:55:43.567",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 144
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 19,
+          "DatabaseName": "Insurance_DB",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-04-06T13:55:43.283",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 144
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 9,
+          "DatabaseName": "LoanProcessing_Staging",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-04-01T16:38:00.577",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 16
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 12,
+          "DatabaseName": "Mortgage_DB",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-04-06T13:55:41.113",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 208
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 5,
+          "DatabaseName": "ReportServer",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-03-26T10:48:26.67",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 80
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 6,
+          "DatabaseName": "ReportServerTempDB",
+          "State": "ONLINE",
+          "RecoveryModel": "SIMPLE",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-03-26T10:48:27.38",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 16
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 11,
+          "DatabaseName": "RetailBanking_DB",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-04-06T13:55:40.7",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 144
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 24,
+          "DatabaseName": "SQLPilot_DcDcTest",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-05-26T20:23:35.527",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 16
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 25,
+          "DatabaseName": "SQLPilot_DcDcTest2",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-05-26T20:23:36.74",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 16
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 22,
+          "DatabaseName": "SQLPilotDemo",
+          "State": "ONLINE",
+          "RecoveryModel": "SIMPLE",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-05-08T15:06:24.73",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 16
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 10,
+          "DatabaseName": "SSISDB",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-04-06T13:48:06.937",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 45
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 23,
+          "DatabaseName": "TDE_Demo_DB_Banking",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-05-26T20:10:53.807",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": true,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 120
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 18,
+          "DatabaseName": "TradeFinance_DB",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-04-06T13:55:42.94",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 208
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 15,
+          "DatabaseName": "WealthMgmt_DB",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 150,
+          "DBFormat": 904,
+          "FormatNotes": "SQL 2019 or earlier",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-04-06T13:55:42.12",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 144
+        }
+      ],
+      "06_DB_Level_Findings": [
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "SSISDB",
+          "Category": "CLR Assemblies",
+          "Severity": "High",
+          "Finding": "User-defined CLR assemblies present. Review PERMISSION_SET (UNSAFE/EXTERNAL_ACCESS) for MI."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "AcquiredBanks_OnPrem_POC",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "AutoLoans_DB",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "BankingDW_DB",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "Compliance_DB",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "CoreBank_OnPrem_POC",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "CreditCards_DB",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "FraudDetection_DB",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "HumanResources_DB",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "Insurance_DB",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "LoanProcessing_Staging",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "Mortgage_DB",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "ReportServer",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "ReportServerTempDB",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "RetailBanking_DB",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "SQLPilot_DcDcTest",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "SQLPilot_DcDcTest2",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "SQLPilotDemo",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "TDE_Demo_DB_Banking",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "TradeFinance_DB",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "WealthMgmt_DB",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        }
+      ],
+      "07_TSQL_Code_Scan": [],
+      "08_SKU_Features": [
+        {
+          "Section": "08_SKU_Features",
+          "DatabaseName": "TDE_Demo_DB_Banking",
+          "FeatureName": "TransparentDatabaseEncryption",
+          "Severity": "Info",
+          "Note": "Feature present; review case by case"
+        }
+      ],
+      "09_CLR_Assemblies": [
+        {
+          "Section": "09_CLR_Assemblies",
+          "DatabaseName": "SSISDB",
+          "AssemblyName": "ISSERVER",
+          "PermissionSet": "UNSAFE_ACCESS",
+          "IsUserDefined": true,
+          "Verdict": "HIGH — UNSAFE CLR; review carefully for MI"
+        }
+      ],
+      "10_Database_Files": [
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "AcquiredBanks_OnPrem_POC",
+          "LogicalName": "AcquiredBanks_OnPrem_POC_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\AcquiredBanks_OnPrem_POC_log.ldf",
+          "SizeMB": 136,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "AcquiredBanks_OnPrem_POC",
+          "LogicalName": "AcquiredBanks_OnPrem_POC",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\AcquiredBanks_OnPrem_POC.mdf",
+          "SizeMB": 72,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "AutoLoans_DB",
+          "LogicalName": "AutoLoans_DB_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\AutoLoans_DB_log.ldf",
+          "SizeMB": 136,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "AutoLoans_DB",
+          "LogicalName": "AutoLoans_DB",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\AutoLoans_DB.mdf",
+          "SizeMB": 72,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "BankingDW_DB",
+          "LogicalName": "BankingDW_DB_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\BankingDW_DB_log.ldf",
+          "SizeMB": 200,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "BankingDW_DB",
+          "LogicalName": "BankingDW_DB",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\BankingDW_DB.mdf",
+          "SizeMB": 136,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "Compliance_DB",
+          "LogicalName": "Compliance_DB_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\Compliance_DB_log.ldf",
+          "SizeMB": 72,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "Compliance_DB",
+          "LogicalName": "Compliance_DB",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\Compliance_DB.mdf",
+          "SizeMB": 72,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "CoreBank_OnPrem_POC",
+          "LogicalName": "CoreBank_OnPrem_POC_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\CoreBank_OnPrem_POC_log.ldf",
+          "SizeMB": 136,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "CoreBank_OnPrem_POC",
+          "LogicalName": "CoreBank_OnPrem_POC",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\CoreBank_OnPrem_POC.mdf",
+          "SizeMB": 72,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "CreditCards_DB",
+          "LogicalName": "CreditCards_DB_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\CreditCards_DB_log.ldf",
+          "SizeMB": 136,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "CreditCards_DB",
+          "LogicalName": "CreditCards_DB",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\CreditCards_DB.mdf",
+          "SizeMB": 72,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "FraudDetection_DB",
+          "LogicalName": "FraudDetection_DB_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\FraudDetection_DB_log.ldf",
+          "SizeMB": 72,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "FraudDetection_DB",
+          "LogicalName": "FraudDetection_DB",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\FraudDetection_DB.mdf",
+          "SizeMB": 72,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "HumanResources_DB",
+          "LogicalName": "HumanResources_DB_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\HumanResources_DB_log.ldf",
+          "SizeMB": 72,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "HumanResources_DB",
+          "LogicalName": "HumanResources_DB",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\HumanResources_DB.mdf",
+          "SizeMB": 72,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "Insurance_DB",
+          "LogicalName": "Insurance_DB_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\Insurance_DB_log.ldf",
+          "SizeMB": 72,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "Insurance_DB",
+          "LogicalName": "Insurance_DB",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\Insurance_DB.mdf",
+          "SizeMB": 72,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "LoanProcessing_Staging",
+          "LogicalName": "LoanProcessing_Staging_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\LoanProcessing_Staging_log.ldf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "LoanProcessing_Staging",
+          "LogicalName": "LoanProcessing_Staging",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\LoanProcessing_Staging.mdf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "Mortgage_DB",
+          "LogicalName": "Mortgage_DB_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\Mortgage_DB_log.ldf",
+          "SizeMB": 136,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "Mortgage_DB",
+          "LogicalName": "Mortgage_DB",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\Mortgage_DB.mdf",
+          "SizeMB": 72,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "ReportServer",
+          "LogicalName": "ReportServer_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\ReportServer_log.ldf",
+          "SizeMB": 72,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "ReportServer",
+          "LogicalName": "ReportServer",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\ReportServer.mdf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "ReportServerTempDB",
+          "LogicalName": "ReportServerTempDB_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\ReportServerTempDB_log.ldf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "ReportServerTempDB",
+          "LogicalName": "ReportServerTempDB",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\ReportServerTempDB.mdf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "RetailBanking_DB",
+          "LogicalName": "RetailBanking_DB_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\RetailBanking_DB_log.ldf",
+          "SizeMB": 72,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "RetailBanking_DB",
+          "LogicalName": "RetailBanking_DB",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\RetailBanking_DB.mdf",
+          "SizeMB": 72,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "SQLPilot_DcDcTest",
+          "LogicalName": "SQLPilot_DcDcTest_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\SQLPilot_DcDcTest_log.ldf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "SQLPilot_DcDcTest",
+          "LogicalName": "SQLPilot_DcDcTest",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\SQLPilot_DcDcTest.mdf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "SQLPilot_DcDcTest2",
+          "LogicalName": "SQLPilot_DcDcTest2_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\SQLPilot_DcDcTest2_log.ldf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "SQLPilot_DcDcTest2",
+          "LogicalName": "SQLPilot_DcDcTest2",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\SQLPilot_DcDcTest2.mdf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "SQLPilotDemo",
+          "LogicalName": "SQLPilotDemo_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\SQLPilotDemo_log.ldf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "SQLPilotDemo",
+          "LogicalName": "SQLPilotDemo",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\SQLPilotDemo.mdf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "SSISDB",
+          "LogicalName": "log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Program Files\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\DATA\\SSISDB.ldf",
+          "SizeMB": 5,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "SSISDB",
+          "LogicalName": "data",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Program Files\\Microsoft SQL Server\\MSSQL15.MSSQLSERVER\\MSSQL\\DATA\\SSISDB.mdf",
+          "SizeMB": 40,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "TDE_Demo_DB_Banking",
+          "LogicalName": "TDE_Demo_DB_Banking_Log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\TDE_Demo_DB_Banking.ldf",
+          "SizeMB": 20,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "TDE_Demo_DB_Banking",
+          "LogicalName": "TDE_Demo_DB_Banking_Data",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\TDE_Demo_DB_Banking.mdf",
+          "SizeMB": 100,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "TradeFinance_DB",
+          "LogicalName": "TradeFinance_DB_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\TradeFinance_DB_log.ldf",
+          "SizeMB": 136,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "TradeFinance_DB",
+          "LogicalName": "TradeFinance_DB",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\TradeFinance_DB.mdf",
+          "SizeMB": 72,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "WealthMgmt_DB",
+          "LogicalName": "WealthMgmt_DB_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\WealthMgmt_DB_log.ldf",
+          "SizeMB": 72,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "WealthMgmt_DB",
+          "LogicalName": "WealthMgmt_DB",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\WealthMgmt_DB.mdf",
+          "SizeMB": 72,
+          "MIVerdict": "OK"
+        }
+      ],
+      "11_Availability_Groups": [],
+      "12_Database_Mirroring": [],
+      "13_Log_Shipping_Primary": [],
+      "13_Log_Shipping_Secondary": [],
+      "14_Replication_Subscribers": [],
+      "14_Replication_Publishers": [],
+      "15_Cloud_Migration_Matrix": [
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "Azure VM (SQL on IaaS)",
+          "Fit": "Yes",
+          "Reason": "Best compatibility option. Carries over almost all on-prem features. Validate OS, edition, licensing, HA/DR, storage, and version support."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "AWS EC2 (SQL on IaaS)",
+          "Fit": "Yes",
+          "Reason": "Best AWS compatibility option. Validate licensing model (BYOL vs LI), EBS/FSx storage, AD domain dependency, and HA/DR strategy."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "GCP Compute Engine (SQL on IaaS)",
+          "Fit": "Yes",
+          "Reason": "Best GCP compatibility option. Validate licensing, persistent-disk storage, AD/IAM dependencies, and HA/DR strategy."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "Azure SQL Managed Instance",
+          "Fit": "No",
+          "Reason": "Format version analysis: max DB format = 904 (904 = SQL 2019; MI Link blocked, use DMS or backup/restore). Blockers found: FileStream/FileTable=0, In-Memory OLTP=0, UNSAFE/EXTERNAL CLR=1, Risky Agent jobs=1, Linked Servers=2."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "Azure SQL Database",
+          "Fit": "No",
+          "Reason": "Single-DB target. Anything instance-level (Agent jobs, linked servers, cross-DB queries, CLR, FileStream) blocks this. Ideal for clean app-level workloads only."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "AWS RDS for SQL Server",
+          "Fit": "No",
+          "Reason": "RDS restricts OS access, has option-group feature gates, no SQL Agent CmdExec/PowerShell/SSIS subsystems, no xp_cmdshell, and limited linked-server support. Validate edition + version availability."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "GCP Cloud SQL for SQL Server",
+          "Fit": "No",
+          "Reason": "Most restrictive managed SQL Server option. No SQL Agent until recently, limited linked-server support, no FileStream, and tight feature gates. Validate Cloud SQL Server version availability."
+        }
+      ]
+    },
+    "Node6": {
+      "01_Instance_Summary": [
+        {
+          "Section": "01_Instance_Summary",
+          "ServerName": "Node6",
+          "MachineName": "Node6",
+          "InstanceName": null,
+          "Edition": "Developer Edition (64-bit)",
+          "ProductVersion": "16.0.4245.2",
+          "ProductLevel": "RTM",
+          "CULevel": "CU24",
+          "ServerCollation": "SQL_Latin1_General_CP1_CI_AS",
+          "IsClustered": "No",
+          "HadrEnabled": "Yes",
+          "AuthMode": "Mixed Mode",
+          "UserDatabaseCount": 3,
+          "LinkedServerCount": 0,
+          "EnabledAgentJobs": 1,
+          "AssessedAt": "2026-05-28T09:23:30.2622039"
+        }
+      ],
+      "02_Instance_Configuration": [
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "Ad Hoc Distributed Queries",
+          "ValueInUse": 0,
+          "Description": "Enable or disable Ad Hoc Distributed Queries",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "backup compression default",
+          "ValueInUse": 1,
+          "Description": "Enable compression of backups by default",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "clr enabled",
+          "ValueInUse": 0,
+          "Description": "CLR user code execution enabled in the server",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "cost threshold for parallelism",
+          "ValueInUse": 50,
+          "Description": "cost threshold for parallelism",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "max degree of parallelism",
+          "ValueInUse": 4,
+          "Description": "maximum degree of parallelism",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "max server memory (MB)",
+          "ValueInUse": 6144,
+          "Description": "Maximum size of server memory (MB)",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "Ole Automation Procedures",
+          "ValueInUse": 0,
+          "Description": "Enable or disable Ole Automation Procedures",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "optimize for ad hoc workloads",
+          "ValueInUse": 1,
+          "Description": "When this option is set, plan cache size is further reduced for single-use adhoc OLTP workload.",
+          "MIRelevance": "Info"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "remote access",
+          "ValueInUse": 1,
+          "Description": "Allow remote access",
+          "MIRelevance": "Info — RPC; review for managed targets"
+        },
+        {
+          "Section": "02_Instance_Configuration",
+          "ConfigName": "xp_cmdshell",
+          "ValueInUse": 0,
+          "Description": "Enable or disable command shell",
+          "MIRelevance": "Info"
+        }
+      ],
+      "03_Linked_Servers": [],
+      "04_SQL_Agent_Jobs": [],
+      "05_Database_Inventory": [
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 7,
+          "DatabaseName": "Loans_OnPrem",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 160,
+          "DBFormat": null,
+          "FormatNotes": "unknown format",
+          "OwnerLogin": "sa",
+          "CreatedAt": "2026-04-28T18:46:36.953",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 60
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 5,
+          "DatabaseName": "ReportServer",
+          "State": "ONLINE",
+          "RecoveryModel": "FULL",
+          "CompatLevel": 160,
+          "DBFormat": 957,
+          "FormatNotes": "SQL 2022 RTM",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-03-26T11:32:44.7",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 272
+        },
+        {
+          "Section": "05_Database_Inventory",
+          "DatabaseId": 6,
+          "DatabaseName": "ReportServerTempDB",
+          "State": "ONLINE",
+          "RecoveryModel": "SIMPLE",
+          "CompatLevel": 160,
+          "DBFormat": 957,
+          "FormatNotes": "SQL 2022 RTM",
+          "OwnerLogin": "USHADC0\\ushakale",
+          "CreatedAt": "2026-03-26T11:32:45.227",
+          "IsReadOnly": false,
+          "IsTDEEncrypted": false,
+          "IsPublished": false,
+          "IsSubscribed": false,
+          "IsCDCEnabled": false,
+          "SizeMB": 16
+        }
+      ],
+      "06_DB_Level_Findings": [
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "ReportServer",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        },
+        {
+          "Section": "06_DB_Level_Findings",
+          "DatabaseName": "ReportServerTempDB",
+          "Category": "Security",
+          "Severity": "Medium",
+          "Finding": "Windows users/groups present. Map to AAD/Entra ID on Azure targets; SQL logins for RDS/Cloud SQL."
+        }
+      ],
+      "07_TSQL_Code_Scan": [],
+      "08_SKU_Features": [],
+      "09_CLR_Assemblies": [],
+      "10_Database_Files": [
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "Loans_OnPrem",
+          "LogicalName": "Loans_OnPrem_Log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\log\\Loans_OnPrem.ldf",
+          "SizeMB": 10,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "Loans_OnPrem",
+          "LogicalName": "Loans_OnPrem_Data",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\data\\Loans_OnPrem.mdf",
+          "SizeMB": 50,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "ReportServer",
+          "LogicalName": "ReportServer_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\ReportServer_log.ldf",
+          "SizeMB": 200,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "ReportServer",
+          "LogicalName": "ReportServer",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\ReportServer.mdf",
+          "SizeMB": 72,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "ReportServerTempDB",
+          "LogicalName": "ReportServerTempDB_log",
+          "FileType": "LOG",
+          "PhysicalPath": "C:\\Log\\ReportServerTempDB_log.ldf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        },
+        {
+          "Section": "10_Database_Files",
+          "DatabaseName": "ReportServerTempDB",
+          "LogicalName": "ReportServerTempDB",
+          "FileType": "ROWS",
+          "PhysicalPath": "C:\\Data\\ReportServerTempDB.mdf",
+          "SizeMB": 8,
+          "MIVerdict": "OK"
+        }
+      ],
+      "11_Availability_Groups": [
+        {
+          "Section": "11_Availability_Groups",
+          "AGName": "UshaAg22MI",
+          "IsDistributedAG": null,
+          "ReplicaServer": "Node6",
+          "AvailabilityMode": null,
+          "FailoverMode": null,
+          "Role": "RESOLVING",
+          "SyncHealth": "NOT_HEALTHY",
+          "ConnectedState": "DISCONNECTED",
+          "OperationalState": null
+        }
+      ],
+      "12_Database_Mirroring": [],
+      "13_Log_Shipping_Primary": [],
+      "13_Log_Shipping_Secondary": [],
+      "14_Replication_Subscribers": [],
+      "14_Replication_Publishers": [],
+      "15_Cloud_Migration_Matrix": [
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "Azure VM (SQL on IaaS)",
+          "Fit": "Yes",
+          "Reason": "Best compatibility option. Carries over almost all on-prem features. Validate OS, edition, licensing, HA/DR, storage, and version support."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "AWS EC2 (SQL on IaaS)",
+          "Fit": "Yes",
+          "Reason": "Best AWS compatibility option. Validate licensing model (BYOL vs LI), EBS/FSx storage, AD domain dependency, and HA/DR strategy."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "GCP Compute Engine (SQL on IaaS)",
+          "Fit": "Yes",
+          "Reason": "Best GCP compatibility option. Validate licensing, persistent-disk storage, AD/IAM dependencies, and HA/DR strategy."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "Azure SQL Managed Instance",
+          "Fit": "Yes",
+          "Reason": "Format version analysis: max DB format = 957 (957 = SQL 2022 RTM; MI Link blocked, use DMS or backup/restore). Blockers found: FileStream/FileTable=0, In-Memory OLTP=0, UNSAFE/EXTERNAL CLR=0, Risky Agent jobs=0, Linked Servers=0."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "Azure SQL Database",
+          "Fit": "Yes",
+          "Reason": "Single-DB target. Anything instance-level (Agent jobs, linked servers, cross-DB queries, CLR, FileStream) blocks this. Ideal for clean app-level workloads only."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "AWS RDS for SQL Server",
+          "Fit": "Yes",
+          "Reason": "RDS restricts OS access, has option-group feature gates, no SQL Agent CmdExec/PowerShell/SSIS subsystems, no xp_cmdshell, and limited linked-server support. Validate edition + version availability."
+        },
+        {
+          "Section": "15_Cloud_Migration_Matrix",
+          "TargetPlatform": "GCP Cloud SQL for SQL Server",
+          "Fit": "Yes",
+          "Reason": "Most restrictive managed SQL Server option. No SQL Agent until recently, limited linked-server support, no FileStream, and tight feature gates. Validate Cloud SQL Server version availability."
+        }
+      ]
+    }
+  }
+}

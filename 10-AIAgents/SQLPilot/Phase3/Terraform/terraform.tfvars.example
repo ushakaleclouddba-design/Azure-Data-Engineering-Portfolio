@@ -1,0 +1,35 @@
+################################################################################
+# terraform.tfvars.example
+#
+# Copy this file to "terraform.tfvars" and fill in the two REQUIRED values
+# below. The actual terraform.tfvars is gitignored (see .gitignore in this
+# folder) so secrets never get committed.
+#
+#   cp terraform.tfvars.example terraform.tfvars
+#   notepad terraform.tfvars
+#
+################################################################################
+
+# --- REQUIRED -----------------------------------------------------------------
+
+# Your public IP, with /32 suffix. NSG rules will only allow RDP and SQL
+# from this IP. To find yours from PowerShell:
+#
+#   (Invoke-RestMethod ifconfig.me/ip) + "/32"
+#
+# Example: "203.0.113.42/32"
+allowed_source_ip = "REPLACE_WITH_YOUR_IP/32"
+
+# Local admin / SQL sysadmin password. Must be 12+ chars, must meet
+# Windows complexity rules (upper, lower, digit, symbol).
+# Example: "Sqlp1l0t!Demo2026"
+admin_password = "REPLACE_WITH_STRONG_PASSWORD"
+
+
+# --- OPTIONAL OVERRIDES (defaults are already set in variables.tf) -----------
+
+# resource_group_name = "rg-sqlpilot-dryrun-eastus2"
+# location            = "eastus2"
+# vm_name             = "sql-vm-sqlpilot-01"
+# vm_size             = "Standard_D2s_v5"
+# admin_username      = "sqlpilotadmin"
