@@ -1,153 +1,182 @@
-# Azure Data Engineering & DBA Portfolio
+# ☁️ Azure Data Engineering Portfolio
 
-> Hands-on proof-of-concept portfolio demonstrating end-to-end Azure data platform capabilities across DBA (DP-300) and Data Engineering (DP-203) tracks.
-
-**Usha Kale** — Senior Cloud DBA / Azure Data Engineer
-**Certifications:** AZ-104 (Azure Administrator), DP-300 (Database Administrator), AZ-305 (Azure Solutions Architect)
-**Targeting:** DP-203 (Azure Data Engineer Associate)
+A production-grade Azure Data Engineering portfolio covering 12 end-to-end POCs — SQL Server to Azure migrations, ADF medallion pipelines, Azure Monitor, LRS, TDE, Always On AG with MI Link, PowerShell automation, and AI agent integration. Built by a Senior Cloud DBA with 15+ years in banking and financial services.
 
 ---
 
-## Portfolio at a Glance
+## 🌟 What This Portfolio Demonstrates
 
-| Track | Completed | Total | Progress |
-|---|---|---|---|
-| **DBA POCs (DP-300)** | 6 | 30 | 20% |
-| **Data Engineering POCs (DP-203)** | 8 | 20 | 40% |
-| **PowerShell DBA Toolkit** | 1 | 32 | 3% |
-| **Appendices (detailed walkthroughs)** | 1 (Q) | 16 | Growing |
+- SQL Server to Azure SQL Managed Instance migration via DMS, LRS, and Azure Migrate
+- ADF Medallion Architecture — Bronze/Silver/Gold on ADLS Gen2 with SHIR
+- Azure Monitor with KQL queries, alerts, and Log Analytics
+- Always On Availability Groups with MI Link (Distributed AG pattern)
+- TDE migration with certificate export/import to Azure SQL MI
+- PowerShell automation for SQL Server installation and configuration
+- AI agent integration — SQLMigratePlus built on Claude API ReAct loop
+- SOX/PCI audit trail patterns for banking compliance
 
 ---
 
-## Repository Structure
+## 🏗️ Architecture Overview
+
+```
+On-Premises SQL Server (VirtualBox Lab — 9 nodes)
+         |
+         v
+Azure Data Factory (usha-adf-poc) — SHIR-Node5
+         |
+         v
+ADLS Gen2 (ushaadfpocadls) — Bronze / Silver / Gold
+         |
+         v
+Azure SQL Managed Instance (usha-sqlmi-poc)
+         |
+         v
+Azure Monitor + Log Analytics — KQL alerting
+         |
+         v
+Databricks (usha-databricks-poc) — Gold Analysis notebook
+```
+
+---
+
+## 📁 Repository Structure
 
 ```
 Azure-Data-Engineering-Portfolio/
-├── README.md                                                  (this file)
-├── Bible/
-│   └── SQL_Azure_Migration_Technical_Guide_v11.docx          (main reference, 13 migration approaches)
-├── Tracker/
-│   └── Azure_Portfolio_Master_Tracker_v3_0421.docx           (POC progress tracker)
-├── Appendices/
-│   └── Appendix_Q_LRS_Migration_to_SQL_MI_v7.docx            (LRS migration walkthrough)
-├── Resume/
-│   └── UshaKale_Resume_v3.docx
-└── archive/
-    └── (prior document versions for audit trail)
+│
+├── 00-Portfolio-Docs/                    # Master tracker, Bible, resume, session starters
+├── 01-VHD-LiftShift/                     # Azure Migrate agentless VM lift-and-shift
+├── 02-ADF-ADLS-Pipeline/                 # ADF Medallion pipeline — 8 POCs, SHIR, Key Vault
+├── 04-Azure-Monitor/                     # Log Analytics, KQL queries, CPU/pipeline alerts
+├── 05-SQLMI-Migration/                   # DMS online migration — 14 banking databases
+├── 06-LRS-Migration/                     # Log Replay Service — 141K rows, 3 DBs, 100% parity
+├── 07-TDE-Migration/                     # TDE certificate migration to Azure SQL MI
+├── 08b-AlwaysOn-AG-and-MI-Link/          # Always On AG + Distributed AG → MI Link
+├── 09-PowerShell-Automation/             # SQL Server install scripts, dbatools automation
+├── 10-AIAgents/                          # SQLMigratePlus AI migration agent (Claude API)
+├── InterviewPreparation/                 # 73 DE/DBA interview questions with answers
+├── Newbee-Documentation/                 # Onboarding guides for new DBAs
+│
+├── archive/                              # Older tracker versions
+├── .gitignore
+└── README.md
 ```
 
 ---
 
-## Featured POCs
+## 📋 POC Summary
 
-### POC #6 — Log Replay Service (LRS) Migration to SQL Managed Instance (April 20, 2026)
-
-**Summary:** Executed end-to-end migration of 3 banking-themed databases from on-premises SQL Server 2019 to Azure SQL Managed Instance using raw Log Replay Service with 100% row count parity.
-
-| Metric | Value |
-|---|---|
-| Rows migrated | 141,050 |
-| Tables migrated | 13 across 3 databases |
-| Migration method | LRS (continuous mode + tail-log cutover) |
-| Row count parity | 100% |
-| Azure spend | < $0.50 |
-| Key Learnings documented | 14 |
-| Microsoft Learn citations | 15 clickable links |
-
-**Read full walkthrough:** [Appendices/Appendix_Q_LRS_Migration_to_SQL_MI_v7.docx](Appendices/Appendix_Q_LRS_Migration_to_SQL_MI_v7.docx)
+| # | POC | Key Tech | Status |
+|---|-----|----------|--------|
+| 01 | VHD Lift-and-Shift | Azure Migrate, VirtualBox | ✅ Complete |
+| 02 | ADF Medallion Pipeline | ADF, ADLS Gen2, SHIR, Key Vault, Databricks | ✅ Complete |
+| 04 | Azure Monitor | Log Analytics, KQL, Alert Rules | ✅ Complete |
+| 05 | SQL MI Migration via DMS | DMS online, 14 DBs, SSISDB, Azure-SSIS IR | ✅ Complete |
+| 06 | LRS Migration | Log Replay Service, continuous mode, tail-log cutover | ✅ Complete |
+| 07 | TDE Migration | TDE cert export/import, Azure SQL MI | ✅ Complete |
+| 08b | Always On AG + MI Link | WSFC, Distributed AG, SQL MI Link | ✅ Complete |
+| 09 | PowerShell Automation | SQL install scripts, CredSSP, dbatools | ✅ Complete |
+| 10 | AI Agents (SQLMigratePlus) | Claude API, PowerShell ReAct loop, Excel TCO | ✅ Complete |
 
 ---
 
-### POC #1-5 — Earlier Completions (April 2026)
+## 🔑 Key POC Highlights
 
-- **POC #1:** VHD Lift & Shift (Node5 → Azure VM) — complete server migration via disk capture
-- **POC #2:** Azure Database Migration Service (DMS) Online Migration — 14 databases to Azure SQL MI with zero downtime
-- **POC #3:** SSIS Integration Services Catalog on SQL MI with Azure-SSIS IR — hybrid SSIS execution via ADF
-- **POC #4:** Azure Monitor + Log Analytics + Alerting — diagnostic settings, KQL queries, alert rules
-- **POC #5:** Azure Migrate Appliance + 6-node Server Discovery — agentless WinRM-based discovery with 87% PaaS readiness score
+### POC 02 — ADF Medallion Pipeline
+- Master/Branch orchestration pattern with ForEach over 3 branches
+- SHIR-Node5 ingestion from on-premises SQL Server 2019
+- Key Vault Managed Identity for secret management
+- Mapping Data Flows: Bronze → Silver (Conditional Split) → Gold (aggregate + interest rate)
+- Databricks notebook triggered from ADF for Gold analysis
+- SOX audit trail via StoredProc_AuditLog
+- GitHub CI/CD integration + Azure Monitor alerting
 
-Detailed walkthroughs for these POCs are preserved in the main Bible document (`Bible/SQL_Azure_Migration_Technical_Guide_v11.docx`).
+### POC 05 — SQL MI Migration via DMS
+- Online migration (CDC) of 14 banking databases — zero data loss
+- SSISDB deployed on Azure SQL MI
+- SSIS packages validated via Azure-SSIS Integration Runtime
+- Azure Migrate assessment: 87% PaaS readiness, $60K annual savings
 
----
+### POC 06 — LRS Migration
+- 141,050 rows migrated across 3 databases with 100% row count parity
+- Continuous-mode LRS with transaction log chain integrity
+- Tail-log backup with NORECOVERY for cutover
+- Full AG coexistence pattern — migrated without removing from AG
 
-### Data Engineering POCs (DP-203 Track)
-
-**Completed (8 of 20):**
-
-- ADF + ADLS Gen2 + SSIS + Medallion Architecture
-- ADF Master/Branch Loan Processing Pipeline with Azure Key Vault integration
-- ForEach iteration across branches (SF/SanRamon/Oakland)
-- Bronze → Silver Mapping Data Flow (Conditional Split)
-- Silver → Gold Mapping Data Flow (Aggregate)
-- Databricks PySpark + Delta Lake + MERGE
-- ADF → Databricks Notebook Trigger integration
-- GitHub CI/CD for ADF Pipelines
-
----
-
-## Lab Environment
-
-**On-premises (Intel Mac Pro host):**
-- VirtualBox 7-node domain lab (ushadc.com)
-- Node1: SQL Server 2019 CU32, AG primary (UshaAg19)
-- Node2: SQL Server 2019 CU32, AG secondary
-- Node3-4, Node6: SQL Server 2022 CU24 (idle or HA)
-- Node5: SQL Server 2019 CU32, SSIS, SHIR, Visual Studio 2026
-- Domain Controller: USHADC (Windows Server 2022 Datacenter)
-
-**Azure:**
-- Azure Data Factory (usha-adf-poc)
-- ADLS Gen2 (ushaadfpocadls — landing/processed/curated)
-- Azure SQL Managed Instance (usha-sqlmi-poc) — GP 4 vCore, Free tier
-- Azure Blob Storage (ushalrsbackup)
-- Key Vault (usha-kv-poc)
-- Databricks workspace (usha-databricks-poc)
-- Log Analytics workspace (usha-loganalytics-poc)
-- Self-Hosted Integration Runtime on Node5
+### POC 10 — SQLMigratePlus (AI Migration Agent)
+- 5-stage workflow: Assess → Decide → Migrate → Handoff → Day-2 Ops
+- Claude API tool-use agent with PowerShell ReAct loop
+- Anti-hallucination grounding with real server data
+- 11-sheet Excel TCO report (Azure/AWS/GCP)
+- Automated Handoff stage: connection strings + migration receipts
+- Append-only JSON audit log for compliance
+- Live at: [sqlmigrateplus.com](https://sqlmigrateplus.com)
 
 ---
 
-## Technical Skills Demonstrated
+## 🏦 Banking Domain Context
 
-**SQL Server & Migration:**
-- Log Replay Service (LRS) — raw PowerShell/CLI orchestration
-- Azure Database Migration Service (DMS)
-- Azure Migrate (agentless + WinRM discovery)
-- Always On Availability Groups — hybrid AG patterns
-- BACKUP TO URL with SAS-based credentials
-- Transaction log chain integrity management
+All POCs are designed around banking and financial services compliance requirements:
 
-**Azure Data Platform:**
-- Azure Data Factory (Mapping Data Flows, ForEach, Script activities, Lookups)
-- Azure Databricks (PySpark, Delta Lake, MERGE operations)
-- Medallion architecture (Bronze → Silver → Gold)
-- Azure SQL Managed Instance (VNet + public endpoint configurations)
-- Azure Key Vault integration
-
-**Automation & DevOps:**
-- PowerShell scripting for Azure resource orchestration
-- Azure CLI / Cloud Shell
-- Azure Monitor + Log Analytics + KQL queries
-- GitHub integration for ADF CI/CD
+- **SOX** — append-only audit logs, pipeline audit trail
+- **PCI DSS** — data masking, encrypted backups, TDE
+- **FFIEC** — database security controls, access governance
+- **HMDA** — fair lending data patterns (see Banking Lakehouse repo)
 
 ---
 
-## Documents in This Repository
+## 🧪 Lab Environment
 
-| Document | Purpose | Size |
-|---|---|---|
-| [Bible v11](Bible/SQL_Azure_Migration_Technical_Guide_v11.docx) | Main migration reference — 13 migration approaches with detailed comparison | ~820 KB |
-| [Master Tracker v3](Tracker/Azure_Portfolio_Master_Tracker_v3_0421.docx) | POC progress across DBA + DE tracks | ~20 KB |
-| [Appendix Q v7](Appendices/Appendix_Q_LRS_Migration_to_SQL_MI_v7.docx) | LRS Migration full walkthrough | ~715 KB |
-| [Resume](Resume/UshaKale_Resume_v3.docx) | Current resume (v4 with LRS bullets coming soon) | ~30 KB |
-
----
-
-## Contact
-
-- LinkedIn: [linkedin.com/in/usha-kale](https://linkedin.com/in/usha-kale)
-- GitHub: [@ushakaleclouddba-design](https://github.com/ushakaleclouddba-design)
+| Component | Details |
+|-----------|---------|
+| VirtualBox Lab | 9 VMs — USHADC, Node1–Node8 (192.168.68.20–.28) |
+| Domain | ushadc.com |
+| SQL Versions | SQL Server 2019 (Node1–Node6), SQL Server 2025 (Node7–Node8) |
+| Existing AG | UshaAg19 (Node1–Node2, SQL 2019) — healthy |
+| SHIR | SHIR-Node5 (3 nodes, v5.64.9558.1) |
+| Azure SQL MI | usha-sqlmi-poc (West US 2, General Purpose 4 vCores, free tier) |
+| ADF | usha-adf-poc (East US) |
+| ADLS Gen2 | ushaadfpocadls (landing / processed / curated) |
+| Databricks | usha-databricks-poc |
 
 ---
 
-*Last updated: April 21, 2026 — after LRS Migration POC completion*
+## 🚀 Quick Start
+
+1. Clone this repository
+2. Navigate to the POC folder of interest
+3. Follow the `README.md` or playbook `.docx` inside each folder
+4. Scripts are organized by phase/step — execute in numbered order
+
+### Prerequisites
+- Azure subscription with SQL MI, ADF, ADLS Gen2
+- VirtualBox or VMware lab with SQL Server 2019+
+- PowerShell 7+ with Az module
+- Self-Hosted Integration Runtime configured on lab node
+
+---
+
+## 📚 Related Repositories
+
+| Repo | Description |
+|------|-------------|
+| [Banking-Lakehouse-Databricks](https://github.com/ushakaleclouddba-design/Banking-Lakehouse-Databricks) | 2.26M loan records, Bronze/Silver/Gold, Claude API risk narratives |
+| [SQLMigratePlus](https://github.com/ushakaleclouddba-design/SQLMigratePlus) | AI migration agent portfolio site |
+
+---
+
+## 👤 Author
+
+**Usha Kale**
+Azure Data Engineer & Senior Cloud DBA | 15+ years in Banking & Financial Services
+
+- 🌐 [sqlmigrateplus.com](https://sqlmigrateplus.com)
+- 💼 [LinkedIn](https://www.linkedin.com/in/usha-kale-56a336a)
+- 🐙 [GitHub](https://github.com/ushakaleclouddba-design)
+
+---
+
+## 📜 License
+
+MIT License. See `LICENSE` for details.
