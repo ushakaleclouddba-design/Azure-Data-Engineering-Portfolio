@@ -1,0 +1,50 @@
+{
+	"name": "DS_SQLSRV_OnPrem_Table",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_SQLSRV_OnPrem",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"Servername": {
+					"value": "@dataset().ServerName",
+					"type": "Expression"
+				},
+				"DatabaseName": {
+					"value": "@dataset().DatabaseName",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"ServerName": {
+				"type": "string",
+				"defaultValue": "Node5"
+			},
+			"DatabaseName": {
+				"type": "string",
+				"defaultValue": "AssetMgmt_source"
+			},
+			"TableName": {
+				"type": "string",
+				"defaultValue": "Security"
+			},
+			"SchemaName": {
+				"type": "string",
+				"defaultValue": "dbo"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().SchemaName",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().TableName",
+				"type": "Expression"
+			}
+		}
+	}
+}
