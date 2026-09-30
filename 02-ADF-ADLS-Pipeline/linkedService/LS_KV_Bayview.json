@@ -5,6 +5,7 @@
 		"type": "AzureKeyVault",
 		"typeProperties": {
 			"baseUrl": "https://usha-kv-poc.vault.azure.net/"
-		}
+		},
+		"description": "Bayview POC secrets (usha-kv-poc), managed identity."
 	}
 }
