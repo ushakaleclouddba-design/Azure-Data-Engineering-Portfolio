@@ -1,0 +1,37 @@
+{
+	"name": "PL_Child_Copy_SQL_Full",
+	"properties": {
+		"description": "Copies one on-prem SQL table to bronze Parquet and logs the result; called by the maste",
+		"parameters": {
+			"TableID": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"ServerName": {
+				"type": "string",
+				"defaultValue": "NODE5"
+			},
+			"DatabaseName": {
+				"type": "string",
+				"defaultValue": "AssetMgmt_source"
+			},
+			"SchemaName": {
+				"type": "string",
+				"defaultValue": "dbo"
+			},
+			"TableName": {
+				"type": "string",
+				"defaultValue": "Security"
+			},
+			"Container": {
+				"type": "string",
+				"defaultValue": "landing"
+			},
+			"TargetFolder": {
+				"type": "string",
+				"defaultValue": "AssetMgmt_source/dbo/Security"
+			}
+		},
+		"annotations": []
+	}
+}
