@@ -51,7 +51,25 @@
 						"value": "@activity('LK_Get_ControlRows').output.value",
 						"type": "Expression"
 					},
-					"batchCount": 4
+					"batchCount": 4,
+					"activities": [
+						{
+							"name": "EP_Child_Copy",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Child_Copy_SQL_Full",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						}
+					]
 				}
 			}
 		],
