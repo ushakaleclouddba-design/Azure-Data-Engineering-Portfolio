@@ -47,6 +47,10 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@activity('LK_Get_ControlRows').output.value",
+						"type": "Expression"
+					},
 					"batchCount": 4
 				}
 			}
