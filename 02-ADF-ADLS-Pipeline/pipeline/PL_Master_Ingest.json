@@ -33,6 +33,22 @@
 					},
 					"firstRowOnly": false
 				}
+			},
+			{
+				"name": "FE_Tables",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "LK_Get_ControlRows",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"batchCount": 4
+				}
 			}
 		],
 		"annotations": []
