@@ -1,0 +1,34 @@
+{
+	"name": "LS_AZSQL_DW",
+	"properties": {
+		"description": "Azure SQL warehouse and control DB; server and database passed as parameters; password from Key Vault.",
+		"parameters": {
+			"Servername": {
+				"type": "string",
+				"defaultValue": "usha-poc-sqlsvr.database.windows.net"
+			},
+			"DatabaseName": {
+				"type": "string",
+				"defaultValue": "AssetMgmt_DW"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"server": "@{linkedService().Servername}",
+			"database": "@{linkedService().DatabaseName}",
+			"encrypt": "mandatory",
+			"trustServerCertificate": false,
+			"authenticationType": "SQL",
+			"userName": "ssisadmin",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "LS_KV_Bayview",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "sqlPassword"
+			}
+		}
+	}
+}

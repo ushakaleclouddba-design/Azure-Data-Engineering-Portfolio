@@ -1,0 +1,50 @@
+{
+	"name": "DS_AZSQL_DW_Table",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_AZSQL_DW",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"Servername": {
+					"value": "@dataset().ServerName",
+					"type": "Expression"
+				},
+				"DatabaseName": {
+					"value": "@dataset().DatabaseName",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"ServerName": {
+				"type": "string",
+				"defaultValue": "usha-poc-sqlsvr.database.windows.net"
+			},
+			"DatabaseName": {
+				"type": "string",
+				"defaultValue": "AssetMgmt_DW"
+			},
+			"SchemaName": {
+				"type": "string",
+				"defaultValue": "etl"
+			},
+			"TableName": {
+				"type": "string",
+				"defaultValue": "ControlTable"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().SchemaName",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().TableName",
+				"type": "Expression"
+			}
+		}
+	}
+}

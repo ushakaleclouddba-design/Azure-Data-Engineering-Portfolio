@@ -1,0 +1,11 @@
+{
+	"name": "LS_ADLS_Bronze",
+	"properties": {
+		"description": "ADLS Gen2 ushaadfpocadls - bronze landing; ADF managed identity",
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://ushaadfpocadls.dfs.core.windows.net/"
+		}
+	}
+}

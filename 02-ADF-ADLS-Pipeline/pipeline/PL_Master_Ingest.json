@@ -1,0 +1,99 @@
+{
+	"name": "PL_Master_Ingest",
+	"properties": {
+		"activities": [
+			{
+				"name": "LK_Get_ControlRows",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 2,
+					"retryIntervalInSeconds": 60,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "  SELECT TableID, SourceServer, SourceDatabase, SourceSchema, SourceTable,\n          TargetContainer, TargetFolder\n   FROM etl.ControlTable\n   WHERE IsActive = 1 AND SourceType = 'SqlServer'\n   ORDER BY Priority, TableID;",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_AZSQL_DW_Table",
+						"type": "DatasetReference",
+						"parameters": {
+							"ServerName": "usha-poc-sqlsvr.database.windows.net",
+							"DatabaseName": "AssetMgmt_DW",
+							"SchemaName": "etl",
+							"TableName": "ControlTable"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "FE_Tables",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "LK_Get_ControlRows",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LK_Get_ControlRows').output.value",
+						"type": "Expression"
+					},
+					"batchCount": 4,
+					"activities": [
+						{
+							"name": "EP_Child_Copy",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Child_Copy_SQL_Full",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"TableID": {
+										"value": "@item().TableID",
+										"type": "Expression"
+									},
+									"ServerName": {
+										"value": "@item().SourceServer",
+										"type": "Expression"
+									},
+									"DatabaseName": {
+										"value": "@item().SourceDatabase",
+										"type": "Expression"
+									},
+									"SchemaName": "@item().SourceSchema",
+									"TableName": {
+										"value": "@item().SourceTable",
+										"type": "Expression"
+									},
+									"Container": "@item().TargetContainer",
+									"TargetFolder": "@item().TargetFolder"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"annotations": []
+	}
+}

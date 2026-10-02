@@ -1,0 +1,340 @@
+{
+	"name": "PL_Child_Copy_SQL_Full",
+	"properties": {
+		"description": "Copies one on-prem SQL table to bronze Parquet and logs the result; called by the master pipeline once per control row.",
+		"activities": [
+			{
+				"name": "CP_SQL_To_Bronze",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 2,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_SQLSRV_OnPrem_Table",
+						"type": "DatasetReference",
+						"parameters": {
+							"ServerName": {
+								"value": "@pipeline().parameters.ServerName",
+								"type": "Expression"
+							},
+							"DatabaseName": {
+								"value": "@pipeline().parameters.DatabaseName",
+								"type": "Expression"
+							},
+							"TableName": {
+								"value": "@pipeline().parameters.TableName",
+								"type": "Expression"
+							},
+							"SchemaName": {
+								"value": "@pipeline().parameters.SchemaName",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_ADLS_Bronze_Parquet",
+						"type": "DatasetReference",
+						"parameters": {
+							"Container": {
+								"value": "@pipeline().parameters.Container",
+								"type": "Expression"
+							},
+							"FolderPath": {
+								"value": "@concat(pipeline().parameters.TargetFolder, '/load_date=', formatDateTime(utcNow(), 'yyyy-MM-dd'))",
+								"type": "Expression"
+							},
+							"FileName": {
+								"value": "@concat(pipeline().parameters.TableName, '.parquet')",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "SP_Log_Success",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "CP_SQL_To_Bronze",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 2,
+					"retryIntervalInSeconds": 60,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[etl].[usp_LogCopyResult]",
+					"storedProcedureParameters": {
+						"RunId": {
+							"value": {
+								"value": "@pipeline().RunId",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"PipelineName": {
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"TableID": {
+							"value": {
+								"value": "@pipeline().parameters.TableID",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"StartTime": {
+							"value": {
+								"value": "@pipeline().TriggerTime",
+								"type": "Expression"
+							},
+							"type": "Datetime"
+						},
+						"Status": {
+							"value": "Succeeded",
+							"type": "String"
+						},
+						"RowsRead": {
+							"value": {
+								"value": "@activity('CP_SQL_To_Bronze').output.rowsRead",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"RowsCopied": {
+							"value": {
+								"value": "@activity('CP_SQL_To_Bronze').output.rowsCopied",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"DataReadBytes": {
+							"value": {
+								"value": "@activity('CP_SQL_To_Bronze').output.dataRead",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"CopyDurationSec": {
+							"value": {
+								"value": "@activity('CP_SQL_To_Bronze').output.copyDuration",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"TargetPath": {
+							"value": {
+								"value": "@concat(pipeline().parameters.Container, '/', pipeline().parameters.TargetFolder, '/load_date=', formatDateTime(utcNow(), 'yyyy-MM-dd'), '/', pipeline().parameters.TableName, '.parquet')",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"ErrorMessage": {
+							"value": null,
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AZSQL_DW",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"Servername": "usha-poc-sqlsvr.database.windows.net",
+						"DatabaseName": "AssetMgmt_DW"
+					}
+				}
+			},
+			{
+				"name": "SP_Log_Failure",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "CP_SQL_To_Bronze",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 2,
+					"retryIntervalInSeconds": 60,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[etl].[usp_LogCopyResult]",
+					"storedProcedureParameters": {
+						"RunId": {
+							"value": {
+								"value": "@pipeline().RunId",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"PipelineName": {
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"TableID": {
+							"value": {
+								"value": "@pipeline().parameters.TableID",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"StartTime": {
+							"value": {
+								"value": "@pipeline().TriggerTime",
+								"type": "Expression"
+							},
+							"type": "Datetime"
+						},
+						"Status": {
+							"value": "Failed",
+							"type": "String"
+						},
+						"RowsRead": {
+							"value": null,
+							"type": "Int64"
+						},
+						"RowsCopied": {
+							"value": null,
+							"type": "Int64"
+						},
+						"DataReadBytes": {
+							"value": null,
+							"type": "Int64"
+						},
+						"CopyDurationSec": {
+							"value": null,
+							"type": "Int32"
+						},
+						"TargetPath": {
+							"value": {
+								"value": "@concat(pipeline().parameters.Container, '/', pipeline().parameters.TargetFolder, '/load_date=', formatDateTime(utcNow(), 'yyyy-MM-dd'), '/', pipeline().parameters.TableName, '.parquet')",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"ErrorMessage": {
+							"value": {
+								"value": "@substring(activity('CP_SQL_To_Bronze').error.message, 0, min(length(activity('CP_SQL_To_Bronze').error.message), 3900))",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AZSQL_DW",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"Servername": "usha-poc-sqlsvr.database.windows.net",
+						"DatabaseName": "AssetMgmt_DW"
+					}
+				}
+			},
+			{
+				"name": "FAIL_COPY",
+				"type": "Fail",
+				"dependsOn": [
+					{
+						"activity": "SP_Log_Failure",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"message": {
+						"value": "@concat('Copy failed for ', pipeline().parameters.DatabaseName, '.', pipeline().parameters.SchemaName, '.', pipeline().parameters.TableName, ': ', activity('CP_SQL_To_Bronze').error.message)",
+						"type": "Expression"
+					},
+					"errorCode": " BAYVIEW_COPY_FAILED"
+				}
+			}
+		],
+		"parameters": {
+			"TableID": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"ServerName": {
+				"type": "string",
+				"defaultValue": "NODE5"
+			},
+			"DatabaseName": {
+				"type": "string",
+				"defaultValue": "AssetMgmt_source"
+			},
+			"SchemaName": {
+				"type": "string",
+				"defaultValue": "dbo"
+			},
+			"TableName": {
+				"type": "string",
+				"defaultValue": "Security"
+			},
+			"Container": {
+				"type": "string",
+				"defaultValue": "landing"
+			},
+			"TargetFolder": {
+				"type": "string",
+				"defaultValue": "AssetMgmt_source/dbo/Security"
+			}
+		},
+		"annotations": []
+	}
+}
