@@ -23,13 +23,9 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accessToken' of 'LS_Databricks_POC'"
 		},
-		"LS_FileSystem_Node5_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'LS_FileSystem_Node5'"
-		},
-		"LS_SQLServer_Node5_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'LS_SQLServer_Node5'"
+		"LS_ADLS_Bronze_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://ushaadfpocadls.dfs.core.windows.net/"
 		},
 		"LS_ADLS_Gen2_properties_typeProperties_url": {
 			"type": "string",
@@ -38,6 +34,10 @@
 		"LS_Databricks_Notebook_properties_typeProperties_existingClusterId": {
 			"type": "string",
 			"defaultValue": "0331-224353-06bfarhe"
+		},
+		"LS_KV_Bayview_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://usha-kv-poc.vault.azure.net/"
 		},
 		"LS_KeyVault_POC_properties_typeProperties_baseUrl": {
 			"type": "string",
@@ -53,44 +53,26 @@
 		},
 		"AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"type": "secureString"
-		},
-		"LS_AzureSQL_LoanProcessing_properties_typeProperties_server": {
-			"type": "string",
-			"defaultValue": "usha-poc-sqlsvr.database.windows.net"
-		},
-		"LS_AzureSQL_LoanProcessing_properties_typeProperties_database": {
-			"type": "string",
-			"defaultValue": "LoanProcessing_POC"
-		},
-		"LS_AzureSQL_LoanProcessing_properties_typeProperties_userName": {
-			"type": "string",
-			"defaultValue": "ssisadmin"
-		},
-		"LS_FileSystem_Node5_properties_typeProperties_host": {
-			"type": "string",
-			"defaultValue": "\\\\NODE5\\FNBA_Loanfiles"
-		},
-		"LS_FileSystem_Node5_properties_typeProperties_userId": {
-			"type": "string",
-			"defaultValue": "ushadc0\\ushakale"
-		},
-		"LS_SQLServer_Node5_properties_typeProperties_server": {
-			"type": "string",
-			"defaultValue": "Node5"
-		},
-		"LS_SQLServer_Node5_properties_typeProperties_database": {
-			"type": "string",
-			"defaultValue": "LoanProcessing_Staging"
-		},
-		"LS_SQLServer_Node5_properties_typeProperties_userName": {
-			"type": "string",
-			"defaultValue": "adfuser"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_ADLS_Bronze')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "ADLS Gen2 ushaadfpocadls - bronze landing; ADF managed identity",
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('LS_ADLS_Bronze_properties_typeProperties_url')]"
+				}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LS_ADLS_Gen2')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
@@ -159,6 +141,20 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/LS_KV_Bayview')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Bayview POC secrets (usha-kv-poc), managed identity.",
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('LS_KV_Bayview_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/LS_KeyVault_POC')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -168,17 +164,6 @@
 				"typeProperties": {
 					"baseUrl": "[parameters('LS_KeyVault_POC_properties_typeProperties_baseUrl')]"
 				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SHIR-Node5')]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "SelfHosted",
-				"description": "Self-Hosted IR for Node5 VirtualBox lab",
-				"typeProperties": {}
 			},
 			"dependsOn": []
 		},
@@ -210,12 +195,148 @@
 							"catalogPricingTier": null
 						},
 						"edition": "Standard",
-						"runtimeVersion": "2017",
 						"licenseType": "LicenseIncluded"
 					}
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SHIR-Node5')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"description": "Self-Hosted IR for Node5 VirtualBox lab",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_SSIS_MI_Validation')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Run_PKG04_CrossDatabase",
+						"type": "ExecuteSSISPackage",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"packageLocation": {
+								"packagePath": "MigrationStressTest/MigrationStressTest/PKG_04_CrossDatabase.dtsx",
+								"type": "SSISDB"
+							},
+							"environmentPath": null,
+							"connectVia": {
+								"referenceName": "AzureSSIS-IR-SQLMI",
+								"type": "IntegrationRuntimeReference"
+							},
+							"loggingLevel": "Basic",
+							"projectConnectionManagers": {},
+							"packageConnectionManagers": {}
+						}
+					},
+					{
+						"name": "Run_PKG07_CLR",
+						"type": "ExecuteSSISPackage",
+						"dependsOn": [
+							{
+								"activity": "Run_PKG04_CrossDatabase",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"packageLocation": {
+								"packagePath": "MigrationStressTest/MigrationStressTest/PKG_07_CLR.dtsx",
+								"type": "SSISDB"
+							},
+							"environmentPath": null,
+							"connectVia": {
+								"referenceName": "AzureSSIS-IR-SQLMI",
+								"type": "IntegrationRuntimeReference"
+							},
+							"loggingLevel": "Basic",
+							"projectConnectionManagers": {},
+							"packageConnectionManagers": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/AzureSSIS-IR-SQLMI')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Bronze_Parquet')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_Bronze",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Container": {
+						"type": "string",
+						"defaultValue": "landing"
+					},
+					"FolderPath": {
+						"type": "string",
+						"defaultValue": "AssetMgmt_source/dbo/Security/load_date=2026-09-30"
+					},
+					"FileName": {
+						"type": "string",
+						"defaultValue": "Security.parquet"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().FolderPath",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().Container",
+							"type": "Expression"
+						}
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Bronze')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Gold_Approved')]",
@@ -540,116 +661,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Gen2')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DelimitedText1')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ADLS_Gen2",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": "corebank_Transactions.csv",
-						"folderPath": "transactions",
-						"fileSystem": "landing"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Gen2')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_AzureSQL_LoanProcessing')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureSqlDatabase",
-				"typeProperties": {
-					"server": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_server')]",
-					"database": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_database')]",
-					"encrypt": "mandatory",
-					"trustServerCertificate": false,
-					"authenticationType": "SQL",
-					"userName": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_userName')]",
-					"password": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "LS_KeyVault_POC",
-							"type": "LinkedServiceReference"
-						},
-						"secretName": "sqlPassword"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_KeyVault_POC')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_FileSystem_Node5')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "FileServer",
-				"typeProperties": {
-					"host": "[parameters('LS_FileSystem_Node5_properties_typeProperties_host')]",
-					"userId": "[parameters('LS_FileSystem_Node5_properties_typeProperties_userId')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('LS_FileSystem_Node5_password')]"
-					}
-				},
-				"connectVia": {
-					"referenceName": "SHIR-Node5",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/SHIR-Node5')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_SQLServer_Node5')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "SQL Server on Node5 via SHIR",
-				"annotations": [],
-				"type": "SqlServer",
-				"typeProperties": {
-					"server": "[parameters('LS_SQLServer_Node5_properties_typeProperties_server')]",
-					"database": "[parameters('LS_SQLServer_Node5_properties_typeProperties_database')]",
-					"encrypt": "optional",
-					"trustServerCertificate": true,
-					"authenticationType": "SQL",
-					"userName": "[parameters('LS_SQLServer_Node5_properties_typeProperties_userName')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('LS_SQLServer_Node5_password')]"
-					}
-				},
-				"connectVia": {
-					"referenceName": "SHIR-Node5",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/SHIR-Node5')]"
 			]
 		}
 	]

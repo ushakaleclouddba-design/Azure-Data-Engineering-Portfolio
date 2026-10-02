@@ -35,9 +35,25 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'LS_SQLServer_Node5_v2'"
 		},
+		"LS_ADLS_Bronze_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://ushaadfpocadls.dfs.core.windows.net/"
+		},
 		"LS_ADLS_Gen2_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://ushaadfpocadls.dfs.core.windows.net/"
+		},
+		"LS_AZSQL_DW_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "@{linkedService().Servername}"
+		},
+		"LS_AZSQL_DW_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "@{linkedService().DatabaseName}"
+		},
+		"LS_AZSQL_DW_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "ssisadmin"
 		},
 		"LS_AzureSQL_LoanProcessing_properties_typeProperties_server": {
 			"type": "string",
@@ -63,9 +79,25 @@
 			"type": "string",
 			"defaultValue": "ushadc0\\ushakale"
 		},
+		"LS_KV_Bayview_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://usha-kv-poc.vault.azure.net/"
+		},
 		"LS_KeyVault_POC_properties_typeProperties_baseUrl": {
 			"type": "string",
 			"defaultValue": "https://usha-kv-poc.vault.azure.net/"
+		},
+		"LS_SQLSRV_OnPrem_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "@{linkedService().Servername}"
+		},
+		"LS_SQLSRV_OnPrem_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "@{linkedService().DatabaseName}"
+		},
+		"LS_SQLSRV_OnPrem_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "adfuser"
 		},
 		"LS_SQLServer_Node5_properties_typeProperties_server": {
 			"type": "string",
@@ -103,17 +135,6 @@
 			"type": "string",
 			"defaultValue": "curated/transactions/gold"
 		},
-		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
-			"type": "string",
-			"defaultValue": "usha-poc-sqlsvr.database.windows.net"
-		},
-		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
-			"type": "string",
-			"defaultValue": "ssisadmin"
-		},
-		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
-			"type": "secureString"
-		},
 		"AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
 			"type": "string",
 			"defaultValue": "usha-sqlmi-poc.0f3157bbdbf7.database.windows.net"
@@ -123,6 +144,17 @@
 			"defaultValue": "ssisadmin"
 		},
 		"AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
+			"type": "secureString"
+		},
+		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
+			"type": "string",
+			"defaultValue": "usha-poc-sqlsvr.database.windows.net"
+		},
+		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
+			"type": "string",
+			"defaultValue": "ssisadmin"
+		},
+		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"type": "secureString"
 		},
 		"containerUri": {
@@ -164,17 +196,17 @@
 					"LS_Databricks_POC_accessToken": {
 						"value": "[parameters('LS_Databricks_POC_accessToken')]"
 					},
-					"LS_FileSystem_Node5_password": {
-						"value": "[parameters('LS_FileSystem_Node5_password')]"
-					},
-					"LS_SQLServer_Node5_password": {
-						"value": "[parameters('LS_SQLServer_Node5_password')]"
+					"LS_ADLS_Bronze_properties_typeProperties_url": {
+						"value": "[parameters('LS_ADLS_Bronze_properties_typeProperties_url')]"
 					},
 					"LS_ADLS_Gen2_properties_typeProperties_url": {
 						"value": "[parameters('LS_ADLS_Gen2_properties_typeProperties_url')]"
 					},
 					"LS_Databricks_Notebook_properties_typeProperties_existingClusterId": {
 						"value": "[parameters('LS_Databricks_Notebook_properties_typeProperties_existingClusterId')]"
+					},
+					"LS_KV_Bayview_properties_typeProperties_baseUrl": {
+						"value": "[parameters('LS_KV_Bayview_properties_typeProperties_baseUrl')]"
 					},
 					"LS_KeyVault_POC_properties_typeProperties_baseUrl": {
 						"value": "[parameters('LS_KeyVault_POC_properties_typeProperties_baseUrl')]"
@@ -187,30 +219,6 @@
 					},
 					"AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 						"value": "[parameters('AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword')]"
-					},
-					"LS_AzureSQL_LoanProcessing_properties_typeProperties_server": {
-						"value": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_server')]"
-					},
-					"LS_AzureSQL_LoanProcessing_properties_typeProperties_database": {
-						"value": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_database')]"
-					},
-					"LS_AzureSQL_LoanProcessing_properties_typeProperties_userName": {
-						"value": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_userName')]"
-					},
-					"LS_FileSystem_Node5_properties_typeProperties_host": {
-						"value": "[parameters('LS_FileSystem_Node5_properties_typeProperties_host')]"
-					},
-					"LS_FileSystem_Node5_properties_typeProperties_userId": {
-						"value": "[parameters('LS_FileSystem_Node5_properties_typeProperties_userId')]"
-					},
-					"LS_SQLServer_Node5_properties_typeProperties_server": {
-						"value": "[parameters('LS_SQLServer_Node5_properties_typeProperties_server')]"
-					},
-					"LS_SQLServer_Node5_properties_typeProperties_database": {
-						"value": "[parameters('LS_SQLServer_Node5_properties_typeProperties_database')]"
-					},
-					"LS_SQLServer_Node5_properties_typeProperties_userName": {
-						"value": "[parameters('LS_SQLServer_Node5_properties_typeProperties_userName')]"
 					}
 				}
 			},
@@ -230,8 +238,56 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"LS_FileSystem_Node5_password": {
+						"value": "[parameters('LS_FileSystem_Node5_password')]"
+					},
+					"LS_SQLServer_Node5_password": {
+						"value": "[parameters('LS_SQLServer_Node5_password')]"
+					},
 					"LS_SQLServer_Node5_v2_password": {
 						"value": "[parameters('LS_SQLServer_Node5_v2_password')]"
+					},
+					"LS_AZSQL_DW_properties_typeProperties_server": {
+						"value": "[parameters('LS_AZSQL_DW_properties_typeProperties_server')]"
+					},
+					"LS_AZSQL_DW_properties_typeProperties_database": {
+						"value": "[parameters('LS_AZSQL_DW_properties_typeProperties_database')]"
+					},
+					"LS_AZSQL_DW_properties_typeProperties_userName": {
+						"value": "[parameters('LS_AZSQL_DW_properties_typeProperties_userName')]"
+					},
+					"LS_AzureSQL_LoanProcessing_properties_typeProperties_server": {
+						"value": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_server')]"
+					},
+					"LS_AzureSQL_LoanProcessing_properties_typeProperties_database": {
+						"value": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_database')]"
+					},
+					"LS_AzureSQL_LoanProcessing_properties_typeProperties_userName": {
+						"value": "[parameters('LS_AzureSQL_LoanProcessing_properties_typeProperties_userName')]"
+					},
+					"LS_FileSystem_Node5_properties_typeProperties_host": {
+						"value": "[parameters('LS_FileSystem_Node5_properties_typeProperties_host')]"
+					},
+					"LS_FileSystem_Node5_properties_typeProperties_userId": {
+						"value": "[parameters('LS_FileSystem_Node5_properties_typeProperties_userId')]"
+					},
+					"LS_SQLSRV_OnPrem_properties_typeProperties_server": {
+						"value": "[parameters('LS_SQLSRV_OnPrem_properties_typeProperties_server')]"
+					},
+					"LS_SQLSRV_OnPrem_properties_typeProperties_database": {
+						"value": "[parameters('LS_SQLSRV_OnPrem_properties_typeProperties_database')]"
+					},
+					"LS_SQLSRV_OnPrem_properties_typeProperties_userName": {
+						"value": "[parameters('LS_SQLSRV_OnPrem_properties_typeProperties_userName')]"
+					},
+					"LS_SQLServer_Node5_properties_typeProperties_server": {
+						"value": "[parameters('LS_SQLServer_Node5_properties_typeProperties_server')]"
+					},
+					"LS_SQLServer_Node5_properties_typeProperties_database": {
+						"value": "[parameters('LS_SQLServer_Node5_properties_typeProperties_database')]"
+					},
+					"LS_SQLServer_Node5_properties_typeProperties_userName": {
+						"value": "[parameters('LS_SQLServer_Node5_properties_typeProperties_userName')]"
 					},
 					"LS_SQLServer_Node5_v2_properties_typeProperties_server": {
 						"value": "[parameters('LS_SQLServer_Node5_v2_properties_typeProperties_server')]"
@@ -250,6 +306,26 @@
 					},
 					"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 						"value": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'usha-adf-poc_ArmTemplate_0')]"
+			]
+		},
+		{
+			"name": "usha-adf-poc_ArmTemplate_2",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_2.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
 					},
 					"TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_pipelineRunDate": {
 						"value": "[parameters('TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_pipelineRunDate')]"
@@ -263,7 +339,7 @@
 				}
 			},
 			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'usha-adf-poc_ArmTemplate_0')]"
+				"[resourceId('Microsoft.Resources/deployments', 'usha-adf-poc_ArmTemplate_1')]"
 			]
 		}
 	]

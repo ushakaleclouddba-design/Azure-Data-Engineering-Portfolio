@@ -35,9 +35,25 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'LS_SQLServer_Node5_v2'"
 		},
+		"LS_ADLS_Bronze_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://ushaadfpocadls.dfs.core.windows.net/"
+		},
 		"LS_ADLS_Gen2_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://ushaadfpocadls.dfs.core.windows.net/"
+		},
+		"LS_AZSQL_DW_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "@{linkedService().Servername}"
+		},
+		"LS_AZSQL_DW_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "@{linkedService().DatabaseName}"
+		},
+		"LS_AZSQL_DW_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "ssisadmin"
 		},
 		"LS_AzureSQL_LoanProcessing_properties_typeProperties_server": {
 			"type": "string",
@@ -63,9 +79,25 @@
 			"type": "string",
 			"defaultValue": "ushadc0\\ushakale"
 		},
+		"LS_KV_Bayview_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://usha-kv-poc.vault.azure.net/"
+		},
 		"LS_KeyVault_POC_properties_typeProperties_baseUrl": {
 			"type": "string",
 			"defaultValue": "https://usha-kv-poc.vault.azure.net/"
+		},
+		"LS_SQLSRV_OnPrem_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "@{linkedService().Servername}"
+		},
+		"LS_SQLSRV_OnPrem_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "@{linkedService().DatabaseName}"
+		},
+		"LS_SQLSRV_OnPrem_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "adfuser"
 		},
 		"LS_SQLServer_Node5_properties_typeProperties_server": {
 			"type": "string",
@@ -103,17 +135,6 @@
 			"type": "string",
 			"defaultValue": "curated/transactions/gold"
 		},
-		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
-			"type": "string",
-			"defaultValue": "usha-poc-sqlsvr.database.windows.net"
-		},
-		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
-			"type": "string",
-			"defaultValue": "ssisadmin"
-		},
-		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
-			"type": "secureString"
-		},
 		"AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
 			"type": "string",
 			"defaultValue": "usha-sqlmi-poc.0f3157bbdbf7.database.windows.net"
@@ -124,12 +145,373 @@
 		},
 		"AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"type": "secureString"
+		},
+		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
+			"type": "string",
+			"defaultValue": "usha-poc-sqlsvr.database.windows.net"
+		},
+		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
+			"type": "string",
+			"defaultValue": "ssisadmin"
+		},
+		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
+			"type": "secureString"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Child_Copy_SQL_Full')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Copies one on-prem SQL table to bronze Parquet and logs the result; called by the master pipeline once per control row.",
+				"activities": [
+					{
+						"name": "CP_SQL_To_Bronze",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_SQLSRV_OnPrem_Table",
+								"type": "DatasetReference",
+								"parameters": {
+									"ServerName": {
+										"value": "@pipeline().parameters.ServerName",
+										"type": "Expression"
+									},
+									"DatabaseName": {
+										"value": "@pipeline().parameters.DatabaseName",
+										"type": "Expression"
+									},
+									"TableName": {
+										"value": "@pipeline().parameters.TableName",
+										"type": "Expression"
+									},
+									"SchemaName": {
+										"value": "@pipeline().parameters.SchemaName",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_ADLS_Bronze_Parquet",
+								"type": "DatasetReference",
+								"parameters": {
+									"Container": {
+										"value": "@pipeline().parameters.Container",
+										"type": "Expression"
+									},
+									"FolderPath": {
+										"value": "@concat(pipeline().parameters.TargetFolder, '/load_date=', formatDateTime(utcNow(), 'yyyy-MM-dd'))",
+										"type": "Expression"
+									},
+									"FileName": {
+										"value": "@concat(pipeline().parameters.TableName, '.parquet')",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "SP_Log_Success",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "CP_SQL_To_Bronze",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 60,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[etl].[usp_LogCopyResult]",
+							"storedProcedureParameters": {
+								"RunId": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"PipelineName": {
+									"value": {
+										"value": "@pipeline().Pipeline",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"TableID": {
+									"value": {
+										"value": "@pipeline().parameters.TableID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"StartTime": {
+									"value": {
+										"value": "@pipeline().TriggerTime",
+										"type": "Expression"
+									},
+									"type": "Datetime"
+								},
+								"Status": {
+									"value": "Succeeded",
+									"type": "String"
+								},
+								"RowsRead": {
+									"value": {
+										"value": "@activity('CP_SQL_To_Bronze').output.rowsRead",
+										"type": "Expression"
+									},
+									"type": "Int64"
+								},
+								"RowsCopied": {
+									"value": {
+										"value": "@activity('CP_SQL_To_Bronze').output.rowsCopied",
+										"type": "Expression"
+									},
+									"type": "Int64"
+								},
+								"DataReadBytes": {
+									"value": {
+										"value": "@activity('CP_SQL_To_Bronze').output.dataRead",
+										"type": "Expression"
+									},
+									"type": "Int64"
+								},
+								"CopyDurationSec": {
+									"value": {
+										"value": "@activity('CP_SQL_To_Bronze').output.copyDuration",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"TargetPath": {
+									"value": {
+										"value": "@concat(pipeline().parameters.Container, '/', pipeline().parameters.TargetFolder, '/load_date=', formatDateTime(utcNow(), 'yyyy-MM-dd'), '/', pipeline().parameters.TableName, '.parquet')",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"ErrorMessage": {
+									"value": null,
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_AZSQL_DW",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"Servername": "usha-poc-sqlsvr.database.windows.net",
+								"DatabaseName": "AssetMgmt_DW"
+							}
+						}
+					},
+					{
+						"name": "SP_Log_Failure",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "CP_SQL_To_Bronze",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 60,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[etl].[usp_LogCopyResult]",
+							"storedProcedureParameters": {
+								"RunId": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"PipelineName": {
+									"value": {
+										"value": "@pipeline().Pipeline",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"TableID": {
+									"value": {
+										"value": "@pipeline().parameters.TableID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"StartTime": {
+									"value": {
+										"value": "@pipeline().TriggerTime",
+										"type": "Expression"
+									},
+									"type": "Datetime"
+								},
+								"Status": {
+									"value": "Failed",
+									"type": "String"
+								},
+								"RowsRead": {
+									"value": null,
+									"type": "Int64"
+								},
+								"RowsCopied": {
+									"value": null,
+									"type": "Int64"
+								},
+								"DataReadBytes": {
+									"value": null,
+									"type": "Int64"
+								},
+								"CopyDurationSec": {
+									"value": null,
+									"type": "Int32"
+								},
+								"TargetPath": {
+									"value": {
+										"value": "@concat(pipeline().parameters.Container, '/', pipeline().parameters.TargetFolder, '/load_date=', formatDateTime(utcNow(), 'yyyy-MM-dd'), '/', pipeline().parameters.TableName, '.parquet')",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"ErrorMessage": {
+									"value": {
+										"value": "@substring(activity('CP_SQL_To_Bronze').error.message, 0, min(length(activity('CP_SQL_To_Bronze').error.message), 3900))",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_AZSQL_DW",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"Servername": "usha-poc-sqlsvr.database.windows.net",
+								"DatabaseName": "AssetMgmt_DW"
+							}
+						}
+					},
+					{
+						"name": "FAIL_COPY",
+						"type": "Fail",
+						"dependsOn": [
+							{
+								"activity": "SP_Log_Failure",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"message": {
+								"value": "@concat('Copy failed for ', pipeline().parameters.DatabaseName, '.', pipeline().parameters.SchemaName, '.', pipeline().parameters.TableName, ': ', activity('CP_SQL_To_Bronze').error.message)",
+								"type": "Expression"
+							},
+							"errorCode": " BAYVIEW_COPY_FAILED"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"TableID": {
+						"type": "int",
+						"defaultValue": 1
+					},
+					"ServerName": {
+						"type": "string",
+						"defaultValue": "NODE5"
+					},
+					"DatabaseName": {
+						"type": "string",
+						"defaultValue": "AssetMgmt_source"
+					},
+					"SchemaName": {
+						"type": "string",
+						"defaultValue": "dbo"
+					},
+					"TableName": {
+						"type": "string",
+						"defaultValue": "Security"
+					},
+					"Container": {
+						"type": "string",
+						"defaultValue": "landing"
+					},
+					"TargetFolder": {
+						"type": "string",
+						"defaultValue": "AssetMgmt_source/dbo/Security"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_SQLSRV_OnPrem_Table')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Bronze_Parquet')]",
+				"[concat(variables('factoryId'), '/linkedServices/LS_AZSQL_DW')]"
+			]
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_CoreBank_SSIS_To_ADLS')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
@@ -1168,6 +1550,249 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_Master_Ingest')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LK_Get_ControlRows",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 60,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "  SELECT TableID, SourceServer, SourceDatabase, SourceSchema, SourceTable,\n          TargetContainer, TargetFolder\n   FROM etl.ControlTable\n   WHERE IsActive = 1 AND SourceType = 'SqlServer'\n   ORDER BY Priority, TableID;",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_AZSQL_DW_Table",
+								"type": "DatasetReference",
+								"parameters": {
+									"ServerName": "usha-poc-sqlsvr.database.windows.net",
+									"DatabaseName": "AssetMgmt_DW",
+									"SchemaName": "etl",
+									"TableName": "ControlTable"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "FE_Tables",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "LK_Get_ControlRows",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('LK_Get_ControlRows').output.value",
+								"type": "Expression"
+							},
+							"batchCount": 4,
+							"activities": [
+								{
+									"name": "EP_Child_Copy",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_Child_Copy_SQL_Full",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"TableID": {
+												"value": "@item().TableID",
+												"type": "Expression"
+											},
+											"ServerName": {
+												"value": "@item().SourceServer",
+												"type": "Expression"
+											},
+											"DatabaseName": {
+												"value": "@item().SourceDatabase",
+												"type": "Expression"
+											},
+											"SchemaName": {
+												"value": "@item().SourceSchema",
+												"type": "Expression"
+											},
+											"TableName": {
+												"value": "@item().SourceTable",
+												"type": "Expression"
+											},
+											"Container": {
+												"value": "@item().TargetContainer",
+												"type": "Expression"
+											},
+											"TargetFolder": {
+												"value": "@item().TargetFolder",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_AZSQL_DW_Table')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_Child_Copy_SQL_Full')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_SSIS_MI_Validation')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Run_PKG04_CrossDatabase",
+						"type": "ExecuteSSISPackage",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"packageLocation": {
+								"packagePath": "MigrationStressTest/MigrationStressTest/PKG_04_CrossDatabase.dtsx",
+								"type": "SSISDB"
+							},
+							"environmentPath": null,
+							"connectVia": {
+								"referenceName": "AzureSSIS-IR-SQLMI",
+								"type": "IntegrationRuntimeReference"
+							},
+							"loggingLevel": "Basic",
+							"projectConnectionManagers": {},
+							"packageConnectionManagers": {}
+						}
+					},
+					{
+						"name": "Run_PKG07_CLR",
+						"type": "ExecuteSSISPackage",
+						"dependsOn": [
+							{
+								"activity": "Run_PKG04_CrossDatabase",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"packageLocation": {
+								"packagePath": "MigrationStressTest/MigrationStressTest/PKG_07_CLR.dtsx",
+								"type": "SSISDB"
+							},
+							"environmentPath": null,
+							"connectVia": {
+								"referenceName": "AzureSSIS-IR-SQLMI",
+								"type": "IntegrationRuntimeReference"
+							},
+							"loggingLevel": "Basic",
+							"projectConnectionManagers": {},
+							"packageConnectionManagers": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/AzureSSIS-IR-SQLMI')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Bronze_Parquet')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_Bronze",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Container": {
+						"type": "string",
+						"defaultValue": "landing"
+					},
+					"FolderPath": {
+						"type": "string",
+						"defaultValue": "AssetMgmt_source/dbo/Security/load_date=2026-09-30"
+					},
+					"FileName": {
+						"type": "string",
+						"defaultValue": "Security.parquet"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().FolderPath",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().Container",
+							"type": "Expression"
+						}
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_Bronze')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Gold_Approved')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -1493,6 +2118,61 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_AZSQL_DW_Table')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_AZSQL_DW",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"Servername": {
+							"value": "@dataset().ServerName",
+							"type": "Expression"
+						},
+						"DatabaseName": {
+							"value": "@dataset().DatabaseName",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"ServerName": {
+						"type": "string",
+						"defaultValue": "usha-poc-sqlsvr.database.windows.net"
+					},
+					"DatabaseName": {
+						"type": "string",
+						"defaultValue": "AssetMgmt_DW"
+					},
+					"SchemaName": {
+						"type": "string",
+						"defaultValue": "etl"
+					},
+					"TableName": {
+						"type": "string",
+						"defaultValue": "ControlTable"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().SchemaName",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().TableName",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_AZSQL_DW')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_AzureSQL_LoanApplications')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -1590,6 +2270,61 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_SQLServer_Node5_v2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_SQLSRV_OnPrem_Table')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_SQLSRV_OnPrem",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"Servername": {
+							"value": "@dataset().ServerName",
+							"type": "Expression"
+						},
+						"DatabaseName": {
+							"value": "@dataset().DatabaseName",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"ServerName": {
+						"type": "string",
+						"defaultValue": "Node5"
+					},
+					"DatabaseName": {
+						"type": "string",
+						"defaultValue": "AssetMgmt_source"
+					},
+					"TableName": {
+						"type": "string",
+						"defaultValue": "Security"
+					},
+					"SchemaName": {
+						"type": "string",
+						"defaultValue": "dbo"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().SchemaName",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().TableName",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_SQLSRV_OnPrem')]"
 			]
 		},
 		{
@@ -1704,6 +2439,20 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/LS_ADLS_Bronze')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "ADLS Gen2 ushaadfpocadls - bronze landing; ADF managed identity",
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('LS_ADLS_Bronze_properties_typeProperties_url')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/LS_ADLS_Gen2')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -1720,6 +2469,45 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_AZSQL_DW')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Azure SQL warehouse and control DB; server and database passed as parameters; password from Key Vault.",
+				"parameters": {
+					"Servername": {
+						"type": "string",
+						"defaultValue": "usha-poc-sqlsvr.database.windows.net"
+					},
+					"DatabaseName": {
+						"type": "string",
+						"defaultValue": "AssetMgmt_DW"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"server": "[parameters('LS_AZSQL_DW_properties_typeProperties_server')]",
+					"database": "[parameters('LS_AZSQL_DW_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": false,
+					"authenticationType": "SQL",
+					"userName": "[parameters('LS_AZSQL_DW_properties_typeProperties_userName')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "LS_KV_Bayview",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "sqlPassword"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_KV_Bayview')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LS_AzureSQL_LoanProcessing')]",
@@ -1823,6 +2611,20 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/LS_KV_Bayview')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Bayview POC secrets (usha-kv-poc), managed identity.",
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('LS_KV_Bayview_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/LS_KeyVault_POC')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -1834,6 +2636,50 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_SQLSRV_OnPrem')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Any on-prem SQL Server via SHIR; server and database passed as parameters; password from Key Vault",
+				"parameters": {
+					"Servername": {
+						"type": "string",
+						"defaultValue": "Node5"
+					},
+					"DatabaseName": {
+						"type": "string",
+						"defaultValue": "AssetMgmt_source"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"server": "[parameters('LS_SQLSRV_OnPrem_properties_typeProperties_server')]",
+					"database": "[parameters('LS_SQLSRV_OnPrem_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": true,
+					"authenticationType": "SQL",
+					"userName": "[parameters('LS_SQLSRV_OnPrem_properties_typeProperties_userName')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "LS_KV_Bayview",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "adfuserPassword"
+					}
+				},
+				"connectVia": {
+					"referenceName": "SHIR-Node5",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/SHIR-Node5')]",
+				"[concat(variables('factoryId'), '/linkedServices/LS_KV_Bayview')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LS_SQLServer_Node5')]",
@@ -1933,6 +2779,40 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/PL_CoreBank_SSIS_To_ADLS')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSSIS-IR-SQLMI')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "Managed",
+				"description": "SSIS Integration Environment for MAnaged Instance",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "West US 2",
+						"nodeSize": "Standard_D2_v3",
+						"numberOfNodes": 1,
+						"maxParallelExecutionsPerNode": 1,
+						"vNetProperties": {
+							"subnetId": "/subscriptions/26f7a991-84b3-47b7-966b-f19cbb0379bf/resourceGroups/Usha_SQLMI_POC/providers/Microsoft.Network/virtualNetworks/vnet-usha-sqlmi-poc/subnets/AzureSSIS-Subnet"
+						}
+					},
+					"ssisProperties": {
+						"catalogInfo": {
+							"catalogServerEndpoint": "[parameters('AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint')]",
+							"catalogAdminUserName": "[parameters('AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName')]",
+							"catalogAdminPassword": {
+								"type": "SecureString",
+								"value": "[parameters('AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword')]"
+							},
+							"catalogPricingTier": null
+						},
+						"edition": "Standard",
+						"licenseType": "LicenseIncluded"
+					}
+				}
+			},
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/AzureSSIS-IR')]",
@@ -2262,118 +3142,6 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DelimitedText1')]",
 				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Parquet_Silver')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/AzureSSIS-IR-SQLMI')]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "Managed",
-				"description": "SSIS Integration Environment for MAnaged Instance",
-				"typeProperties": {
-					"computeProperties": {
-						"location": "West US 2",
-						"nodeSize": "Standard_D2_v3",
-						"numberOfNodes": 1,
-						"maxParallelExecutionsPerNode": 1,
-						"vNetProperties": {
-							"subnetId": "/subscriptions/26f7a991-84b3-47b7-966b-f19cbb0379bf/resourceGroups/Usha_SQLMI_POC/providers/Microsoft.Network/virtualNetworks/vnet-usha-sqlmi-poc/subnets/AzureSSIS-Subnet"
-						}
-					},
-					"ssisProperties": {
-						"catalogInfo": {
-							"catalogServerEndpoint": "[parameters('AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint')]",
-							"catalogAdminUserName": "[parameters('AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName')]",
-							"catalogAdminPassword": {
-								"type": "SecureString",
-								"value": "[parameters('AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword')]"
-							},
-							"catalogPricingTier": null
-						},
-						"edition": "Standard",
-						"runtimeVersion": "2017",
-						"licenseType": "LicenseIncluded"
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_SSIS_MI_Validation')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Run_PKG04_CrossDatabase",
-						"type": "ExecuteSSISPackage",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"packageLocation": {
-								"packagePath": "MigrationStressTest/MigrationStressTest/PKG_04_CrossDatabase.dtsx",
-								"type": "SSISDB"
-							},
-							"environmentPath": null,
-							"connectVia": {
-								"referenceName": "AzureSSIS-IR-SQLMI",
-								"type": "IntegrationRuntimeReference"
-							},
-							"loggingLevel": "Basic",
-							"projectConnectionManagers": {},
-							"packageConnectionManagers": {}
-						}
-					},
-					{
-						"name": "Run_PKG07_CLR",
-						"type": "ExecuteSSISPackage",
-						"dependsOn": [
-							{
-								"activity": "Run_PKG04_CrossDatabase",
-								"dependencyConditions": [
-									"Completed"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"packageLocation": {
-								"packagePath": "MigrationStressTest/MigrationStressTest/PKG_07_CLR.dtsx",
-								"type": "SSISDB"
-							},
-							"environmentPath": null,
-							"connectVia": {
-								"referenceName": "AzureSSIS-IR-SQLMI",
-								"type": "IntegrationRuntimeReference"
-							},
-							"loggingLevel": "Basic",
-							"projectConnectionManagers": {},
-							"packageConnectionManagers": {}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/AzureSSIS-IR-SQLMI')]"
 			]
 		}
 	]

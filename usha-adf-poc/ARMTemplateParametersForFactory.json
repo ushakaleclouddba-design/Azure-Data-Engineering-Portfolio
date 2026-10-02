@@ -26,8 +26,20 @@
 		"LS_SQLServer_Node5_v2_password": {
 			"value": ""
 		},
+		"LS_ADLS_Bronze_properties_typeProperties_url": {
+			"value": "https://ushaadfpocadls.dfs.core.windows.net/"
+		},
 		"LS_ADLS_Gen2_properties_typeProperties_url": {
 			"value": "https://ushaadfpocadls.dfs.core.windows.net/"
+		},
+		"LS_AZSQL_DW_properties_typeProperties_server": {
+			"value": "@{linkedService().Servername}"
+		},
+		"LS_AZSQL_DW_properties_typeProperties_database": {
+			"value": "@{linkedService().DatabaseName}"
+		},
+		"LS_AZSQL_DW_properties_typeProperties_userName": {
+			"value": "ssisadmin"
 		},
 		"LS_AzureSQL_LoanProcessing_properties_typeProperties_server": {
 			"value": "usha-poc-sqlsvr.database.windows.net"
@@ -47,8 +59,20 @@
 		"LS_FileSystem_Node5_properties_typeProperties_userId": {
 			"value": "ushadc0\\ushakale"
 		},
+		"LS_KV_Bayview_properties_typeProperties_baseUrl": {
+			"value": "https://usha-kv-poc.vault.azure.net/"
+		},
 		"LS_KeyVault_POC_properties_typeProperties_baseUrl": {
 			"value": "https://usha-kv-poc.vault.azure.net/"
+		},
+		"LS_SQLSRV_OnPrem_properties_typeProperties_server": {
+			"value": "@{linkedService().Servername}"
+		},
+		"LS_SQLSRV_OnPrem_properties_typeProperties_database": {
+			"value": "@{linkedService().DatabaseName}"
+		},
+		"LS_SQLSRV_OnPrem_properties_typeProperties_userName": {
+			"value": "adfuser"
 		},
 		"LS_SQLServer_Node5_properties_typeProperties_server": {
 			"value": "Node5"
@@ -77,15 +101,6 @@
 		"TriggerDailySilverToGold_properties_PL_CoreBank_SSIS_To_ADLS_parameters_goldPath": {
 			"value": "curated/transactions/gold"
 		},
-		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
-			"value": "usha-poc-sqlsvr.database.windows.net"
-		},
-		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
-			"value": "ssisadmin"
-		},
-		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
-			"value": ""
-		},
 		"AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
 			"value": "usha-sqlmi-poc.0f3157bbdbf7.database.windows.net"
 		},
@@ -93,6 +108,15 @@
 			"value": "ssisadmin"
 		},
 		"AzureSSIS-IR-SQLMI_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
+			"value": ""
+		},
+		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
+			"value": "usha-poc-sqlsvr.database.windows.net"
+		},
+		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
+			"value": "ssisadmin"
+		},
+		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"value": ""
 		}
 	}
