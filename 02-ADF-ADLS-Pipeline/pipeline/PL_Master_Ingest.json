@@ -13,7 +13,26 @@
 					"secureOutput": false,
 					"secureInput": false
 				},
-				"userProperties": []
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "  SELECT TableID, SourceServer, SourceDatabase, SourceSchema, SourceTable,\n          TargetContainer, TargetFolder\n   FROM etl.ControlTable\n   WHERE IsActive = 1 AND SourceType = 'SqlServer'\n   ORDER BY Priority, TableID;",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_AZSQL_DW_Table",
+						"type": "DatasetReference",
+						"parameters": {
+							"ServerName": "usha-poc-sqlsvr.database.windows.net",
+							"DatabaseName": "AssetMgmt_DW",
+							"SchemaName": "etl",
+							"TableName": "ControlTable"
+						}
+					},
+					"firstRowOnly": false
+				}
 			}
 		],
 		"annotations": []
