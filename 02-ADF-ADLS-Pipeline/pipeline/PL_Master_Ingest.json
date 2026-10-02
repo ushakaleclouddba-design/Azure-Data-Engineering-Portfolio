@@ -66,7 +66,28 @@
 									"referenceName": "PL_Child_Copy_SQL_Full",
 									"type": "PipelineReference"
 								},
-								"waitOnCompletion": true
+								"waitOnCompletion": true,
+								"parameters": {
+									"TableID": {
+										"value": "@item().TableID",
+										"type": "Expression"
+									},
+									"ServerName": {
+										"value": "@item().SourceServer",
+										"type": "Expression"
+									},
+									"DatabaseName": {
+										"value": "@item().SourceDatabase",
+										"type": "Expression"
+									},
+									"SchemaName": "@item().SourceSchema",
+									"TableName": {
+										"value": "@item().SourceTable",
+										"type": "Expression"
+									},
+									"Container": "@item().TargetContainer",
+									"TargetFolder": "@item().TargetFolder"
+								}
 							}
 						}
 					]
