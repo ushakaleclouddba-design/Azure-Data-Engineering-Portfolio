@@ -2,11 +2,25 @@
 	"name": "LS_ORCL_OnPrem",
 	"properties": {
 		"description": "On-prem Oracle Free on Node6 (FREEPDB1) via SHIR-Node5; read-only user ADF_READER; password from Key Vault",
+		"parameters": {
+			"HostName": {
+				"type": "string",
+				"defaultValue": "Node6.ushadc.com"
+			},
+			"Port": {
+				"type": "string",
+				"defaultValue": "1521"
+			},
+			"ServiceName": {
+				"type": "string",
+				"defaultValue": "FREEPDB1"
+			}
+		},
 		"annotations": [],
 		"type": "Oracle",
 		"version": "2.0",
 		"typeProperties": {
-			"server": "Node6.ushadc.com:1521/FREEPDB1",
+			"server": "@{linkedService().HostName}:@{linkedService().Port}/@{linkedService().ServiceName}",
 			"authenticationType": "Basic",
 			"username": "Adf_reader",
 			"password": {
