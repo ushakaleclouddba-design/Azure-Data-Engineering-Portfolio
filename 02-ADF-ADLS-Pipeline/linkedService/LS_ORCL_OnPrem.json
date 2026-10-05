@@ -1,0 +1,30 @@
+{
+	"name": "LS_ORCL_OnPrem",
+	"properties": {
+		"description": "On-prem Oracle Free on Node6 (FREEPDB1) via SHIR-Node5; read-only user ADF_READER; password from Key Vault",
+		"annotations": [],
+		"type": "Oracle",
+		"version": "2.0",
+		"typeProperties": {
+			"server": "Node6.ushadc.com:1521/FREEPDB1",
+			"authenticationType": "Basic",
+			"username": "Adf_reader",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "LS_KV_Bayview",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "bayview-ora-adfreader-pwd"
+			},
+			"encryptionClient": "accepted",
+			"encryptionTypesClient": "(AES128, AES192, AES256, 3DES112, 3DES168)",
+			"cryptoChecksumClient": "accepted",
+			"cryptoChecksumTypesClient": "(SHA1, SHA256, SHA384, SHA512)"
+		},
+		"connectVia": {
+			"referenceName": "SHIR-Node5",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
