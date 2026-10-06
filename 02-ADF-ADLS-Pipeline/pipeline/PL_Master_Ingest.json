@@ -80,14 +80,36 @@
 										"value": "@item().SourceDatabase",
 										"type": "Expression"
 									},
-									"SchemaName": "@item().SourceSchema",
+									"SchemaName": {
+										"value": "@item().SourceSchema",
+										"type": "Expression"
+									},
 									"TableName": {
 										"value": "@item().SourceTable",
 										"type": "Expression"
 									},
-									"Container": "@item().TargetContainer",
-									"TargetFolder": "@item().TargetFolder"
+									"Container": {
+										"value": "@item().TargetContainer",
+										"type": "Expression"
+									},
+									"TargetFolder": {
+										"value": "@item().TargetFolder",
+										"type": "Expression"
+									}
 								}
+							}
+						},
+						{
+							"name": "SW_SourceType",
+							"type": "Switch",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"on": {
+									"value": "@item().SourceType",
+									"type": "Expression"
+								},
+								"cases": []
 							}
 						}
 					]
