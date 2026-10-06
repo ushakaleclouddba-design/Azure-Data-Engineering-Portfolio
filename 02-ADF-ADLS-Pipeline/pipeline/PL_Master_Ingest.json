@@ -111,10 +111,10 @@
 								},
 								"cases": [
 									{
-										"value": "Case1"
+										"value": "SqlServer"
 									},
 									{
-										"value": "Case2"
+										"value": "Oracle"
 									}
 								]
 							}
