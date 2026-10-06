@@ -271,7 +271,7 @@
 						},
 						"ErrorMessage": {
 							"value": {
-								"value": "@substring(activity('CP_SQL_To_Bronze').error.message, 0, min(length(activity('CP_SQL_To_Bronze').error.message), 3900))",
+								"value": "@activity('CP_ORCL_To_Bronze').outputactivity('CP_ORCL_To_Bronze').outputsubstring(activity('CP_SQL_To_Bronze').error.message, 0, min(length(activity('CP_SQL_To_Bronze').error.message), 3900))",
 								"type": "Expression"
 							},
 							"type": "String"
@@ -301,7 +301,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"message": {
-						"value": "@concat('Copy failed for ', pipeline().parameters.DatabaseName, '.', pipeline().parameters.SchemaName, '.', pipeline().parameters.TableName, ': ', activity('CP_SQL_To_Bronze').error.message)",
+						"value": "@activity('CP_ORCL_To_Bronze').outputconcat('Copy failed for ', pipeline().parameters.DatabaseName, '.', pipeline().parameters.SchemaName, '.', pipeline().parameters.TableName, ': ', activity('CP_SQL_To_Bronze').error.message)",
 						"type": "Expression"
 					},
 					"errorCode": " BAYVIEW_COPY_FAILED"
