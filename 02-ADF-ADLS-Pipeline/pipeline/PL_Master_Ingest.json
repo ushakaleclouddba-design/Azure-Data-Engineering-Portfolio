@@ -109,7 +109,14 @@
 									"value": "@item().SourceType",
 									"type": "Expression"
 								},
-								"cases": []
+								"cases": [
+									{
+										"value": "Case1"
+									},
+									{
+										"value": "Case2"
+									}
+								]
 							}
 						}
 					]
