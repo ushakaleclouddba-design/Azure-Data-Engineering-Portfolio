@@ -81,10 +81,6 @@
 								"value": "@pipeline().parameters.Container",
 								"type": "Expression"
 							},
-							"FolderPath": {
-								"value": "@concat(pipeline().parameters.TargetFolder, '/load_date=', formatDateTime(utcNow(), 'yyyy-MM-dd'))",
-								"type": "Expression"
-							},
 							"FileName": {
 								"value": "@concat(pipeline().parameters.TableName, '_', formatDateTime(pipeline().TriggerTime, 'HHmmss'), '_', substring(pipeline().RunId, 0, 8), '.parquet')",
 								"type": "Expression"
@@ -269,7 +265,7 @@
 						},
 						"TargetPath": {
 							"value": {
-								"value": "@concat(pipeline().parameters.Container, '/', pipeline().parameters.TargetFolder, '/load_date=', formatDateTime(utcNow(), 'yyyy-MM-dd'), '/', pipeline().parameters.TableName, '.parquet')",
+								"value": "@concat(pipeline().parameters.Container, '/', pipeline().parameters.TargetFolder, '/load_date=', formatDateTime(pipeline().TriggerTime, 'yyyy-MM-dd'), '/', pipeline().parameters.TableName, '_', formatDateTime(pipeline().TriggerTime, 'HHmmss'), '_', substring(pipeline().RunId, 0, 8), '.parquet')",
 								"type": "Expression"
 							},
 							"type": "String"
