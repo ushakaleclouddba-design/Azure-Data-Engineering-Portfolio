@@ -85,7 +85,7 @@
 								"type": "Expression"
 							},
 							"FileName": {
-								"value": "@concat(pipeline().parameters.TableName, '.parquet')",
+								"value": "@concat(pipeline().parameters.TableName, '_', formatDateTime(utcNow(), 'HHmmss'), '_', substring(pipeline().RunId, 0, 8), '.parquet')",
 								"type": "Expression"
 							}
 						}
