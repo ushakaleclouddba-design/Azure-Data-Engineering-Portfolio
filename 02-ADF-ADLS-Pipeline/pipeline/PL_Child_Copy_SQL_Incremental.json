@@ -81,6 +81,10 @@
 								"value": "@pipeline().parameters.Container",
 								"type": "Expression"
 							},
+							"FolderPath": {
+								"value": "@concat(pipeline().parameters.TargetFolder, '/load_date=', formatDateTime(pipeline().TriggerTime, 'yyyy-MM-dd'))",
+								"type": "Expression"
+							},
 							"FileName": {
 								"value": "@concat(pipeline().parameters.TableName, '_', formatDateTime(pipeline().TriggerTime, 'HHmmss'), '_', substring(pipeline().RunId, 0, 8), '.parquet')",
 								"type": "Expression"
