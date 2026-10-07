@@ -60,12 +60,12 @@
 							"userProperties": [],
 							"typeProperties": {
 								"on": {
-									"value": "@item().SourceType",
+									"value": "@concat(item().SourceType, '_', if(equals(item().LoadType, 'Full'), 'Full', 'Incremental'))",
 									"type": "Expression"
 								},
 								"cases": [
 									{
-										"value": "SqlServer",
+										"value": "SqlServer_Full",
 										"activities": [
 											{
 												"name": "EP_Child_Copy_SQL",
@@ -116,7 +116,7 @@
 										]
 									},
 									{
-										"value": "Oracle",
+										"value": "Oracle_Full",
 										"activities": [
 											{
 												"name": "EP_Child_Copy_ORCL",
@@ -129,6 +129,57 @@
 												"typeProperties": {
 													"pipeline": {
 														"referenceName": "PL_Child_Copy_ORCL_Full",
+														"type": "PipelineReference"
+													},
+													"waitOnCompletion": true,
+													"parameters": {
+														"TableID": {
+															"value": "@item().TableID",
+															"type": "Expression"
+														},
+														"ServerName": {
+															"value": "@item().SourceServer",
+															"type": "Expression"
+														},
+														"DatabaseName": {
+															"value": "@item().SourceDatabase",
+															"type": "Expression"
+														},
+														"SchemaName": {
+															"value": "@item().SourceSchema",
+															"type": "Expression"
+														},
+														"TableName": {
+															"value": "@item().SourceTable",
+															"type": "Expression"
+														},
+														"Container": {
+															"value": "@item().TargetContainer",
+															"type": "Expression"
+														},
+														"TargetFolder": {
+															"value": "@item().TargetFolder",
+															"type": "Expression"
+														}
+													}
+												}
+											}
+										]
+									},
+									{
+										"value": "SqlServer_Incremental",
+										"activities": [
+											{
+												"name": "EP_Child_Copy_SQL_copy1",
+												"type": "ExecutePipeline",
+												"dependsOn": [],
+												"policy": {
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"pipeline": {
+														"referenceName": "PL_Child_Copy_SQL_Full",
 														"type": "PipelineReference"
 													},
 													"waitOnCompletion": true,
