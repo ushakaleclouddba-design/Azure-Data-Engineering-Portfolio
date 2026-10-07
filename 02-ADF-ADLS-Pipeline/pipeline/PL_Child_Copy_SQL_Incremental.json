@@ -424,6 +424,12 @@
 						"type": "Expression"
 					}
 				}
+			},
+			{
+				"name": "IF_HasChanges",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": []
 			}
 		],
 		"parameters": {
