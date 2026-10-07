@@ -17,7 +17,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": "  SELECT TableID, SourceServer, SourceDatabase, SourceSchema, SourceTable,\n          TargetContainer, TargetFolder\n   FROM etl.ControlTable\n   WHERE IsActive = 1 AND SourceType = 'SqlServer'\n   ORDER BY Priority, TableID;",
+						"sqlReaderQuery": " SELECT TableID, SourceType, SourceServer, SourceDatabase, SourceSchema, SourceTable,\n       TargetContainer, TargetFolder\nFROM etl.ControlTable\nWHERE IsActive = 1\nORDER BY Priority, TableID;",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
