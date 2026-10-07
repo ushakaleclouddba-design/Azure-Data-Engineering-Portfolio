@@ -185,6 +185,14 @@
 						"ErrorMessage": {
 							"value": null,
 							"type": "String"
+						},
+						"WatermarkFrom": {
+							"value": "@activity('LK_GetChangeWindow').output.firstRow.FromValue",
+							"type": "String"
+						},
+						"WatermarkTo": {
+							"value": "@activity('LK_GetChangeWindow').output.firstRow.ToValue",
+							"type": "String"
 						}
 					}
 				},
