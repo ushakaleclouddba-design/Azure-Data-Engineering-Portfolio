@@ -6,7 +6,14 @@
 			{
 				"name": "CP_SQL_To_Bronze",
 				"type": "Copy",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "SV_BuildQuery",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 2,
@@ -376,6 +383,30 @@
 						}
 					}
 				}
+			},
+			{
+				"name": "SV_BuildQuery",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LK_GetChangeWindow",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "QueryText",
+					"value": {
+						"value": "@activity('LK_GetChangeWindow').output",
+						"type": "Expression"
+					}
+				}
 			}
 		],
 		"parameters": {
@@ -422,6 +453,11 @@
 			"LastWatermark": {
 				"type": "string",
 				"defaultValue": " "
+			}
+		},
+		"variables": {
+			"QueryText": {
+				"type": "String"
 			}
 		},
 		"annotations": []
