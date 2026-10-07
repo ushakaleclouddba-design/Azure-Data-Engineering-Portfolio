@@ -119,7 +119,7 @@
 										"value": "Oracle",
 										"activities": [
 											{
-												"name": "PL_Child_Copy_ORCL_Full",
+												"name": "EP_Child_Copy_ORCL",
 												"type": "ExecutePipeline",
 												"dependsOn": [],
 												"policy": {
