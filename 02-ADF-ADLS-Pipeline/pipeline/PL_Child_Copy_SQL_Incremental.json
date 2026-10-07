@@ -303,6 +303,79 @@
 					},
 					"errorCode": " BAYVIEW_COPY_FAILED"
 				}
+			},
+			{
+				"name": "LK_GetChangeWindow",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderStoredProcedureName": "[etl].[usp_GetChangeWindow]",
+						"storedProcedureParameters": {
+							"LastWatermark": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.LastWatermark",
+									"type": "Expression"
+								}
+							},
+							"LoadType": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.LoadType",
+									"type": "Expression"
+								}
+							},
+							"SchemaName": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.SchemaName",
+									"type": "Expression"
+								}
+							},
+							"TableName": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.TableName",
+									"type": "Expression"
+								}
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_SQLSRV_OnPrem_Table",
+						"type": "DatasetReference",
+						"parameters": {
+							"ServerName": {
+								"value": "@pipeline().parameters.ServerName",
+								"type": "Expression"
+							},
+							"DatabaseName": {
+								"value": "@pipeline().parameters.DatabaseName",
+								"type": "Expression"
+							},
+							"TableName": {
+								"value": "@pipeline().parameters.SchemaName",
+								"type": "Expression"
+							},
+							"SchemaName": {
+								"value": "@pipeline().parameters.TableName",
+								"type": "Expression"
+							}
+						}
+					}
+				}
 			}
 		],
 		"parameters": {
