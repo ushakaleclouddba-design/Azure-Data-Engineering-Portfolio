@@ -17,7 +17,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": "  SELECT TableID, SourceServer, SourceDatabase, SourceSchema, SourceTable,\n          TargetContainer, TargetFolder\n   FROM etl.ControlTable\n   WHERE IsActive = 1 AND SourceType = 'SqlServer'\n   ORDER BY Priority, TableID;",
+						"sqlReaderQuery": " SELECT TableID, SourceType, SourceServer, SourceDatabase, SourceSchema, SourceTable,\n       TargetContainer, TargetFolder\nFROM etl.ControlTable\nWHERE IsActive = 1\nORDER BY Priority, TableID;",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -54,40 +54,134 @@
 					"batchCount": 4,
 					"activities": [
 						{
-							"name": "EP_Child_Copy",
-							"type": "ExecutePipeline",
+							"name": "SW_SourceType",
+							"type": "Switch",
 							"dependsOn": [],
-							"policy": {
-								"secureInput": false
-							},
 							"userProperties": [],
 							"typeProperties": {
-								"pipeline": {
-									"referenceName": "PL_Child_Copy_SQL_Full",
-									"type": "PipelineReference"
+								"on": {
+									"value": "@item().SourceType",
+									"type": "Expression"
 								},
-								"waitOnCompletion": true,
-								"parameters": {
-									"TableID": {
-										"value": "@item().TableID",
-										"type": "Expression"
+								"cases": [
+									{
+										"value": "SqlServer",
+										"activities": [
+											{
+												"name": "EP_Child_Copy_SQL",
+												"type": "ExecutePipeline",
+												"dependsOn": [],
+												"policy": {
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"pipeline": {
+														"referenceName": "PL_Child_Copy_SQL_Full",
+														"type": "PipelineReference"
+													},
+													"waitOnCompletion": true,
+													"parameters": {
+														"TableID": {
+															"value": "@item().TableID",
+															"type": "Expression"
+														},
+														"ServerName": {
+															"value": "@item().SourceServer",
+															"type": "Expression"
+														},
+														"DatabaseName": {
+															"value": "@item().SourceDatabase",
+															"type": "Expression"
+														},
+														"SchemaName": {
+															"value": "@item().SourceSchema",
+															"type": "Expression"
+														},
+														"TableName": {
+															"value": "@item().SourceTable",
+															"type": "Expression"
+														},
+														"Container": {
+															"value": "@item().TargetContainer",
+															"type": "Expression"
+														},
+														"TargetFolder": {
+															"value": "@item().TargetFolder",
+															"type": "Expression"
+														}
+													}
+												}
+											}
+										]
 									},
-									"ServerName": {
-										"value": "@item().SourceServer",
-										"type": "Expression"
-									},
-									"DatabaseName": {
-										"value": "@item().SourceDatabase",
-										"type": "Expression"
-									},
-									"SchemaName": "@item().SourceSchema",
-									"TableName": {
-										"value": "@item().SourceTable",
-										"type": "Expression"
-									},
-									"Container": "@item().TargetContainer",
-									"TargetFolder": "@item().TargetFolder"
-								}
+									{
+										"value": "Oracle",
+										"activities": [
+											{
+												"name": "EP_Child_Copy_ORCL",
+												"type": "ExecutePipeline",
+												"dependsOn": [],
+												"policy": {
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"pipeline": {
+														"referenceName": "PL_Child_Copy_ORCL_Full",
+														"type": "PipelineReference"
+													},
+													"waitOnCompletion": true,
+													"parameters": {
+														"TableID": {
+															"value": "@item().TableID",
+															"type": "Expression"
+														},
+														"ServerName": {
+															"value": "@item().SourceServer",
+															"type": "Expression"
+														},
+														"DatabaseName": {
+															"value": "@item().SourceDatabase",
+															"type": "Expression"
+														},
+														"SchemaName": {
+															"value": "@item().SourceSchema",
+															"type": "Expression"
+														},
+														"TableName": {
+															"value": "@item().SourceTable",
+															"type": "Expression"
+														},
+														"Container": {
+															"value": "@item().TargetContainer",
+															"type": "Expression"
+														},
+														"TargetFolder": {
+															"value": "@item().TargetFolder",
+															"type": "Expression"
+														}
+													}
+												}
+											}
+										]
+									}
+								],
+								"defaultActivities": [
+									{
+										"name": "FAIL_UnknownSourceType",
+										"type": "Fail",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"message": {
+												"value": "@concat('Unsupported SourceType: ', item().SourceType, ' (TableID ', string(item().TableID), ')')",
+												"type": "Expression"
+											},
+											"errorCode": "BAYVIEW_UNKNOWN_SOURCETYPE"
+										}
+									}
+								]
 							}
 						}
 					]

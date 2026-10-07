@@ -1,0 +1,58 @@
+{
+	"name": "DS_ORCL_Table",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ORCL_OnPrem",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"HostName": {
+					"value": "@dataset().HostName",
+					"type": "Expression"
+				},
+				"Port": {
+					"value": "@dataset().Port",
+					"type": "Expression"
+				},
+				"ServiceName": {
+					"value": "@dataset().ServiceName",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"HostName": {
+				"type": "string",
+				"defaultValue": "Node6.ushadc.com"
+			},
+			"Port": {
+				"type": "string",
+				"defaultValue": "1521"
+			},
+			"ServiceName": {
+				"type": "string",
+				"defaultValue": "FREEPDB1"
+			},
+			"SchemaName": {
+				"type": "string",
+				"defaultValue": "BAYVIEW_SRC"
+			},
+			"TableName": {
+				"type": "string",
+				"defaultValue": "BENCHMARK"
+			}
+		},
+		"annotations": [],
+		"type": "OracleTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().SchemaName",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().TableName",
+				"type": "Expression"
+			}
+		}
+	}
+}
