@@ -87,6 +87,14 @@
 			"type": "string",
 			"defaultValue": "https://usha-kv-poc.vault.azure.net/"
 		},
+		"LS_ORCL_OnPrem_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "@{linkedService().HostName}:@{linkedService().Port}/@{linkedService().ServiceName}"
+		},
+		"LS_ORCL_OnPrem_properties_typeProperties_username": {
+			"type": "string",
+			"defaultValue": "Adf_reader"
+		},
 		"LS_SQLSRV_OnPrem_properties_typeProperties_server": {
 			"type": "string",
 			"defaultValue": "@{linkedService().Servername}"
@@ -270,6 +278,12 @@
 					},
 					"LS_FileSystem_Node5_properties_typeProperties_userId": {
 						"value": "[parameters('LS_FileSystem_Node5_properties_typeProperties_userId')]"
+					},
+					"LS_ORCL_OnPrem_properties_typeProperties_server": {
+						"value": "[parameters('LS_ORCL_OnPrem_properties_typeProperties_server')]"
+					},
+					"LS_ORCL_OnPrem_properties_typeProperties_username": {
+						"value": "[parameters('LS_ORCL_OnPrem_properties_typeProperties_username')]"
 					},
 					"LS_SQLSRV_OnPrem_properties_typeProperties_server": {
 						"value": "[parameters('LS_SQLSRV_OnPrem_properties_typeProperties_server')]"

@@ -65,6 +65,12 @@
 		"LS_KeyVault_POC_properties_typeProperties_baseUrl": {
 			"value": "https://usha-kv-poc.vault.azure.net/"
 		},
+		"LS_ORCL_OnPrem_properties_typeProperties_server": {
+			"value": "@{linkedService().HostName}:@{linkedService().Port}/@{linkedService().ServiceName}"
+		},
+		"LS_ORCL_OnPrem_properties_typeProperties_username": {
+			"value": "Adf_reader"
+		},
 		"LS_SQLSRV_OnPrem_properties_typeProperties_server": {
 			"value": "@{linkedService().Servername}"
 		},
