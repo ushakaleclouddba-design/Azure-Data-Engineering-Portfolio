@@ -65,11 +65,11 @@
 								"type": "Expression"
 							},
 							"TableName": {
-								"value": "@pipeline().parameters.SchemaName",
+								"value": "@pipeline().parameters.TableName",
 								"type": "Expression"
 							},
 							"SchemaName": {
-								"value": "@pipeline().parameters.TableName",
+								"value": "@pipeline().parameters.SchemaName",
 								"type": "Expression"
 							}
 						}
