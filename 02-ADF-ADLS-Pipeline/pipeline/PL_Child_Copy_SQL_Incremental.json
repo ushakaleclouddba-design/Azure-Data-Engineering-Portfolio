@@ -25,6 +25,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SqlServerSource",
+						"sqlReaderQuery": "@variables('QueryText')",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
