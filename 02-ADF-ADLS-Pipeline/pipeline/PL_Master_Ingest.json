@@ -170,7 +170,7 @@
 										"value": "SqlServer_Incremental",
 										"activities": [
 											{
-												"name": "EP_Child_Copy_SQL_copy1",
+												"name": "EP_Child_Copy_SQL_Incr",
 												"type": "ExecutePipeline",
 												"dependsOn": [],
 												"policy": {
@@ -179,39 +179,22 @@
 												"userProperties": [],
 												"typeProperties": {
 													"pipeline": {
-														"referenceName": "PL_Child_Copy_SQL_Full",
+														"referenceName": "PL_Child_Copy_SQL_Incremental",
 														"type": "PipelineReference"
 													},
 													"waitOnCompletion": true,
 													"parameters": {
-														"TableID": {
-															"value": "@item().TableID",
-															"type": "Expression"
-														},
-														"ServerName": {
-															"value": "@item().SourceServer",
-															"type": "Expression"
-														},
-														"DatabaseName": {
-															"value": "@item().SourceDatabase",
-															"type": "Expression"
-														},
-														"SchemaName": {
-															"value": "@item().SourceSchema",
-															"type": "Expression"
-														},
-														"TableName": {
-															"value": "@item().SourceTable",
-															"type": "Expression"
-														},
-														"Container": {
-															"value": "@item().TargetContainer",
-															"type": "Expression"
-														},
-														"TargetFolder": {
-															"value": "@item().TargetFolder",
-															"type": "Expression"
-														}
+														"TableID": "@item().TableID",
+														"ServerName": "@item().SourceServer",
+														"DatabaseName": "@item().SourceDatabase",
+														"SchemaName": "@item().SourceSchema",
+														"TableName": "@item().SourceTable",
+														"Container": "@item().TargetContainer",
+														"TargetFolder": "@item().TargetFolder",
+														"LoadType": "@item().LoadType",
+														"KeyColumns": "@coalesce(item().KeyColumns, '')",
+														"WatermarkColumn": "@coalesce(item().WatermarkColumn, '')",
+														"LastWatermark": "@coalesce(item().LastWatermark, '')"
 													}
 												}
 											}
