@@ -190,11 +190,17 @@
 										"type": "String"
 									},
 									"WatermarkFrom": {
-										"value": "@activity('LK_GetChangeWindow').output.firstRow.FromValue",
+										"value": {
+											"value": "@activity('LK_GetChangeWindow').output.firstRow.FromValue",
+											"type": "Expression"
+										},
 										"type": "String"
 									},
 									"WatermarkTo": {
-										"value": "@activity('LK_GetChangeWindow').output.firstRow.ToValue",
+										"value": {
+											"value": "@activity('LK_GetChangeWindow').output.firstRow.ToValue",
+											"type": "Expression"
+										},
 										"type": "String"
 									}
 								}
@@ -225,7 +231,10 @@
 							"typeProperties": {
 								"source": {
 									"type": "SqlServerSource",
-									"sqlReaderQuery": "@variables('QueryText')",
+									"sqlReaderQuery": {
+										"value": "@variables('QueryText')",
+										"type": "Expression"
+									},
 									"queryTimeout": "02:00:00",
 									"partitionOption": "None"
 								},
@@ -387,11 +396,17 @@
 										"type": "String"
 									},
 									"WatermarkFrom": {
-										"value": "@activity('LK_GetChangeWindow').output.firstRow.FromValue",
+										"value": {
+											"value": "@activity('LK_GetChangeWindow').output.firstRow.FromValue",
+											"type": "Expression"
+										},
 										"type": "String"
 									},
 									"WatermarkTo": {
-										"value": "@activity('LK_GetChangeWindow').output.firstRow.ToValue",
+										"value": {
+											"value": "@activity('LK_GetChangeWindow').output.firstRow.ToValue",
+											"type": "Expression"
+										},
 										"type": "String"
 									}
 								}
@@ -490,11 +505,17 @@
 										"type": "String"
 									},
 									"WatermarkFrom": {
-										"value": "@activity('LK_GetChangeWindow').output.firstRow.FromValue",
+										"value": {
+											"value": "@activity('LK_GetChangeWindow').output.firstRow.FromValue",
+											"type": "Expression"
+										},
 										"type": "String"
 									},
 									"WatermarkTo": {
-										"value": "@activity('LK_GetChangeWindow').output.firstRow.ToValue",
+										"value": {
+											"value": "@activity('LK_GetChangeWindow').output.firstRow.ToValue",
+											"type": "Expression"
+										},
 										"type": "String"
 									}
 								}
@@ -535,7 +556,7 @@
 		"parameters": {
 			"TableID": {
 				"type": "int",
-				"defaultValue": 4
+				"defaultValue": 1
 			},
 			"ServerName": {
 				"type": "string",
@@ -551,7 +572,7 @@
 			},
 			"TableName": {
 				"type": "string",
-				"defaultValue": "Position"
+				"defaultValue": "Security"
 			},
 			"Container": {
 				"type": "string",
@@ -559,23 +580,23 @@
 			},
 			"TargetFolder": {
 				"type": "string",
-				"defaultValue": "AssetMgmt_source/dbo/Position"
+				"defaultValue": "AssetMgmt_source/dbo/Security"
 			},
 			"LoadType": {
 				"type": "string",
-				"defaultValue": "Rowversion"
+				"defaultValue": "ChangeTracking"
 			},
 			"KeyColumns": {
 				"type": "string",
-				"defaultValue": "PositionID"
+				"defaultValue": "SecurityID"
 			},
 			"WatermarkColumn": {
 				"type": "string",
-				"defaultValue": "RowVer"
+				"defaultValue": " "
 			},
 			"LastWatermark": {
 				"type": "string",
-				"defaultValue": " "
+				"defaultValue": "2"
 			}
 		},
 		"variables": {
